@@ -1,5 +1,6 @@
 using System.Data;
 using Microsoft.Data.Sqlite;
+using System.Resources;
 
 namespace Mage.Engine;
 
@@ -45,8 +46,11 @@ public struct Archive {
         File.Create($"{mageDir}{BIND_FILE_PATH}");
 
         var archive = Load(mageDir, fileDir);
+        
         archive.ConnectDB();
-        // TODO: Run setup script.
+        var setupCommand = archive.db.CreateCommand();
+		setupCommand.CommandText = ResourceLoader.Load("Resources.DB.setup.sqlite.sql");
+		setupCommand.ExecuteNonQuery();
 
         return archive;
     }
