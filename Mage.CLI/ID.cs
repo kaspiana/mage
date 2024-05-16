@@ -1,4 +1,4 @@
-namespace Borealis.Engine;
+namespace Mage.Engine;
 
 public enum DocumentID : int {};
 public enum TaxonymID : int {};

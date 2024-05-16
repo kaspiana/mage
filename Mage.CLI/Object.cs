@@ -1,4 +1,4 @@
-namespace Borealis.Engine;
+namespace Mage.Engine;
 
 public enum ObjectType {
     Document,

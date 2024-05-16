@@ -1,4 +1,4 @@
-namespace Borealis.Engine;
+namespace Mage.Engine;
 
 public struct Document {
     public string hash;
@@ -7,4 +7,8 @@ public struct Document {
     public DateTime ingestDate;
     public string? comment;
     public byte[]? thumbnail;
+}
+
+public struct DocumentTag {
+    public DocumentID? id;
 }
