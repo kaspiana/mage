@@ -49,7 +49,13 @@ public struct Archive {
         File.WriteAllLines($"{mageDir}{INFO_FILE_PATH}", infoLines);
 
         // create bind file
-        File.Create($"{mageDir}{BIND_FILE_PATH}");
+        File.WriteAllLines($"{mageDir}{BIND_FILE_PATH}", [
+            "doc=",
+            "tag=",
+            "taxonym=@0",
+            "seq=",
+            "view=main"
+        ]);
 
         var archive = Load(mageDir, fileDir);
         
