@@ -14,12 +14,14 @@ public struct Archive {
     public const string BIND_FILE_PATH = "bind";
     public const string DB_FILE_PATH = "db.sqlite";
 
+    public const int CURRENT_VERSION = 1;
     public const string DEFAULT_VIEW_NAME = "main";
 
     public string mageDir;
     public string fileDir;
 
     public string? name;
+    public int version;
 
     public SqliteConnection? db;
 
@@ -35,7 +37,11 @@ public struct Archive {
         
         // write info file
         var infoMap = new Dictionary<string, string>();
-        if(name is not null) infoMap["name"] = name;
+
+        if(name is not null)
+            infoMap["name"] = name;
+        infoMap["version"] = CURRENT_VERSION.ToString();
+
         var infoLines = new List<string>();
         foreach(var kv in infoMap){
             infoLines.Add($"{kv.Key}={kv.Value}");
@@ -66,11 +72,13 @@ public struct Archive {
         }
 
         string? name = infoMap.ContainsKey("name") ? infoMap["name"] : null;
+        int version = int.Parse(infoMap["version"]);
 
         var archive = new Archive(){
             mageDir = mageDir,
             fileDir = fileDir,
             name = name,
+            version = version,
             db = null
         };
 
