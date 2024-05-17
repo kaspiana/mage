@@ -19,7 +19,7 @@ public class Archive {
     public const string BIND_FILE_PATH = "bind";
     public const string DB_FILE_PATH = "db.sqlite";
 
-    public const int CURRENT_VERSION = 1;
+    public const int CURRENT_VERSION = 2;
     public const string DEFAULT_VIEW_NAME = "main";
 
     public string mageDir;
