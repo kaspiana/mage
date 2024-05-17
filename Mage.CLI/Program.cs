@@ -80,12 +80,12 @@ if(archive is not null){
         var docID = (DocumentID)ObjectRef.ResolveDocument(archive, docRef)!;
         var doc = (Document)archive.GetDocument(docID)!;
 
-        Console.WriteLine($"Document {doc.hash}");
-        Console.WriteLine($"\tarchive id: @{doc.id}");
-        Console.WriteLine($"\tfile name: {doc.fileName}");
-        Console.WriteLine($"\textension: {doc.extension}");
-        Console.WriteLine($"\tingest timestamp: {doc.ingestTimestamp}");
-        Console.WriteLine($"\tcomment: {(doc.comment is null ? "<none>" : doc.comment)}");
+        Console.WriteLine($"document {doc.hash}");
+        Console.WriteLine($"\tArchive ID: @{doc.id}");
+        Console.WriteLine($"\tFile name: {doc.fileName}");
+        Console.WriteLine($"\tExtension: {doc.extension}");
+        Console.WriteLine($"\tIngest timestamp: {doc.ingestTimestamp}");
+        Console.WriteLine($"\tComment: {(doc.comment is null ? "<none>" : doc.comment)}");
 
         if(reflect){
             var boundView = archive.GetBinding(ObjectType.View);
@@ -112,6 +112,59 @@ if(archive is not null){
 
     }, docRefArgument);
     docCommand.Add(docOpenCommand);
+
+
+    // mage view [view-ref]
+    var viewCommand = new Command("view", "Manipulate view.");
+    var viewRefArgument = new Argument<string>(
+        name: "view"
+    );
+    viewCommand.Add(viewRefArgument);
+    viewCommand.SetHandler((viewRef) => {
+
+        var viewName = ObjectRef.ResolveView(archive, viewRef);
+        var view = (View)archive.ViewGet(viewName!)!;
+
+        Console.WriteLine($"view {viewName}");
+        
+        for(int i = 0; i < view.documents.Count(); i++){
+            var documentID = view.documents[i];
+            if(documentID is null){
+                Console.WriteLine($"\t/{i}: <missing>");
+            } else {
+                Console.WriteLine($"\t/{i}: {archive.GetDocumentHash((DocumentID)documentID)}");
+            }
+        }
+
+    }, viewRefArgument);
+    rootCommand.Add(viewCommand);
+
+    // mage view [view-ref] clear
+    var viewClearCommand = new Command("clear", "Clear the view.");
+    viewClearCommand.SetHandler((viewRef) => {
+        var viewName = ObjectRef.ResolveView(archive, viewRef);
+        archive.ViewClear(viewName!);
+    }, viewRefArgument);
+    viewCommand.Add(viewClearCommand);
+
+    // mage view [view-ref] delete
+    var viewDeleteCommand = new Command("delete", "Delete the view.");
+    viewDeleteCommand.SetHandler((viewRef) => {
+        var viewName = ObjectRef.ResolveView(archive, viewRef);
+        archive.ViewDelete(viewName!);
+    }, viewRefArgument);
+    viewCommand.Add(viewDeleteCommand);
+
+    // mage view [view-ref] add [doc-ref]
+    var viewAddCommand = new Command("add", "Add a document to the view.");
+    viewAddCommand.Add(docRefArgument);
+    viewAddCommand.SetHandler((viewRef, docRef) => {
+        var viewName = ObjectRef.ResolveView(archive, viewRef)!;
+        var docID = (DocumentID)ObjectRef.ResolveDocument(archive, docRef)!;
+
+        archive.ViewAdd(viewName, docID);
+    }, viewRefArgument, docRefArgument);
+    viewCommand.Add(viewAddCommand);
 
 }
 
