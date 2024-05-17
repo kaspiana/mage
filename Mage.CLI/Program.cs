@@ -121,6 +121,15 @@ if(archive is not null){
     }, docRefArgument);
     docCommand.Add(docDeleteCommand);
 
+    // mage views
+    var viewsCommand = new Command("views", "List all views.");
+    viewsCommand.SetHandler(() => {
+        var views = archive.ViewGetAll();
+        foreach(var view in views){
+            Console.WriteLine($"* {view}");
+        }
+    });
+    rootCommand.Add(viewsCommand);
 
     // mage view [view-ref]
     var viewCommand = new Command("view", "Manipulate view.");
