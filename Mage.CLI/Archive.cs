@@ -115,7 +115,18 @@ public struct Archive {
         }
     }
 
-    public string[] GetView(string viewName){
+    public View? GetView(string viewName){
+
+        ViewType? viewType = null;
+        if(viewName == "main") viewType = ViewType.Main;
+        if(viewName == "in") viewType = ViewType.In;
+        if(viewName.StartsWith("user")) viewType = ViewType.User;
+        if(viewName.StartsWith("query")) viewType = ViewType.Query;
+        if(viewName.StartsWith("stash")) viewType = ViewType.Stash;
+
+        if(viewType is null)
+            return null;
+
         var viewsDir = $"{mageDir}{VIEWS_DIR_PATH}";
         var viewDirsFull = Directory.GetDirectories(viewsDir);
         var documentHashes = new List<string>();
@@ -135,7 +146,11 @@ public struct Archive {
             }
         }
 
-        return documentHashes.ToArray();
+        return new View(){
+            name = viewName,
+            viewType = (ViewType)viewType,
+            documents = documentHashes.ToArray()
+        };
     }
 
     public int? GetDocumentID(string documentHash){
