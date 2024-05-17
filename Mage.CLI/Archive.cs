@@ -163,12 +163,12 @@ public struct Archive {
         ConnectDB();
 
         var com = db.CreateCommand();
-		com.CommandText = $"select * from Document where ID = @ID";
+		com.CommandText = $"select Hash from Document where ID = @ID";
         com.Parameters.AddWithValue("ID", documentID);
 		
         var reader = com.ExecuteReader();
         if(reader.Read()){
-            return reader.GetString(1);
+            return reader.GetString(0);
         }
 
         return null;
@@ -178,7 +178,7 @@ public struct Archive {
         ConnectDB();
 
         var com = db.CreateCommand();
-		com.CommandText = $"select * from Document where Hash = @Hash";
+		com.CommandText = $"select ID from Document where Hash = @Hash";
         com.Parameters.AddWithValue("Hash", documentHash);
 		
         var reader = com.ExecuteReader();
