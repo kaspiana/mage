@@ -20,8 +20,10 @@ create table TaxonymParent (
 	ChildID integer not null,
 	ParentID integer not null,
 
-	foreign key (ChildID) references Taxonym(ID),
-	foreign key (ParentID) references Taxonym(ID),
+	foreign key (ChildID) references Taxonym(ID)
+        deferrable initially deferred,
+	foreign key (ParentID) references Taxonym(ID)
+        deferrable initially deferred,
 	primary key (ChildID, ParentID)
 );
 

@@ -22,8 +22,7 @@ public static partial class CLICommands {
         {
             docRefArgument,
             reflectOption,
-            ComDocOpen(ctx, docRefArgument),
-            ComDocDelete(ctx, docRefArgument)
+            ComDocOpen(ctx, docRefArgument)
         };
 
         com.SetHandler((docRef, reflect) => {
@@ -63,17 +62,6 @@ public static partial class CLICommands {
             fileOpener.StartInfo.UseShellExecute = true;
             fileOpener.Start();
 
-        }, docRefArgument);
-        
-        return com;
-    }
-
-    public static Command ComDocDelete(CLIContext ctx, Argument<string> docRefArgument){
-        // mage doc [doc-ref] delete
-        var com = new Command("delete", "Delete document.");
-        com.SetHandler((docRef) => {
-            var docID = (DocumentID)ObjectRef.ResolveDocument(ctx.archive, docRef)!;
-            ctx.archive.DocumentDelete(docID);
         }, docRefArgument);
         
         return com;
