@@ -1,4 +1,5 @@
 test-archives/
 Mage.CLI/obj/
 Mage.CLI/bin/
+Mage.CLI/*.ps1
 notes.md
