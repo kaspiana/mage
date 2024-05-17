@@ -129,7 +129,7 @@ public struct Archive {
 
         var viewsDir = $"{mageDir}{VIEWS_DIR_PATH}";
         var viewDirsFull = Directory.GetDirectories(viewsDir);
-        var documentIDs = new List<DocumentID>();
+        var documentIDs = new List<(int, DocumentID?)>();
 
         foreach(var viewDirFull in viewDirsFull){
             var viewDir = Path.GetFileName(viewDirFull);
@@ -138,20 +138,24 @@ public struct Archive {
                 var filePaths = Directory.GetFiles(viewDirFull);
 
                 foreach(var filePath in filePaths){
-                    var hash = Path.GetFileNameWithoutExtension(filePath)[2..];
+                    var fileName = Path.GetFileNameWithoutExtension(filePath);
+                    var tildeIndex = fileName.IndexOf('~');
+                    var index = int.Parse(fileName[0..tildeIndex]);
+                    var hash = fileName[(tildeIndex+1)..];
                     var docID = GetDocumentID(hash);
-                    if(docID is not null)
-                        documentIDs.Add((DocumentID)docID);
+                    documentIDs.Add((index, docID));
                 }
 
                 break;
             }
         }
 
+        documentIDs.Sort((x, y) => x.Item1.CompareTo(y.Item1));
+
         return new View(){
             name = viewName,
             viewType = (ViewType)viewType,
-            documents = documentIDs.ToArray()
+            documents = documentIDs.Select((t) => t.Item2).ToArray()
         };
     }
 

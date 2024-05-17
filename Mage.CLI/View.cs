@@ -11,5 +11,5 @@ public enum ViewType {
 public struct View {
     public string? name;
     public ViewType viewType;
-    public DocumentID[] documents;
+    public DocumentID?[] documents;
 }
