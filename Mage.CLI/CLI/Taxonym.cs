@@ -82,17 +82,19 @@ public static partial class CLICommands {
 
     public static Command ComTaxonymAlias(CLIContext ctx, Argument<string> taxonymRefArgument){
 
-        var aliasArgument = new Argument<string>(
+        var aliasArgument = new Argument<string[]>(
             name: "alias"
-        );
+        ){ Arity = ArgumentArity.OneOrMore };
 
         var com = new Command("alias", "Add an alias to the taxonym."){
             aliasArgument
         };
 
-        com.SetHandler((taxonymRef, alias) => {
+        com.SetHandler((taxonymRef, aliases) => {
             var taxonymID = (TaxonymID)ObjectRef.ResolveTaxonym(ctx.archive, taxonymRef)!;
-            ctx.archive.TaxonymAddAlias(taxonymID, alias);
+            foreach(var alias in aliases){
+                ctx.archive.TaxonymAddAlias(taxonymID, alias);
+            }
         }, taxonymRefArgument, aliasArgument);
 
         return com;
@@ -100,17 +102,19 @@ public static partial class CLICommands {
 
     public static Command ComTaxonymUnalias(CLIContext ctx, Argument<string> taxonymRefArgument){
 
-        var aliasArgument = new Argument<string>(
+        var aliasArgument = new Argument<string[]>(
             name: "alias"
-        );
+        ){ Arity = ArgumentArity.OneOrMore };
 
         var com = new Command("unalias", "Remove an alias from the taxonym."){
             aliasArgument
         };
 
-        com.SetHandler((taxonymRef, alias) => {
+        com.SetHandler((taxonymRef, aliases) => {
             var taxonymID = (TaxonymID)ObjectRef.ResolveTaxonym(ctx.archive, taxonymRef)!;
-            ctx.archive.TaxonymRemoveAlias(taxonymID, alias);
+            foreach(var alias in aliases){
+                ctx.archive.TaxonymRemoveAlias(taxonymID, alias);
+            }
         }, taxonymRefArgument, aliasArgument);
 
         return com;
@@ -164,19 +168,20 @@ public static partial class CLICommands {
 
     public static Command ComTaxonymChild(CLIContext ctx, Argument<string> taxonymRefArgument){
 
-        var childRefArgument = new Argument<string>(
+        var childRefArgument = new Argument<string[]>(
             name: "child"
-        );
+        ){ Arity = ArgumentArity.OneOrMore };
 
         var com = new Command("child", "Add a child to the taxonym."){
             childRefArgument
         };
 
-        com.SetHandler((taxonymRef, childRef) => {
+        com.SetHandler((taxonymRef, childRefs) => {
             var taxonymID = (TaxonymID)ObjectRef.ResolveTaxonym(ctx.archive, taxonymRef)!;
-            var childID = (TaxonymID)ObjectRef.ResolveTaxonym(ctx.archive, childRef)!;
-
-            ctx.archive.TaxonymAddChild(taxonymID, childID);
+            foreach(var childRef in childRefs){
+                var childID = (TaxonymID)ObjectRef.ResolveTaxonym(ctx.archive, childRef)!;
+                ctx.archive.TaxonymAddChild(taxonymID, childID);   
+            }
         }, taxonymRefArgument, childRefArgument);
 
         return com;
@@ -185,19 +190,20 @@ public static partial class CLICommands {
 
     public static Command ComTaxonymUnchild(CLIContext ctx, Argument<string> taxonymRefArgument){
 
-        var childRefArgument = new Argument<string>(
+        var childRefArgument = new Argument<string[]>(
             name: "child"
-        );
+        ){ Arity = ArgumentArity.OneOrMore };
 
         var com = new Command("unchild", "Remove a child from the taxonym."){
             childRefArgument
         };
 
-        com.SetHandler((taxonymRef, childRef) => {
+        com.SetHandler((taxonymRef, childRefs) => {
             var taxonymID = (TaxonymID)ObjectRef.ResolveTaxonym(ctx.archive, taxonymRef)!;
-            var childID = (TaxonymID)ObjectRef.ResolveTaxonym(ctx.archive, childRef)!;
-
-            ctx.archive.TaxonymRemoveChild(taxonymID, childID);
+            foreach(var childRef in childRefs){
+                var childID = (TaxonymID)ObjectRef.ResolveTaxonym(ctx.archive, childRef)!;
+                ctx.archive.TaxonymRemoveChild(taxonymID, childID);   
+            }
         }, taxonymRefArgument, childRefArgument);
 
         return com;
@@ -206,19 +212,20 @@ public static partial class CLICommands {
 
     public static Command ComTaxonymParent(CLIContext ctx, Argument<string> taxonymRefArgument){
 
-        var parentRefArgument = new Argument<string>(
+        var parentRefArgument = new Argument<string[]>(
             name: "parent"
-        );
+        ){ Arity = ArgumentArity.OneOrMore };
 
         var com = new Command("parent", "Add a parent to the taxonym."){
             parentRefArgument
         };
 
-        com.SetHandler((taxonymRef, parentRef) => {
+        com.SetHandler((taxonymRef, parentRefs) => {
             var taxonymID = (TaxonymID)ObjectRef.ResolveTaxonym(ctx.archive, taxonymRef)!;
-            var parentID = (TaxonymID)ObjectRef.ResolveTaxonym(ctx.archive, parentRef)!;
-
-            ctx.archive.TaxonymAddParent(taxonymID, parentID);
+            foreach(var parentRef in parentRefs){
+                var parentID = (TaxonymID)ObjectRef.ResolveTaxonym(ctx.archive, parentRef)!;
+                ctx.archive.TaxonymAddParent(taxonymID, parentID);   
+            }
         }, taxonymRefArgument, parentRefArgument);
 
         return com;
@@ -227,19 +234,20 @@ public static partial class CLICommands {
 
     public static Command ComTaxonymUnparent(CLIContext ctx, Argument<string> taxonymRefArgument){
 
-        var parentRefArgument = new Argument<string>(
+        var parentRefArgument = new Argument<string[]>(
             name: "parent"
-        );
+        ){ Arity = ArgumentArity.OneOrMore };
 
         var com = new Command("unparent", "Remove a parent from the taxonym."){
             parentRefArgument
         };
 
-        com.SetHandler((taxonymRef, parentRef) => {
+        com.SetHandler((taxonymRef, parentRefs) => {
             var taxonymID = (TaxonymID)ObjectRef.ResolveTaxonym(ctx.archive, taxonymRef)!;
-            var parentID = (TaxonymID)ObjectRef.ResolveTaxonym(ctx.archive, parentRef)!;
-
-            ctx.archive.TaxonymRemoveParent(taxonymID, parentID);
+            foreach(var parentRef in parentRefs){
+                var parentID = (TaxonymID)ObjectRef.ResolveTaxonym(ctx.archive, parentRef)!;
+                ctx.archive.TaxonymRemoveParent(taxonymID, parentID);   
+            }
         }, taxonymRefArgument, parentRefArgument);
 
         return com;
