@@ -189,4 +189,28 @@ public struct Archive {
         return null;
     }
 
+    public Document? GetDocument(DocumentID documentID){
+        ConnectDB();
+
+        var com = db.CreateCommand();
+		com.CommandText = $"select * from Document where ID = @ID";
+        com.Parameters.AddWithValue("ID", documentID);
+		
+        var reader = com.ExecuteReader();
+        if(reader.Read()){
+            var ingestTimestamp = new DateTime();
+            ingestTimestamp.AddSeconds(reader.GetInt32(3)).ToLocalTime();
+
+            return new Document(){
+                hash = reader.GetString(1),
+                id = documentID,
+                extension = reader.GetString(2),
+                ingestTimestamp = ingestTimestamp,
+                comment = reader.IsDBNull(4) ? null : reader.GetString(4)
+            };
+        }
+
+        return null;
+    }
+
 }
