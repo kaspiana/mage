@@ -203,6 +203,53 @@ public struct Archive {
         return documentID;
     }
 
+    public void DocumentDelete(DocumentID documentID){
+
+        var documentHash = GetDocumentHash(documentID);
+
+        File.Delete($"{fileDir}{documentHash}");
+
+        var views = ViewGetAll();
+        foreach(var viewName in views){
+            var viewDir = new DirectoryInfo($"{mageDir}{VIEWS_DIR_PATH}{viewName}/");
+            foreach(var file in viewDir.EnumerateFiles($"*~{documentHash}.*")){
+                file.Delete();
+            }
+        }
+        
+        ConnectDB();
+        var com = db.CreateCommand();
+		com.CommandText = $@"
+            delete from Document
+            where ID = @ID;
+        ";
+        com.Parameters.AddWithValue("@ID", documentID);
+        com.ExecuteNonQuery();
+        com.Dispose();
+
+    }
+
+    public void DocumentDeleteAll(){
+
+        foreach(var filePath in Directory.GetFiles($"{fileDir}")){
+            File.Delete(filePath);
+        }
+
+        ConnectDB();
+        var com = db.CreateCommand();
+		com.CommandText = $@"
+            delete from Document;
+        ";
+        com.ExecuteNonQuery();
+        com.Dispose();
+
+        var views = ViewGetAll();
+        foreach(var view in views){
+            ViewDelete(view);
+        }
+
+    }
+
     public (int, string) ParseViewFileName(string fileName){
         var tildeIndex = fileName.IndexOf('~');
         var index = int.Parse(fileName[0..tildeIndex]);
@@ -249,6 +296,13 @@ public struct Archive {
     public void ViewDelete(string viewName){
         ViewClear(viewName);
         Directory.Delete($"{mageDir}{VIEWS_DIR_PATH}{viewName}/");
+    }
+
+    public string[] ViewGetAll(){
+        var viewsDir = $"{mageDir}{VIEWS_DIR_PATH}";
+        var viewDirsFull = Directory.GetDirectories(viewsDir);
+        var viewDirs = viewDirsFull.Select((p) => Path.GetFileName(p));
+        return viewDirs.ToArray();
     }
 
     public View? ViewGet(string viewName){
