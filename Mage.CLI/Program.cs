@@ -266,6 +266,31 @@ if(archive is not null){
     }, viewRefArgument, docRefArgument);
     viewCommand.Add(viewAddCommand);
 
+
+    // mage search --sql
+    var searchCommand = new Command("search", "Search all documents.");
+    var sqlClauseOption = new Option<string>(
+        name: "--raw",
+        description: "SQL clause",
+        getDefaultValue: () => ""
+    );
+    searchCommand.Add(sqlClauseOption);
+    searchCommand.SetHandler((sqlClause) => {
+
+        var ids = archive.QueryDocuments(sqlClause);
+        if(ids.Count() > 0){
+            var queryViewName = archive.ViewQueryCreate();
+            foreach(var id in ids){
+                archive.ViewAdd(queryViewName, id);
+            }
+            Console.WriteLine($"{ids.Count()} results found, reflected in {queryViewName}");
+        } else {
+            Console.WriteLine($"no results found");
+        }
+
+    }, sqlClauseOption);
+    rootCommand.Add(searchCommand);
+
 }
 
 rootCommand.Invoke(args);

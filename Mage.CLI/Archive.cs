@@ -291,6 +291,12 @@ public class Archive {
         return viewName;
     }
 
+    public string? ViewQueryCreate(){
+        var viewName = ViewGenerateNumberedName("query");
+        ViewCreate(viewName);
+        return viewName;
+    }
+
     public void ViewDelete(string viewName){
         ViewClear(viewName);
         Directory.Delete($"{mageDir}{VIEWS_DIR_PATH}{viewName}/");
@@ -476,6 +482,22 @@ public class Archive {
         }
 
         return null;
+    }
+
+    public DocumentID[] QueryDocuments(string queryString){
+        ConnectDB();
+
+        var com = db.CreateCommand();
+		com.CommandText = $"select ID from Document {queryString};";
+        var reader = com.ExecuteReader();
+
+        var ids = new List<DocumentID>();
+
+        while(reader.Read()){
+            ids.Add( (DocumentID)reader.GetInt32(0) );
+        }
+
+        return ids.ToArray();
     }
 
     public Document? GetDocument(DocumentID documentID){
