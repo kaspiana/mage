@@ -19,7 +19,7 @@ public class Archive {
     public const string BIND_FILE_PATH = "bind";
     public const string DB_FILE_PATH = "db.sqlite";
 
-    public const int CURRENT_VERSION = 2;
+    public const int CURRENT_VERSION = 3;
     public const string IN_VIEW_NAME = "in";
     public const string OPEN_VIEW_NAME = "open";
     public const string DEFAULT_VIEW_NAME = "main";
@@ -60,7 +60,7 @@ public class Archive {
             $"doc=",
             $"tag=",
             $"taxonym=@1",
-            $"seq=",
+            $"series=",
             $"view={DEFAULT_VIEW_NAME}"
         ]);
 
@@ -418,7 +418,7 @@ public class Archive {
             case ObjectType.Document: kw = "doc"; break;
             case ObjectType.Tag: kw = "tag"; break;
             case ObjectType.Taxonym: kw = "taxonym"; break;
-            case ObjectType.Sequence: kw = "seq"; break;
+            case ObjectType.Series: kw = "series"; break;
             case ObjectType.View: kw = "view"; break;
         }
 

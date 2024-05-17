@@ -98,7 +98,7 @@ public class ObjectRef_Name : ObjectRef
             case ObjectType.Taxonym:
                 return null; // TODO
 
-            case ObjectType.Sequence:
+            case ObjectType.Series:
                 return null;
         }
 

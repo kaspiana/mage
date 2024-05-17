@@ -4,6 +4,6 @@ public enum ObjectType {
     Document,
     Tag,
     Taxonym,
-    Sequence,
+    Series,
     View
 }
