@@ -17,7 +17,7 @@ public struct Archive {
     public const int CURRENT_VERSION = 1;
     public const string DEFAULT_VIEW_NAME = "main";
 
-    public static readonly string[] BIND_KEYS = [
+    public static readonly string[] BINDING_KEYS = [
         "."
     ];
 
@@ -109,6 +109,29 @@ public struct Archive {
             db.Dispose();
             db = null;
         }
+    }
+
+    public string[] GetView(string viewName){
+        var viewsDir = $"{mageDir}{VIEWS_DIR_PATH}";
+        var viewDirsFull = Directory.GetDirectories(viewsDir);
+        var documentHashes = new List<string>();
+
+        foreach(var viewDirFull in viewDirsFull){
+            var viewDir = Path.GetFileName(viewDirFull);
+            if(viewDir == viewName){
+
+                var filePaths = Directory.GetFiles(viewDirFull);
+
+                foreach(var filePath in filePaths){
+                    var hash = Path.GetFileNameWithoutExtension(filePath)[2..];
+                    documentHashes.Add(hash);
+                }
+
+                break;
+            }
+        }
+
+        return documentHashes.ToArray();
     }
 
 }
