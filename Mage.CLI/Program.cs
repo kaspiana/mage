@@ -113,6 +113,24 @@ if(archive is not null){
     }, viewRefArgument);
     bindCommand.Add(bindViewCommand);
 
+    // mage docs
+    var docsCommand = new Command("docs", "Reflect *all* documents in bound view.");
+    var viewRefOption = new Option<string>(
+        name: "--view",
+        getDefaultValue: () => "."
+    );
+    docsCommand.Add(viewRefOption);
+    docsCommand.SetHandler((viewRef) => {
+        var viewName = ObjectRef.ResolveView(archive, viewRef);
+        
+        archive.ViewClear(viewName);
+        var docIDs = archive.QueryDocuments("");
+        foreach(var docID in docIDs){
+            archive.ViewAdd(viewName, docID);
+        }
+    }, viewRefOption);
+    rootCommand.Add(docsCommand);
+
     // mage doc
     var docCommand = new Command("doc", "Manipulate document.");
     var reflectOption = new Option<bool>(
