@@ -41,28 +41,28 @@ if(archive is not null){
         getDefaultValue: () => null
     );
 
-    // mage in
-    var inCommand = new Command("in", "Ingest files in inbox into archive.");
-    inCommand.Add(commentOption);
-    inCommand.SetHandler((comment) => {
+    // mage ingest
+    var ingestCommand = new Command("ingest", "Ingest files in inbox into archive.");
+    ingestCommand.Add(commentOption);
+    ingestCommand.SetHandler((comment) => {
         archive.Ingest();
     }, commentOption);
-    rootCommand.Add(inCommand);
+    rootCommand.Add(ingestCommand);
 
-    // mage in from
-    var inFromCommand = new Command("from", "Copy files to ingest into archive.");
+    // mage ingest from
+    var ingestFromCommand = new Command("from", "Copy files to ingest into archive.");
     var filePathArgument = new Argument<string[]>(
         name: "File path",
         description: "File to be copied and ingested"
     ){ Arity = ArgumentArity.ZeroOrMore };
-    inFromCommand.Add(filePathArgument);
-    inFromCommand.Add(commentOption);
-    inFromCommand.SetHandler((comment, filePaths) => {
+    ingestFromCommand.Add(filePathArgument);
+    ingestFromCommand.Add(commentOption);
+    ingestFromCommand.SetHandler((comment, filePaths) => {
         foreach(var filePath in filePaths){
             archive.IngestFile(filePath, comment);
         }
     }, commentOption, filePathArgument);
-    inCommand.Add(inFromCommand);
+    ingestCommand.Add(ingestFromCommand);
 
     // mage doc
     var docCommand = new Command("doc", "Manipulate document.");
