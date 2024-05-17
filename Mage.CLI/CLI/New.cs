@@ -22,18 +22,45 @@ public static partial class CLICommands {
             name: "name"
         );
 
-        var com = new Command("taxonym", "Create a taxonym."){
-            parentRefArgument,
-            nameArgument
+        var aliasArgument = new Option<string[]>(
+            name: "--alias"
+        ){ 
+            Arity = ArgumentArity.OneOrMore, 
+            AllowMultipleArgumentsPerToken = true 
         };
 
-        com.SetHandler((parentRef, name) => {
-            var parentID = (TaxonymID)ObjectRef.ResolveTaxonym(ctx.archive, parentRef)!;
+        var noncanonicalParentRefArgument = new Option<string[]>(
+            name: "--parent"
+        ){
+            Arity = ArgumentArity.OneOrMore, 
+            AllowMultipleArgumentsPerToken = true 
+        };
 
-            var taxonymID = ctx.archive.TaxonymCreate(parentID, name);
+        var com = new Command("taxonym", "Create a taxonym."){
+            parentRefArgument,
+            nameArgument,
+            aliasArgument,
+            noncanonicalParentRefArgument
+        };
+
+        com.SetHandler((parentRef, name, aliases, noncanonicalParentRefs) => {
+            var parentID = (TaxonymID)ObjectRef.ResolveTaxonym(ctx.archive, parentRef)!;
+            var taxonymID = (TaxonymID)ctx.archive.TaxonymCreate(parentID, name);
+            foreach(var alias in aliases){
+                ctx.archive.TaxonymAddAlias(taxonymID, alias);
+            }
+            foreach(var ncParentRef in noncanonicalParentRefs){
+                var ncParentID = (TaxonymID)ObjectRef.ResolveTaxonym(ctx.archive, ncParentRef)!;
+                ctx.archive.TaxonymAddParent(taxonymID, ncParentID);
+            }
 
             Console.WriteLine($"{taxonymID}: {parentID}:{name}");
-        }, parentRefArgument, nameArgument);
+        }, 
+            parentRefArgument, 
+            nameArgument, 
+            aliasArgument, 
+            noncanonicalParentRefArgument
+        );
 
         return com;
 
