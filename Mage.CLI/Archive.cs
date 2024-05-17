@@ -71,6 +71,10 @@ public struct Archive {
         return archive;
     }
 
+    public void Unload(){
+        DiscnnectDB();
+    }
+
     public static Archive Load(string mageDir, string fileDir){
 
         var infoMap = new Dictionary<string, string>();
