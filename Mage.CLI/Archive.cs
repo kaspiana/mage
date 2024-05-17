@@ -77,6 +77,7 @@ public class Archive {
         
         // setup views
         archive.ViewCreate("in");
+        archive.ViewCreate("open");
         archive.ViewCreate(DEFAULT_VIEW_NAME);
 
         return archive;
@@ -311,6 +312,7 @@ public class Archive {
         ViewType? viewType = null;
         if(viewName == "main") viewType = ViewType.Main;
         if(viewName == "in") viewType = ViewType.In;
+        if(viewName == "open") viewType = ViewType.Open;
         if(viewName.StartsWith("user")) viewType = ViewType.User;
         if(viewName.StartsWith("query")) viewType = ViewType.Query;
         if(viewName.StartsWith("stash")) viewType = ViewType.Stash;

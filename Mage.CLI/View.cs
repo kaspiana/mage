@@ -4,6 +4,7 @@ public enum ViewType {
     Main,
     User,
     In,
+    Open,
     Query,
     Stash
 }
