@@ -30,7 +30,14 @@ if(archive is not null){
     var testCommand = new Command("test", "For debugging purposes.");
     testCommand.SetHandler(() => {
 
-        archive.BindDocument((DocumentID)1);
+
+        archive.db.EnsureConnected();
+        var taxIDs = archive.db.ReadTaxonymChildren(Archive.ROOT_TAXONYM_ID);
+
+        foreach(var taxID in taxIDs){
+            var taxonym = archive.db.ReadTaxonym(taxID);
+            Console.WriteLine(taxonym?.canonicalAlias);
+        }
 
     });
     rootCommand.Add(testCommand);
