@@ -167,6 +167,52 @@ public partial class DBModel {
 
     }
 
+    public void InsertTaxonymAlias(TaxonymID taxonymID, string alias){
+        var com = db.CreateCommand();
+		com.CommandText = $@"
+            insert into TaxonymAlias
+            (TaxonymID, Alias)
+            values (@TaxonymID, @Alias);
+        ";
+        com.Parameters.AddWithValue("@TaxonymID", taxonymID);
+        com.Parameters.AddWithValue("@Alias", alias);
+        com.ExecuteNonQuery();
+        com.Dispose();
+    }
+
+    public void InsertTaxonymParent(TaxonymID childID, TaxonymID parentID){
+        var com = db.CreateCommand();
+		com.CommandText = $@"
+            insert into TaxonymParent
+            (ChildID, ParentID)
+            values (@ChildID, @ParentID);
+        ";
+        com.Parameters.AddWithValue("@ChildID", childID);
+        com.Parameters.AddWithValue("@ParentID", parentID);
+        com.ExecuteNonQuery();
+        com.Dispose();
+    }
+
+    public TaxonymID InsertTaxonym(Taxonym taxonym){
+        var com = db.CreateCommand();
+        com.CommandText = $@"
+            insert into Taxonym
+            (CanonicalParentID, CanonicalAlias)
+            values (@CanonicalParentID, @CanonicalAlias)
+        ";
+        com.Parameters.AddWithValue("@CanonicalParentID", ((object?)taxonym.canonicalParentID) ?? DBNull.Value);
+		com.Parameters.AddWithValue("@CanonicalAlias", taxonym.canonicalAlias);
+		com.ExecuteNonQuery();
+		com.Dispose();
+
+        var taxonymID = (TaxonymID)ReadLastInsertRowID();
+
+        InsertTaxonymAlias(taxonymID, taxonym.canonicalAlias);
+        InsertTaxonymParent(taxonymID, taxonym.canonicalParentID);
+
+        return taxonymID;
+    }
+
 }
 
 
