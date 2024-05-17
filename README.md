@@ -14,7 +14,7 @@ Taxonyms are tag names and tag namespaces, and are organised into a hierarchy de
 
 A reference denotes an object like a document, tag, or view, but does not itself communicate the type of the object. There are four kinds of references:
 
-- ID references, written with the `@` operator; e.g. `@786`.
+- ID references; e.g. `786`.
 - Name references; e.g. view names, document hashes.
 - Bound references, written with the `.` operator.
 - View index references, which refer to a document in a view; e.g. `main/0`, `./6`.
