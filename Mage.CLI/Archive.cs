@@ -170,18 +170,21 @@ public struct Archive {
 		com.CommandText = $@"
             insert into Document (
                 Hash,
+                FileName,
                 Extension,
                 IngestTimestamp,
                 Comment
             )
             values (
                 @Hash,
+                @FileName,
                 @Extension,
                 @IngestTimestamp,
                 @Comment
             )
         ";
         com.Parameters.AddWithValue("@Hash", hash);
+        com.Parameters.AddWithValue("@FileName", fileName);
         com.Parameters.AddWithValue("@Extension", extension);
         com.Parameters.AddWithValue("@IngestTimestamp", ingestTimestamp);
         com.Parameters.AddWithValue("@Comment", comment is null ? System.DBNull.Value : comment);
@@ -193,7 +196,11 @@ public struct Archive {
 		long lastRowID = (long)com.ExecuteScalar()!;
 		com.Dispose();
 
-        return (DocumentID)lastRowID;
+        var documentID = (DocumentID)lastRowID;
+
+        ViewAdd("in", documentID);
+
+        return documentID;
     }
 
     public (int, string) ParseViewFileName(string fileName){
@@ -382,14 +389,15 @@ public struct Archive {
         var reader = com.ExecuteReader();
         if(reader.Read()){
             var ingestTimestamp = new DateTime();
-            ingestTimestamp.AddSeconds(reader.GetInt32(3)).ToLocalTime();
+            ingestTimestamp.AddSeconds(reader.GetInt32(4)).ToLocalTime();
 
             return new Document(){
                 hash = reader.GetString(1),
                 id = documentID,
-                extension = reader.GetString(2),
+                fileName = reader.GetString(2),
+                extension = reader.GetString(3),
                 ingestTimestamp = ingestTimestamp,
-                comment = reader.IsDBNull(4) ? null : reader.GetString(4)
+                comment = reader.IsDBNull(5) ? null : reader.GetString(5)
             };
         }
 
