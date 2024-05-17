@@ -8,7 +8,7 @@ using System.Text;
 
 namespace Mage.Engine;
 
-public struct Archive {
+public class Archive {
 
     public const string MAGE_DIR_PATH = ".mage/";
     public const string IN_DIR_PATH = "in/";
