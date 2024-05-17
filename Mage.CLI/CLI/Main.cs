@@ -62,13 +62,13 @@ public static partial class CLICommands {
     public static Command ComTest(CLIContext ctx){
         var com = new Command("test", "For debugging purposes.");
         com.SetHandler(() => {
-            ctx.archive.db.EnsureConnected();
-            var taxIDs = ctx.archive.db.ReadTaxonymChildren(Archive.ROOT_TAXONYM_ID);
+            
+            Console.WriteLine(ctx.archive.TaxonymFind("general:character:vriska_serket"));
+            Console.WriteLine(ctx.archive.TaxonymFind("general:vriska"));
+            Console.WriteLine(ctx.archive.TaxonymFind("homestuck:vriska"));
+            Console.WriteLine(ctx.archive.TaxonymFind("vriska_serket"));
+            Console.WriteLine(ctx.archive.TaxonymFind("vriska"));
 
-            foreach(var taxID in taxIDs){
-                var taxonym = ctx.archive.db.ReadTaxonym(taxID);
-                Console.WriteLine(taxonym?.canonicalAlias);
-            }
         });
 
         return com;

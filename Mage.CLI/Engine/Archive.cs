@@ -202,6 +202,53 @@ public class Archive {
         return db.ReadTaxonym(taxonymID);
     }
 
+    public TaxonymID? TaxonymFind(IEnumerable<string> qualifiedNameParts, TaxonymID? context = null){
+        
+        if(qualifiedNameParts.Count() == 0)
+			return context is null ? (TaxonymID)1 : (TaxonymID)context;
+		
+		var target = qualifiedNameParts.First();
+
+		List<TaxonymID> layerIDs = [];
+		List<(TaxonymID taxonymID, string alias)> layerAliases = [];
+		
+		var seedID = context is null ? (TaxonymID)1 : (TaxonymID)context;
+		var seedAlias = TaxonymGet(seedID)?.canonicalAlias;
+		layerIDs.Add(seedID);
+		layerAliases.Add((seedID, seedAlias));
+
+		while(layerIDs.Count() > 0){
+			foreach(var (taxonymID, alias) in layerAliases){
+				if(alias == target){
+					if(qualifiedNameParts.Count() == 1){
+						return taxonymID;
+					} else {
+						return TaxonymFind(qualifiedNameParts.Skip(1), taxonymID);
+					}
+				}
+			}
+
+			var idCount = layerIDs.Count();
+			var idList = String.Join(',', layerIDs.Take(idCount));
+            for(int i = 0; i < idCount; i++){
+                var id = layerIDs[i];
+                layerIDs.AddRange(TaxonymGetChildren(id));
+            }
+			layerIDs.RemoveRange(0, idCount);
+            
+            layerAliases.Clear();
+            foreach(var id in layerIDs){
+                layerAliases.AddRange(TaxonymGetAliases(id).Select((alias) => (id, alias)));
+            }
+		}
+
+        return null;
+    }
+    
+    public TaxonymID? TaxonymFind(string qualifiedName, TaxonymID? context = null){
+		return TaxonymFind(qualifiedName.Split(':'), context);
+	}
+
     public TaxonymID[] TaxonymGetChildren(TaxonymID taxonymID){
         db.EnsureConnected();
         return db.ReadTaxonymChildren(taxonymID);

@@ -100,7 +100,7 @@ public class ObjectRef_Name : ObjectRef
                 return null; // TODO
 
             case ObjectType.Taxonym:
-                return null; // TODO
+                return archive.TaxonymFind(name); // TODO
 
             case ObjectType.Series:
                 return null;
