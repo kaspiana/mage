@@ -1,6 +1,8 @@
 using System.Data;
 using Microsoft.Data.Sqlite;
 using System.Resources;
+using System.Runtime.InteropServices;
+using Mage.IO;
 
 namespace Mage.Engine;
 
@@ -115,6 +117,13 @@ public struct Archive {
         }
     }
 
+    public (int, string) ParseViewFileName(string fileName){
+        var tildeIndex = fileName.IndexOf('~');
+        var index = int.Parse(fileName[0..tildeIndex]);
+        var hash = fileName[(tildeIndex+1)..];
+        return (index, hash);
+    }
+
     public View? GetView(string viewName){
 
         ViewType? viewType = null;
@@ -139,9 +148,7 @@ public struct Archive {
 
                 foreach(var filePath in filePaths){
                     var fileName = Path.GetFileNameWithoutExtension(filePath);
-                    var tildeIndex = fileName.IndexOf('~');
-                    var index = int.Parse(fileName[0..tildeIndex]);
-                    var hash = fileName[(tildeIndex+1)..];
+                    var (index, hash) = ParseViewFileName(fileName);
                     var docID = GetDocumentID(hash);
                     documentIDs.Add((index, docID));
                 }
@@ -157,6 +164,23 @@ public struct Archive {
             viewType = (ViewType)viewType,
             documents = documentIDs.Select((t) => t.Item2).ToArray()
         };
+    }
+
+    public int ViewAdd(string viewName, DocumentID documentID){
+        var viewDir = $"{mageDir}{VIEWS_DIR_PATH}{viewName}/";
+
+        var document = (Document)GetDocument(documentID)!;
+
+        var filePaths = Directory.GetFiles(viewDir);
+        var newIndex = filePaths.Count();
+
+        FileExt.CreateHardLink(
+            $"{viewDir}{newIndex}~{document.hash}.{document.extension}",
+            $"{fileDir}{document.hash}",
+            IntPtr.Zero
+        );
+
+        return newIndex;
     }
 
     public string? GetDocumentHash(DocumentID documentID){
