@@ -124,20 +124,23 @@ public struct Archive {
         return (index, hash);
     }
 
-    public ViewType? ParseViewName(string viewName){
+    public void ViewCreate(string viewName){
+        Directory.CreateDirectory($"{mageDir}{VIEWS_DIR_PATH}{viewName}/");
+    }
+
+    public void ViewDelete(string viewName){
+        ViewClear(viewName);
+        Directory.Delete($"{mageDir}{VIEWS_DIR_PATH}{viewName}/");
+    }
+
+    public View? GetView(string viewName){
+
         ViewType? viewType = null;
         if(viewName == "main") viewType = ViewType.Main;
         if(viewName == "in") viewType = ViewType.In;
         if(viewName.StartsWith("user")) viewType = ViewType.User;
         if(viewName.StartsWith("query")) viewType = ViewType.Query;
         if(viewName.StartsWith("stash")) viewType = ViewType.Stash;
-
-        return viewType;
-    }
-
-    public View? GetView(string viewName){
-
-        ViewType? viewType = ParseViewName(viewName);
 
         if(viewType is null)
             return null;
