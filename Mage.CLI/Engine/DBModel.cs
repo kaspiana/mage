@@ -21,8 +21,10 @@ public partial class DBModel {
     }
 
     public void Disconnect(){
-        db.Close();
-        db.Dispose();
+        if(db is not null){
+            db.Close();
+            db.Dispose();
+        }
     }
 
     public void RunResourceScript(string resourcePath){
