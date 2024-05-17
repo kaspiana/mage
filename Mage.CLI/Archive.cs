@@ -206,14 +206,14 @@ public class Archive {
 
     public void DocumentDelete(DocumentID documentID){
 
-        var documentHash = GetDocumentHash(documentID);
+        var doc = (Document)GetDocument(documentID)!;
 
-        File.Delete($"{fileDir}{documentHash}");
+        File.Move($"{fileDir}{doc.hash}", $"{mageDir}{OUT_DIR_PATH}{doc.fileName}.{doc.extension}");
 
         var views = ViewGetAll();
         foreach(var viewName in views){
             var viewDir = new DirectoryInfo($"{mageDir}{VIEWS_DIR_PATH}{viewName}/");
-            foreach(var file in viewDir.EnumerateFiles($"*~{documentHash}.*")){
+            foreach(var file in viewDir.EnumerateFiles($"*~{doc.hash}.*")){
                 file.Delete();
             }
         }
