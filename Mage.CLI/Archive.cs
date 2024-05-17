@@ -464,8 +464,8 @@ public class Archive {
 		
         var reader = com.ExecuteReader();
         if(reader.Read()){
-            var ingestTimestamp = new DateTime();
-            ingestTimestamp.AddSeconds(reader.GetInt32(4)).ToLocalTime();
+            var ingestTimestamp = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+            ingestTimestamp = ingestTimestamp.AddSeconds(reader.GetInt32(4)).ToLocalTime();
 
             return new Document(){
                 hash = reader.GetString(1),
