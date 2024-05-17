@@ -38,7 +38,6 @@ mage view in clear # clear 'in' view
 - Document source links
 - Document series
 - Ingestion of web documents, e.g. images on Twitter, Tumblr, etc., with automatic population of sources and series.
-- Taxonym name resolution
 - Tags
 - Tag search
 - Unlikely: a GUI wrapper around the tool
