@@ -64,11 +64,57 @@ if(archive is not null){
     }, commentOption, filePathArgument);
     ingestCommand.Add(ingestFromCommand);
 
-    // mage doc
-    var docCommand = new Command("doc", "Manipulate document.");
+    // mage bind
+    var bindCommand = new Command("bind", "List bound values.");
+    bindCommand.SetHandler(() => {
+        Console.Write( File.ReadAllText($"{archive.mageDir}{Archive.BIND_FILE_PATH}") );
+    });
+    rootCommand.Add(bindCommand);
+
+    // mage bind doc
+    var bindDocCommand = new Command("doc", "Bind a document to the context.");
     var docRefArgument = new Argument<string>(
         name: "document"
     );
+    bindDocCommand.Add(docRefArgument);
+    bindDocCommand.SetHandler((docRef) => {
+        var docID = ObjectRef.ResolveDocument(archive, docRef);
+        archive.BindDocument(docID);
+    }, docRefArgument);
+    bindCommand.Add(bindDocCommand);
+
+    // mage unbind
+    var unbindCommand = new Command("unbind", "Unbind a bound value.");
+    rootCommand.Add(unbindCommand);
+
+    // mage unbind doc
+    var unbindDocCommand = new Command("doc", "Unbind the bound document.");
+    unbindDocCommand.SetHandler(() => {
+        archive.BindDocument(null);
+    });
+    unbindCommand.Add(unbindDocCommand);
+
+    // mage unbind view
+    var unbindViewCommand = new Command("view", "Unbind the bound view.");
+    unbindViewCommand.SetHandler(() => {
+        archive.BindView(null);
+    });
+    unbindCommand.Add(unbindViewCommand);
+
+    // mage bind view
+    var bindViewCommand = new Command("view", "Bind a view to the context.");
+    var viewRefArgument = new Argument<string>(
+        name: "view"
+    );
+    bindViewCommand.Add(viewRefArgument);
+    bindViewCommand.SetHandler((viewRef) => {
+        var viewName = ObjectRef.ResolveView(archive, viewRef);
+        archive.BindView(viewName);
+    }, viewRefArgument);
+    bindCommand.Add(bindViewCommand);
+
+    // mage doc
+    var docCommand = new Command("doc", "Manipulate document.");
     var reflectOption = new Option<bool>(
         name: "--reflect",
         description: "Add the document to the bound view.",
@@ -133,9 +179,6 @@ if(archive is not null){
 
     // mage view [view-ref]
     var viewCommand = new Command("view", "Manipulate view.");
-    var viewRefArgument = new Argument<string>(
-        name: "view"
-    );
     viewCommand.Add(viewRefArgument);
     viewCommand.SetHandler((viewRef) => {
 
