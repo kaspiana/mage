@@ -12,7 +12,7 @@ public abstract class ObjectRef
 {
     public ObjectRefType refType;
 
-    public abstract int Resolve(Archive archive, ObjectType objType);
+    public abstract object Resolve(Archive archive, ObjectType objType);
 
     public static ObjectRef Parse(string objectRefStr)
     {
@@ -51,7 +51,7 @@ public class ObjectRef_ID : ObjectRef
         return $"id({id})";
     }
 
-    override public int Resolve(Archive archive, ObjectType objType)
+    override public object Resolve(Archive archive, ObjectType objType)
     {
         return id;
     }
@@ -71,7 +71,7 @@ public class ObjectRef_Name : ObjectRef
         return $"namedObject({name})";
     }
 
-    override public int Resolve(Archive archive, ObjectType objType)
+    override public object Resolve(Archive archive, ObjectType objType)
     {
         return 0; // TODO
     }
@@ -90,7 +90,7 @@ public class ObjectRef_Binding : ObjectRef
         return $"boundObject({bindName})";
     }
 
-    override public int Resolve(Archive archive, ObjectType objType)
+    override public object Resolve(Archive archive, ObjectType objType)
     {
         return 0; // TODO
     }
@@ -111,7 +111,7 @@ public class ObjectRef_ViewIndex : ObjectRef
         return $"viewIndexedObject({view}, {index})";
     }
 
-    override public int Resolve(Archive archive, ObjectType objType)
+    override public object Resolve(Archive archive, ObjectType objType)
     {
         return 0; // TODO
     }
@@ -127,14 +127,14 @@ public abstract class ObjectListRef
 {
     public ObjectListRefType refType;
 
-    public abstract int[] Resolve(Archive archive, ObjectType objType);
+    public abstract object[] Resolve(Archive archive, ObjectType objType);
 }
 
 public class ObjectListRef_Array : ObjectListRef
 {
     public ObjectRef[] refs;
 
-    override public int[] Resolve(Archive archive, ObjectType objType)
+    override public object[] Resolve(Archive archive, ObjectType objType)
     {
         return refs.Select((r) => r.Resolve(archive, objType)).ToArray();
     }
@@ -144,7 +144,7 @@ public class ObjectListRef_View : ObjectListRef
 {
     public ObjectRef view;
 
-    override public int[] Resolve(Archive archive, ObjectType objType)
+    override public object[] Resolve(Archive archive, ObjectType objType)
     {
         return []; // TODO: Real implementation
     }
