@@ -133,7 +133,7 @@ public struct Archive {
         Directory.Delete($"{mageDir}{VIEWS_DIR_PATH}{viewName}/");
     }
 
-    public View? GetView(string viewName){
+    public View? ViewGet(string viewName){
 
         ViewType? viewType = null;
         if(viewName == "main") viewType = ViewType.Main;
