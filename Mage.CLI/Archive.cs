@@ -56,19 +56,25 @@ public struct Archive {
 
         // create bind file
         File.WriteAllLines($"{mageDir}{BIND_FILE_PATH}", [
-            "doc=",
-            "tag=",
-            "taxonym=@0",
-            "seq=",
-            "view=main"
+            $"doc=",
+            $"tag=",
+            $"taxonym=@1",
+            $"seq=",
+            $"view={DEFAULT_VIEW_NAME}"
         ]);
 
         var archive = Load(mageDir, fileDir);
         
+        // setup db
         archive.ConnectDB();
         var setupCommand = archive.db.CreateCommand();
 		setupCommand.CommandText = ResourceLoader.Load("Resources.DB.setup.sqlite.sql");
 		setupCommand.ExecuteNonQuery();
+
+        
+        // setup views
+        archive.ViewCreate("in");
+        archive.ViewCreate(DEFAULT_VIEW_NAME);
 
         return archive;
     }
@@ -128,7 +134,7 @@ public struct Archive {
         Directory.CreateDirectory($"{mageDir}{VIEWS_DIR_PATH}{viewName}/");
     }
 
-    public string? ViewNumberedGenerateName(string prefix){
+    public string? ViewGenerateNumberedName(string prefix){
         var viewsDir = $"{mageDir}{VIEWS_DIR_PATH}";
         var viewDirsFull = Directory.GetDirectories(viewsDir);
         var viewDirs = viewDirsFull.Select((p) => Path.GetFileName(p));
@@ -153,7 +159,7 @@ public struct Archive {
         if(name is not null){
             viewName = $"user_{name}";
         } else {
-            viewName = ViewNumberedGenerateName("user");
+            viewName = ViewGenerateNumberedName("user");
         }
 
         ViewCreate(viewName);
@@ -252,6 +258,15 @@ public struct Archive {
                 newIndex++;
             }
         }
+    }
+
+    public string? ViewStash(string viewName){
+        var stashViewName = ViewGenerateNumberedName("stash");
+        ViewCreate(stashViewName);
+        ViewReflect(stashViewName, viewName);
+        ViewClear(viewName);
+
+        return stashViewName;
     }
 
     public string? GetDocumentHash(DocumentID documentID){
