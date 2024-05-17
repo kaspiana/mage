@@ -28,6 +28,9 @@ public static partial class CLICommands {
                 ComViews(ctx),
                 ComView(ctx),
 
+                ComTaxonyms(ctx),
+                ComTaxonym(ctx),
+
                 ComSearch(ctx)
             };
         }

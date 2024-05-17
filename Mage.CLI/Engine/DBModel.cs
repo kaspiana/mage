@@ -167,6 +167,7 @@ public partial class DBModel {
         var reader = com.ExecuteReader();
         if(reader.Read()){
             taxonym = new Taxonym(){
+                id = taxonymID,
                 canonicalParentID = reader.IsDBNull(1) ? null : (TaxonymID)reader.GetInt32(1),
                 canonicalAlias = reader.GetString(2)
             };

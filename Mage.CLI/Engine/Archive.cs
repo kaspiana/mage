@@ -19,7 +19,7 @@ public class Archive {
     public const string BIND_FILE_PATH = "bind";
     public const string DB_FILE_PATH = "db.sqlite";
 
-    public const int CURRENT_VERSION = 3;
+    public const int CURRENT_VERSION = 4;
     public const string IN_VIEW_NAME = "in";
     public const string OPEN_VIEW_NAME = "open";
     public const string DEFAULT_VIEW_NAME = "main";
@@ -60,7 +60,7 @@ public class Archive {
         File.WriteAllLines($"{mageDir}{BIND_FILE_PATH}", [
             $"doc=",
             $"tag=",
-            $"taxonym=@1",
+            $"taxonym=1",
             $"series=",
             $"view={DEFAULT_VIEW_NAME}"
         ]);
@@ -442,7 +442,7 @@ public class Archive {
 
     public void BindDocument(DocumentID? documentID){
         if(documentID is null) BindingSet(ObjectType.Document, "");
-        else BindingSet(ObjectType.Document, $"@{documentID}");
+        else BindingSet(ObjectType.Document, $"{documentID}");
     }
 
     public void BindView(string? viewName){

@@ -31,7 +31,7 @@ public static partial class CLICommands {
             var doc = (Document)ctx.archive.DocumentGet(docID)!;
 
             Console.WriteLine($"document {doc.hash}");
-            Console.WriteLine($"\tArchive ID: @{doc.id}");
+            Console.WriteLine($"\tArchive ID: {doc.id}");
             Console.WriteLine($"\tFile name: {doc.fileName}");
             Console.WriteLine($"\tExtension: {doc.extension}");
             Console.WriteLine($"\tIngest timestamp: {doc.ingestTimestamp}");

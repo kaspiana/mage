@@ -16,8 +16,8 @@ public abstract class ObjectRef
 
     public static ObjectRef Parse(string objectRefStr)
     {
-        if (objectRefStr[0] == '@')
-            return new ObjectRef_ID(int.Parse(objectRefStr[1..]));
+        if ("0123456789".Contains(objectRefStr[0]))
+            return new ObjectRef_ID(int.Parse(objectRefStr));
 
         if (objectRefStr == ".")
             return new ObjectRef_Binding(objectRefStr);
@@ -46,6 +46,10 @@ public abstract class ObjectRef
 
     public static string? ResolveView(Archive archive, string objectRefStr){
         return (string?)ParseResolve(archive, objectRefStr, ObjectType.View);
+    }
+
+    public static TaxonymID? ResolveTaxonym(Archive archive, string objectRefStr){
+        return (TaxonymID?)ParseResolve(archive, objectRefStr, ObjectType.Taxonym);
     }
 }
 
