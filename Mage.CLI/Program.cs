@@ -124,7 +124,7 @@ if(archive is not null){
         var viewName = ObjectRef.ResolveView(archive, viewRef);
         
         archive.ViewClear(viewName);
-        var docIDs = archive.QueryDocuments("");
+        var docIDs = archive.DocumentsQuery("");
         foreach(var docID in docIDs){
             archive.ViewAdd(viewName, docID);
         }
@@ -142,7 +142,7 @@ if(archive is not null){
     docCommand.Add(reflectOption);
     docCommand.SetHandler((docRef, reflect) => {
         var docID = (DocumentID)ObjectRef.ResolveDocument(archive, docRef)!;
-        var doc = (Document)archive.GetDocument(docID)!;
+        var doc = (Document)archive.DocumentGet(docID)!;
 
         Console.WriteLine($"document {doc.hash}");
         Console.WriteLine($"\tArchive ID: @{doc.id}");
@@ -152,7 +152,7 @@ if(archive is not null){
         Console.WriteLine($"\tComment: {(doc.comment is null ? "<none>" : doc.comment)}");
 
         if(reflect){
-            var boundView = archive.GetBinding(ObjectType.View);
+            var boundView = archive.BindingGet(ObjectType.View);
             archive.ViewAdd(boundView, docID);
         }
 
@@ -163,7 +163,7 @@ if(archive is not null){
     var docOpenCommand = new Command("open", "Open document with appropriate handler.");
     docOpenCommand.SetHandler((docRef) => {
         var docID = (DocumentID)ObjectRef.ResolveDocument(archive, docRef)!;
-        var doc = (Document)archive.GetDocument(docID)!;
+        var doc = (Document)archive.DocumentGet(docID)!;
 
         var viewIndex = archive.ViewAdd(Archive.OPEN_VIEW_NAME, docID);
         var viewFilePath = $"{archive.mageDir}{Archive.VIEWS_DIR_PATH}{Archive.OPEN_VIEW_NAME}/{viewIndex}~{doc.hash}.{doc.extension}";
@@ -188,7 +188,7 @@ if(archive is not null){
     // mage views
     var viewsCommand = new Command("views", "List all views.");
     viewsCommand.SetHandler(() => {
-        var views = archive.ViewGetAll();
+        var views = archive.ViewsGetAll();
         foreach(var view in views){
             Console.WriteLine($"* {view}");
         }
@@ -295,7 +295,7 @@ if(archive is not null){
     searchCommand.Add(sqlClauseOption);
     searchCommand.SetHandler((sqlClause) => {
 
-        var ids = archive.QueryDocuments(sqlClause);
+        var ids = archive.DocumentsQuery(sqlClause);
         if(ids.Count() > 0){
             var queryViewName = archive.ViewQueryCreate();
             foreach(var id in ids){

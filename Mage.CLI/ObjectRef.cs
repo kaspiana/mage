@@ -123,7 +123,7 @@ public class ObjectRef_Binding : ObjectRef
     {
         return ParseResolve(
             archive,
-            archive.GetBinding(objType),
+            archive.BindingGet(objType),
             objType
         );
     }

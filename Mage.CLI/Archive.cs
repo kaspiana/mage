@@ -205,11 +205,11 @@ public class Archive {
 
     public void DocumentDelete(DocumentID documentID){
 
-        var doc = (Document)GetDocument(documentID)!;
+        var doc = (Document)DocumentGet(documentID)!;
 
         File.Move($"{fileDir}{doc.hash}", $"{mageDir}{OUT_DIR_PATH}{doc.fileName}.{doc.extension}");
 
-        var views = ViewGetAll();
+        var views = ViewsGetAll();
         foreach(var viewName in views){
             var viewDir = new DirectoryInfo($"{mageDir}{VIEWS_DIR_PATH}{viewName}/");
             foreach(var file in viewDir.EnumerateFiles($"*~{doc.hash}.*")){
@@ -229,7 +229,7 @@ public class Archive {
 
     }
 
-    public void DocumentDeleteAll(){
+    public void DocumentsDeleteAll(){
 
         foreach(var filePath in Directory.GetFiles($"{fileDir}")){
             File.Delete(filePath);
@@ -243,7 +243,7 @@ public class Archive {
         com.ExecuteNonQuery();
         com.Dispose();
 
-        var views = ViewGetAll();
+        var views = ViewsGetAll();
         foreach(var view in views){
             ViewDelete(view);
         }
@@ -304,7 +304,7 @@ public class Archive {
         Directory.Delete($"{mageDir}{VIEWS_DIR_PATH}{viewName}/");
     }
 
-    public string[] ViewGetAll(){
+    public string[] ViewsGetAll(){
         var viewsDir = $"{mageDir}{VIEWS_DIR_PATH}";
         var viewDirsFull = Directory.GetDirectories(viewsDir);
         var viewDirs = viewDirsFull.Select((p) => Path.GetFileName(p));
@@ -357,7 +357,7 @@ public class Archive {
     public int ViewAdd(string viewName, DocumentID documentID){
         var viewDir = $"{mageDir}{VIEWS_DIR_PATH}{viewName}/";
 
-        var document = (Document)GetDocument(documentID)!;
+        var document = (Document)DocumentGet(documentID)!;
 
         var filePaths = Directory.GetFiles(viewDir);
         var newIndex = filePaths.Count();
@@ -388,7 +388,7 @@ public class Archive {
 
         foreach(var documentID in sourceView.documents){
             if(documentID is not null){
-                var document = (Document)GetDocument((DocumentID)documentID)!;
+                var document = (Document)DocumentGet((DocumentID)documentID)!;
 
                 FileExt.CreateHardLink(
                     $"{viewDir}{newIndex}~{document.hash}.{document.extension}",
@@ -410,7 +410,7 @@ public class Archive {
         return stashViewName;
     }
 
-    public string GetBinding(ObjectType objType){
+    public string BindingGet(ObjectType objType){
         var lines = File.ReadAllLines($"{mageDir}{BIND_FILE_PATH}");
 
         var kw = "";
@@ -431,7 +431,7 @@ public class Archive {
         throw new UnreachableException();
     }
 
-    public void SetBinding(ObjectType objType, string val){
+    public void BindingSet(ObjectType objType, string val){
         var lines = File.ReadAllLines($"{mageDir}{BIND_FILE_PATH}");
 
         for(int i = 0; i < lines.Count(); i++){
@@ -447,13 +447,13 @@ public class Archive {
     }
 
     public void BindDocument(DocumentID? documentID){
-        if(documentID is null) SetBinding(ObjectType.Document, "");
-        else SetBinding(ObjectType.Document, $"@{documentID}");
+        if(documentID is null) BindingSet(ObjectType.Document, "");
+        else BindingSet(ObjectType.Document, $"@{documentID}");
     }
 
     public void BindView(string? viewName){
-        if(viewName is null) SetBinding(ObjectType.View, DEFAULT_VIEW_NAME);
-        else SetBinding(ObjectType.View, viewName);
+        if(viewName is null) BindingSet(ObjectType.View, DEFAULT_VIEW_NAME);
+        else BindingSet(ObjectType.View, viewName);
     }
 
     public string? GetDocumentHash(DocumentID documentID){
@@ -486,7 +486,7 @@ public class Archive {
         return null;
     }
 
-    public DocumentID[] QueryDocuments(string queryString){
+    public DocumentID[] DocumentsQuery(string queryString){
         ConnectDB();
 
         var com = db.CreateCommand();
@@ -502,7 +502,7 @@ public class Archive {
         return ids.ToArray();
     }
 
-    public Document? GetDocument(DocumentID documentID){
+    public Document? DocumentGet(DocumentID documentID){
         ConnectDB();
 
         var com = db.CreateCommand();
