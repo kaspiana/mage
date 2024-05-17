@@ -17,6 +17,10 @@ public struct Archive {
     public const int CURRENT_VERSION = 1;
     public const string DEFAULT_VIEW_NAME = "main";
 
+    public static readonly string[] BIND_KEYS = [
+        "."
+    ];
+
     public string mageDir;
     public string fileDir;
 
