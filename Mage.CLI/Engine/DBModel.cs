@@ -202,6 +202,29 @@ public partial class DBModel {
         return taxonymIDs.ToArray();
     }
 
+    public TaxonymID[] ReadTaxonymParents(TaxonymID taxonymID, SqliteTransaction? transaction = null){
+        var taxonymIDs = new List<TaxonymID>();
+
+        var com = db.CreateCommand();
+        com.CommandText = $@"
+            select ParentID
+            from TaxonymParent
+            where TaxonymParent.ChildID = @ChildID;
+        ";
+        com.Transaction = transaction;
+        com.Parameters.AddWithValue("ChildID", taxonymID);
+
+        var reader = com.ExecuteReader();
+        while(reader.Read()){
+            taxonymIDs.Add((TaxonymID)reader.GetInt32(0));
+        }
+
+        reader.Close();
+        com.Dispose();
+
+        return taxonymIDs.ToArray();
+    }
+
 }
 
 // Insertion
