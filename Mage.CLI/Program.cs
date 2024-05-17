@@ -26,6 +26,14 @@ var rootCommand = new RootCommand("A tool for cataloguing images and other docum
 
 if(archive is not null){
 
+    var testCommand = new Command("test", "For debugging purposes.");
+    testCommand.SetHandler(() => {
+
+        
+
+    });
+    rootCommand.Add(testCommand);
+
     var commentOption = new Option<string?>(
         name: "--comment",
         description: "A comment to be given on the document.",
