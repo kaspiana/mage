@@ -147,8 +147,8 @@ if(archive is not null){
         var docID = (DocumentID)ObjectRef.ResolveDocument(archive, docRef)!;
         var doc = (Document)archive.GetDocument(docID)!;
 
-        var viewIndex = archive.ViewAdd("open", docID);
-        var viewFilePath = $"{archive.mageDir}{Archive.VIEWS_DIR_PATH}open/{viewIndex}~{doc.hash}.{doc.extension}";
+        var viewIndex = archive.ViewAdd(Archive.OPEN_VIEW_NAME, docID);
+        var viewFilePath = $"{archive.mageDir}{Archive.VIEWS_DIR_PATH}{Archive.OPEN_VIEW_NAME}/{viewIndex}~{doc.hash}.{doc.extension}";
 
         using Process fileOpener = new Process();
 

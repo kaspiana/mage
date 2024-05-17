@@ -20,6 +20,8 @@ public class Archive {
     public const string DB_FILE_PATH = "db.sqlite";
 
     public const int CURRENT_VERSION = 2;
+    public const string IN_VIEW_NAME = "in";
+    public const string OPEN_VIEW_NAME = "open";
     public const string DEFAULT_VIEW_NAME = "main";
 
     public string mageDir;
@@ -72,8 +74,8 @@ public class Archive {
 
         
         // setup views
-        archive.ViewCreate("in");
-        archive.ViewCreate("open");
+        archive.ViewCreate(IN_VIEW_NAME);
+        archive.ViewCreate(OPEN_VIEW_NAME);
         archive.ViewCreate(DEFAULT_VIEW_NAME);
 
         return archive;
@@ -312,9 +314,9 @@ public class Archive {
     public View? ViewGet(string viewName){
 
         ViewType? viewType = null;
-        if(viewName == "main") viewType = ViewType.Main;
-        if(viewName == "in") viewType = ViewType.In;
-        if(viewName == "open") viewType = ViewType.Open;
+        if(viewName == DEFAULT_VIEW_NAME) viewType = ViewType.Main;
+        if(viewName == IN_VIEW_NAME) viewType = ViewType.In;
+        if(viewName == OPEN_VIEW_NAME) viewType = ViewType.Open;
         if(viewName.StartsWith("user")) viewType = ViewType.User;
         if(viewName.StartsWith("query")) viewType = ViewType.Query;
         if(viewName.StartsWith("stash")) viewType = ViewType.Stash;
@@ -450,7 +452,7 @@ public class Archive {
     }
 
     public void BindView(string? viewName){
-        if(viewName is null) SetBinding(ObjectType.View, "main");
+        if(viewName is null) SetBinding(ObjectType.View, DEFAULT_VIEW_NAME);
         else SetBinding(ObjectType.View, viewName);
     }
 
