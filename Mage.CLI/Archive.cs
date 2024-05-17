@@ -129,7 +129,7 @@ public struct Archive {
 
         var viewsDir = $"{mageDir}{VIEWS_DIR_PATH}";
         var viewDirsFull = Directory.GetDirectories(viewsDir);
-        var documentHashes = new List<string>();
+        var documentIDs = new List<DocumentID>();
 
         foreach(var viewDirFull in viewDirsFull){
             var viewDir = Path.GetFileName(viewDirFull);
@@ -139,7 +139,9 @@ public struct Archive {
 
                 foreach(var filePath in filePaths){
                     var hash = Path.GetFileNameWithoutExtension(filePath)[2..];
-                    documentHashes.Add(hash);
+                    var docID = GetDocumentID(hash);
+                    if(docID is not null)
+                        documentIDs.Add((DocumentID)docID);
                 }
 
                 break;
@@ -149,11 +151,11 @@ public struct Archive {
         return new View(){
             name = viewName,
             viewType = (ViewType)viewType,
-            documents = documentHashes.ToArray()
+            documents = documentIDs.ToArray()
         };
     }
 
-    public int? GetDocumentID(string documentHash){
+    public DocumentID? GetDocumentID(string documentHash){
         ConnectDB();
 
         var com = db.CreateCommand();
@@ -162,7 +164,7 @@ public struct Archive {
 		
         var reader = com.ExecuteReader();
         if(reader.Read()){
-            return reader.GetInt32(0);
+            return (DocumentID)reader.GetInt32(0);
         }
 
         return null;
