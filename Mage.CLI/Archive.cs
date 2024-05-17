@@ -138,4 +138,19 @@ public struct Archive {
         return documentHashes.ToArray();
     }
 
+    public int? GetDocumentID(string documentHash){
+        ConnectDB();
+
+        var com = db.CreateCommand();
+		com.CommandText = $"select * from Document where Hash = @Hash";
+        com.Parameters.AddWithValue("Hash", documentHash);
+		
+        var reader = com.ExecuteReader();
+        if(reader.Read()){
+            return reader.GetInt32(0);
+        }
+
+        return null;
+    }
+
 }
