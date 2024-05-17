@@ -163,6 +163,46 @@ if(archive is not null){
     }, viewRefArgument);
     viewCommand.Add(viewDeleteCommand);
 
+    // mage view [view-ref] reflect [view-ref]
+    var viewReflectCommand = new Command("reflect", "Reflect another view's documents into the view.");
+    var sourceViewRefArguemnt = new Argument<string>(
+        name: "src-view"
+    );
+    viewReflectCommand.Add(sourceViewRefArguemnt);
+    viewReflectCommand.SetHandler((viewRef, sourceViewRef) => {
+        var viewName = ObjectRef.ResolveView(archive, viewRef)!;
+        var sourceViewName = ObjectRef.ResolveView(archive, sourceViewRef)!;
+
+        archive.ViewReflect(viewName, sourceViewName);
+    }, viewRefArgument, sourceViewRefArguemnt);
+    viewCommand.Add(viewReflectCommand);
+
+    // mage view [view-ref] stash
+    var viewStashCommand = new Command("stash", "Stash and clear the view's contents.");
+    viewStashCommand.SetHandler((viewRef) => {
+        var viewName = ObjectRef.ResolveView(archive, viewRef);
+        var stashName = archive.ViewStash(viewName);
+
+        Console.WriteLine($"stashed documents in {stashName}");
+    }, viewRefArgument);
+    viewCommand.Add(viewStashCommand);
+
+    // mage view [view-ref] unstash [stash-ref]
+    var viewUnstashCommand = new Command("unstash", "Reflect a stash into this view and delete the stash.");
+    var stashRefArguemnt = new Argument<string>(
+        name: "stash"
+    );
+    viewUnstashCommand.Add(stashRefArguemnt);
+    viewUnstashCommand.SetHandler((viewRef, stashRef) => {
+        var viewName = ObjectRef.ResolveView(archive, viewRef)!;
+        var stashName = ObjectRef.ResolveView(archive, stashRef)!;
+
+        archive.ViewClear(viewName);
+        archive.ViewReflect(viewName, stashName);
+        archive.ViewDelete(stashName);
+    }, viewRefArgument, stashRefArguemnt);
+    viewCommand.Add(viewUnstashCommand);
+
     // mage view [view-ref] add [doc-ref]
     var viewAddCommand = new Command("add", "Add a document to the view.");
     viewAddCommand.Add(docRefArgument);
