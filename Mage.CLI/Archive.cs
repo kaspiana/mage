@@ -183,6 +183,14 @@ public struct Archive {
         return newIndex;
     }
 
+    public void ViewClear(string viewName){
+        var viewDir = $"{mageDir}{VIEWS_DIR_PATH}{viewName}/";
+        
+        foreach(var filePath in Directory.GetFiles(viewDir)){
+            File.Delete(filePath);
+        }
+    }
+
     public string? GetDocumentHash(DocumentID documentID){
         ConnectDB();
 
