@@ -15,7 +15,6 @@ public static partial class CLICommands {
             };
         } else {
             com = new RootCommand(msg){
-                ComInit(ctx),
                 ComTest(ctx),
 
                 ComIngest(ctx),
@@ -28,7 +27,7 @@ public static partial class CLICommands {
 
                 ComViews(ctx),
                 ComView(ctx),
-                
+
                 ComSearch(ctx)
             };
         }
