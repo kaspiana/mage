@@ -8,7 +8,3 @@ public struct Document {
     public DateTime ingestTimestamp;
     public string? comment;
 }
-
-public struct DocumentTag {
-    public DocumentID? id;
-}

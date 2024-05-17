@@ -5,8 +5,3 @@ public struct Taxonym {
     public TaxonymID? canonicalParentID;
 	public string canonicalAlias;
 }
-
-public struct TaxonymAlias {
-    public TaxonymID id;
-    public string alias;
-}

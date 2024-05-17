@@ -23,6 +23,7 @@ public class Archive {
     public const string IN_VIEW_NAME = "in";
     public const string OPEN_VIEW_NAME = "open";
     public const string DEFAULT_VIEW_NAME = "main";
+    public const TaxonymID ROOT_TAXONYM_ID = (TaxonymID)1;
 
     public string mageDir;
     public string fileDir;
@@ -30,7 +31,7 @@ public class Archive {
     public string? name;
     public int version;
 
-    public SqliteConnection? db;
+    public DBModel db;
 
     public static Archive Init(string archiveDir, string? name = null){
         var fileDir = archiveDir;
@@ -67,11 +68,8 @@ public class Archive {
         var archive = Load(mageDir, fileDir);
         
         // setup db
-        archive.ConnectDB();
-        var setupCommand = archive.db.CreateCommand();
-		setupCommand.CommandText = ResourceLoader.Load("Resources.DB.setup.sqlite.sql");
-		setupCommand.ExecuteNonQuery();
-
+        archive.db.EnsureConnected();
+        archive.db.RunResourceScript("setup.sqlite.sql");
         
         // setup views
         archive.ViewCreate(IN_VIEW_NAME);
@@ -82,7 +80,7 @@ public class Archive {
     }
 
     public void Unload(){
-        DiscnnectDB();
+        db.Disconnect();
     }
 
     public static Archive Load(string mageDir, string fileDir){
@@ -103,26 +101,11 @@ public class Archive {
             fileDir = fileDir,
             name = name,
             version = version,
-            db = null
+            db = new DBModel(){ dbPath = $"{mageDir}{DB_FILE_PATH}" }
         };
 
         return archive;
 
-    }
-
-    public void ConnectDB(){
-        if(db is null){
-            db = new SqliteConnection($"DataSource={mageDir}{DB_FILE_PATH}");
-            db.Open();
-        }
-    }
-
-    public void DiscnnectDB(){
-        if(db is not null){
-            db.Close();
-            db.Dispose();
-            db = null;
-        }
     }
 
     public string HashFile(string filePath){
@@ -160,43 +143,17 @@ public class Archive {
         var fileName = Path.GetFileNameWithoutExtension(filePath);
         var extension = Path.GetExtension(filePath)[1..];
         var hash = HashFile(filePath);
-        var ingestTimestamp = ((DateTimeOffset)DateTime.Now).ToUnixTimeSeconds();
 
         File.Copy(filePath, $"{fileDir}{hash}");
 
-        ConnectDB();
-
-        var com = db.CreateCommand();
-		com.CommandText = $@"
-            insert into Document (
-                Hash,
-                FileName,
-                Extension,
-                IngestTimestamp,
-                Comment
-            )
-            values (
-                @Hash,
-                @FileName,
-                @Extension,
-                @IngestTimestamp,
-                @Comment
-            )
-        ";
-        com.Parameters.AddWithValue("@Hash", hash);
-        com.Parameters.AddWithValue("@FileName", fileName);
-        com.Parameters.AddWithValue("@Extension", extension);
-        com.Parameters.AddWithValue("@IngestTimestamp", ingestTimestamp);
-        com.Parameters.AddWithValue("@Comment", comment is null ? System.DBNull.Value : comment);
-
-        com.ExecuteNonQuery();
-        com.Dispose();
-
-        com = new SqliteCommand("select last_insert_rowid()", db);
-		long lastRowID = (long)com.ExecuteScalar()!;
-		com.Dispose();
-
-        var documentID = (DocumentID)lastRowID;
+        db.EnsureConnected();
+        var documentID = db.InsertDocument(new Document(){
+            hash = hash,
+            fileName = fileName,
+            extension = extension,
+            ingestTimestamp = DateTime.Now,
+            comment = comment
+        });
 
         ViewAdd("in", documentID);
 
@@ -217,15 +174,8 @@ public class Archive {
             }
         }
         
-        ConnectDB();
-        var com = db.CreateCommand();
-		com.CommandText = $@"
-            delete from Document
-            where ID = @ID;
-        ";
-        com.Parameters.AddWithValue("@ID", documentID);
-        com.ExecuteNonQuery();
-        com.Dispose();
+        db.EnsureConnected();
+        db.DeleteDocument(documentID);
 
     }
 
@@ -235,18 +185,8 @@ public class Archive {
             File.Delete(filePath);
         }
 
-        ConnectDB();
-        var com = db.CreateCommand();
-		com.CommandText = $@"
-            delete from Document;
-        ";
-        com.ExecuteNonQuery();
-        com.Dispose();
-
-        var views = ViewsGetAll();
-        foreach(var view in views){
-            ViewDelete(view);
-        }
+        db.EnsureConnected();
+        db.DeleteAllDocuments();
 
     }
 
@@ -457,74 +397,23 @@ public class Archive {
     }
 
     public string? GetDocumentHash(DocumentID documentID){
-        ConnectDB();
-
-        var com = db.CreateCommand();
-		com.CommandText = $"select Hash from Document where ID = @ID";
-        com.Parameters.AddWithValue("ID", documentID);
-		
-        var reader = com.ExecuteReader();
-        if(reader.Read()){
-            return reader.GetString(0);
-        }
-
-        return null;
+        db.EnsureConnected();
+        return db.ReadDocumentHash(documentID);
     }
 
     public DocumentID? GetDocumentID(string documentHash){
-        ConnectDB();
-
-        var com = db.CreateCommand();
-		com.CommandText = $"select ID from Document where Hash = @Hash";
-        com.Parameters.AddWithValue("Hash", documentHash);
-		
-        var reader = com.ExecuteReader();
-        if(reader.Read()){
-            return (DocumentID)reader.GetInt32(0);
-        }
-
-        return null;
+        db.EnsureConnected();
+        return db.ReadDocumentID(documentHash);
     }
 
     public DocumentID[] DocumentsQuery(string queryString){
-        ConnectDB();
-
-        var com = db.CreateCommand();
-		com.CommandText = $"select ID from Document {queryString};";
-        var reader = com.ExecuteReader();
-
-        var ids = new List<DocumentID>();
-
-        while(reader.Read()){
-            ids.Add( (DocumentID)reader.GetInt32(0) );
-        }
-
-        return ids.ToArray();
+        db.EnsureConnected();
+        return db.QueryDocuments(queryString);
     }
 
     public Document? DocumentGet(DocumentID documentID){
-        ConnectDB();
-
-        var com = db.CreateCommand();
-		com.CommandText = $"select * from Document where ID = @ID";
-        com.Parameters.AddWithValue("ID", documentID);
-		
-        var reader = com.ExecuteReader();
-        if(reader.Read()){
-            var ingestTimestamp = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
-            ingestTimestamp = ingestTimestamp.AddSeconds(reader.GetInt32(4)).ToLocalTime();
-
-            return new Document(){
-                hash = reader.GetString(1),
-                id = documentID,
-                fileName = reader.GetString(2),
-                extension = reader.GetString(3),
-                ingestTimestamp = ingestTimestamp,
-                comment = reader.IsDBNull(5) ? null : reader.GetString(5)
-            };
-        }
-
-        return null;
+        db.EnsureConnected();
+        return db.ReadDocument(documentID);
     }
 
 }
