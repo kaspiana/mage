@@ -159,6 +159,21 @@ public struct Archive {
         };
     }
 
+    public string? GetDocumentHash(DocumentID documentID){
+        ConnectDB();
+
+        var com = db.CreateCommand();
+		com.CommandText = $"select * from Document where ID = @ID";
+        com.Parameters.AddWithValue("ID", documentID);
+		
+        var reader = com.ExecuteReader();
+        if(reader.Read()){
+            return reader.GetString(1);
+        }
+
+        return null;
+    }
+
     public DocumentID? GetDocumentID(string documentHash){
         ConnectDB();
 
