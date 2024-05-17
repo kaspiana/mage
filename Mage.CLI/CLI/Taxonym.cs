@@ -12,7 +12,8 @@ public static partial class CLICommands {
         );
 
         var com = new Command("taxonym", "Manipulate taxonym"){
-            taxonymRefArgument
+            taxonymRefArgument,
+            ComTaxonymChildren(ctx, taxonymRefArgument)
         };
 
         com.SetHandler((taxonymRef) => {
@@ -24,6 +25,29 @@ public static partial class CLICommands {
             } else {
                 Console.WriteLine($"{taxonym?.id}: {taxonym?.canonicalParentID}:{taxonym?.canonicalAlias}");
             }
+        }, taxonymRefArgument);
+
+        return com;
+    }
+
+    public static Command ComTaxonymChildren(CLIContext ctx, Argument<string> taxonymRefArgument){
+
+        var com = new Command("children", "List the taxonym's children.");
+
+        com.SetHandler((taxonymRef) => {
+            var taxonymID = (TaxonymID)ObjectRef.ResolveTaxonym(ctx.archive, taxonymRef)!;
+            var childIDs = ctx.archive.TaxonymGetChildren(taxonymID);
+            var children = childIDs.Select((id) => ctx.archive.TaxonymGet(id));
+
+            foreach(var taxonym in children){
+                if(taxonym?.id == Archive.ROOT_TAXONYM_ID){
+                    Console.WriteLine($"{taxonym?.id}: <root>");
+                } else {
+                    Console.WriteLine($"{taxonym?.id}: {taxonym?.canonicalParentID}:{taxonym?.canonicalAlias}");
+                }
+            }
+
+
         }, taxonymRefArgument);
 
         return com;

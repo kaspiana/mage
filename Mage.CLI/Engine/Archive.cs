@@ -202,6 +202,11 @@ public class Archive {
         return db.ReadTaxonym(taxonymID);
     }
 
+    public TaxonymID[] TaxonymGetChildren(TaxonymID taxonymID){
+        db.EnsureConnected();
+        return db.ReadTaxonymChildren(taxonymID);
+    }
+
     public TaxonymID[] TaxonymsQuery(string sqlClause){
         db.EnsureConnected();
         return db.QueryTaxonyms(sqlClause);
