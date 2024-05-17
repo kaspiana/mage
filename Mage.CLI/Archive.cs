@@ -2,7 +2,9 @@ using System.Data;
 using Microsoft.Data.Sqlite;
 using System.Resources;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using Mage.IO;
+using System.Text;
 
 namespace Mage.Engine;
 
@@ -121,6 +123,77 @@ public struct Archive {
             db.Dispose();
             db = null;
         }
+    }
+
+    public string HashFile(string filePath){
+        string? hash = null;
+
+        using (FileStream fs = new FileStream(filePath, FileMode.Open))
+        using (BufferedStream bs = new BufferedStream(fs))
+        {
+            using (var sha1 = SHA1.Create())
+            {
+                byte[] _hash = sha1.ComputeHash(bs);
+                StringBuilder formatted = new StringBuilder(2 * _hash.Length);
+                foreach (byte b in _hash)
+                {
+                    formatted.AppendFormat("{0:X2}", b);
+                }
+
+                hash = formatted.ToString();
+            }
+        }
+
+        return hash;
+    }
+
+    public void Ingest(){
+        var inboxFiles = Directory.GetFiles($"{mageDir}{IN_DIR_PATH}");
+
+        foreach(var filePath in inboxFiles){
+            IngestFile(filePath);
+            File.Delete(filePath);
+        }
+    }
+
+    public DocumentID IngestFile(string filePath, string? comment = null){
+        var fileName = Path.GetFileNameWithoutExtension(filePath);
+        var extension = Path.GetExtension(filePath)[1..];
+        var hash = HashFile(filePath);
+        var ingestTimestamp = ((DateTimeOffset)DateTime.Now).ToUnixTimeSeconds();
+
+        File.Copy(filePath, $"{fileDir}{hash}");
+
+        ConnectDB();
+
+        var com = db.CreateCommand();
+		com.CommandText = $@"
+            insert into Document (
+                Hash,
+                Extension,
+                IngestTimestamp,
+                Comment
+            )
+            values (
+                @Hash,
+                @Extension,
+                @IngestTimestamp,
+                @Comment
+            )
+        ";
+        com.Parameters.AddWithValue("@Hash", hash);
+        com.Parameters.AddWithValue("@Extension", extension);
+        com.Parameters.AddWithValue("@IngestTimestamp", ingestTimestamp);
+        com.Parameters.AddWithValue("@Comment", comment is null ? System.DBNull.Value : comment);
+
+        com.ExecuteNonQuery();
+        com.Dispose();
+
+        com = new SqliteCommand("select last_insert_rowid()", db);
+		long lastRowID = (long)com.ExecuteScalar()!;
+		com.Dispose();
+
+        return (DocumentID)lastRowID;
     }
 
     public (int, string) ParseViewFileName(string fileName){
