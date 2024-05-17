@@ -197,6 +197,15 @@ public class Archive {
         return (index, hash);
     }
 
+    public TaxonymID? TaxonymCreate(TaxonymID parentID, string name){
+        db.EnsureConnected();
+        var taxonymID = db.InsertTaxonym(new Taxonym(){
+            canonicalParentID = parentID,
+            canonicalAlias = name
+        });
+        return taxonymID;
+    }
+
     public void ViewCreate(string viewName){
         Directory.CreateDirectory($"{mageDir}{VIEWS_DIR_PATH}{viewName}/");
     }
