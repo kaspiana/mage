@@ -13,6 +13,9 @@ public static partial class CLICommands {
 
         var com = new Command("taxonym", "Manipulate taxonym"){
             taxonymRefArgument,
+            ComTaxonymAliases(ctx, taxonymRefArgument),
+            ComTaxonymAlias(ctx, taxonymRefArgument),
+            ComTaxonymUnalias(ctx, taxonymRefArgument),
             ComTaxonymChildren(ctx, taxonymRefArgument),
             ComTaxonymParents(ctx, taxonymRefArgument),
             ComTaxonymChild(ctx, taxonymRefArgument),
@@ -31,6 +34,63 @@ public static partial class CLICommands {
                 Console.WriteLine($"{taxonym?.id}: {taxonym?.canonicalParentID}:{taxonym?.canonicalAlias}");
             }
         }, taxonymRefArgument);
+
+        return com;
+    }
+
+    public static Command ComTaxonymAliases(CLIContext ctx, Argument<string> taxonymRefArgument){
+
+        var com = new Command("aliases", "List the taxonym's aliases.");
+
+        com.SetHandler((taxonymRef) => {
+            var taxonymID = (TaxonymID)ObjectRef.ResolveTaxonym(ctx.archive, taxonymRef)!;
+            var taxonym = ctx.archive.TaxonymGet(taxonymID);
+            var aliases = ctx.archive.TaxonymGetAliases(taxonymID);
+
+            foreach(var alias in aliases){
+                if(alias == taxonym?.canonicalAlias){
+                    Console.WriteLine($"* {alias}");
+                } else {
+                    Console.WriteLine($"  {alias}");
+                }
+            }
+        }, taxonymRefArgument);
+
+        return com;
+    }
+
+    public static Command ComTaxonymAlias(CLIContext ctx, Argument<string> taxonymRefArgument){
+
+        var aliasArgument = new Argument<string>(
+            name: "alias"
+        );
+
+        var com = new Command("alias", "Add an alias to the taxonym."){
+            aliasArgument
+        };
+
+        com.SetHandler((taxonymRef, alias) => {
+            var taxonymID = (TaxonymID)ObjectRef.ResolveTaxonym(ctx.archive, taxonymRef)!;
+            ctx.archive.TaxonymAddAlias(taxonymID, alias);
+        }, taxonymRefArgument, aliasArgument);
+
+        return com;
+    }
+
+    public static Command ComTaxonymUnalias(CLIContext ctx, Argument<string> taxonymRefArgument){
+
+        var aliasArgument = new Argument<string>(
+            name: "alias"
+        );
+
+        var com = new Command("unalias", "Remove an alias from the taxonym."){
+            aliasArgument
+        };
+
+        com.SetHandler((taxonymRef, alias) => {
+            var taxonymID = (TaxonymID)ObjectRef.ResolveTaxonym(ctx.archive, taxonymRef)!;
+            ctx.archive.TaxonymRemoveAlias(taxonymID, alias);
+        }, taxonymRefArgument, aliasArgument);
 
         return com;
     }

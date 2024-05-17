@@ -231,6 +231,11 @@ public class Archive {
         db.DeleteTaxonym(taxonymID);
     }
 
+    public string[] TaxonymGetAliases(TaxonymID taxonymID){
+        db.EnsureConnected();
+        return db.ReadTaxonymAliases(taxonymID);
+    }
+
     public void TaxonymAddAlias(TaxonymID taxonymID, string alias){
         db.EnsureConnected();
         db.InsertTaxonymAlias(taxonymID, alias);

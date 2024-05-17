@@ -225,6 +225,29 @@ public partial class DBModel {
         return taxonymIDs.ToArray();
     }
 
+    public string[] ReadTaxonymAliases(TaxonymID taxonymID, SqliteTransaction? transaction = null){
+        var aliases = new List<string>();
+
+        var com = db.CreateCommand();
+        com.CommandText = @"
+            select Alias
+            from TaxonymAlias
+            where TaxonymID = @TaxonymID;
+        ";
+        com.Transaction = transaction;
+        com.Parameters.AddWithValue("@TaxonymID", taxonymID);
+
+        var reader = com.ExecuteReader();
+        while(reader.Read()){
+            aliases.Add(reader.GetString(0));
+        }
+
+        reader.Close();
+        com.Dispose();
+
+        return aliases.ToArray();
+    }
+
 }
 
 // Insertion
