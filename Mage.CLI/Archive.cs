@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Mage.IO;
 using System.Text;
+using System.Diagnostics;
 
 namespace Mage.Engine;
 
@@ -401,6 +402,27 @@ public class Archive {
         ViewClear(viewName);
 
         return stashViewName;
+    }
+
+    public string GetBinding(ObjectType objType){
+        var lines = File.ReadAllLines($"{mageDir}{BIND_FILE_PATH}");
+
+        var kw = "";
+        switch(objType){
+            case ObjectType.Document: kw = "doc"; break;
+            case ObjectType.Tag: kw = "tag"; break;
+            case ObjectType.Taxonym: kw = "taxonym"; break;
+            case ObjectType.Sequence: kw = "seq"; break;
+            case ObjectType.View: kw = "view"; break;
+        }
+
+        foreach(var line in lines){
+            if(line.StartsWith($"{kw}=")){
+                return line[(kw.Count()+1)..];
+            }
+        }
+
+        throw new UnreachableException();
     }
 
     public string? GetDocumentHash(DocumentID documentID){

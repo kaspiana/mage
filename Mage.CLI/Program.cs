@@ -29,7 +29,7 @@ if(archive is not null){
     var testCommand = new Command("test", "For debugging purposes.");
     testCommand.SetHandler(() => {
 
-        
+
 
     });
     rootCommand.Add(testCommand);
@@ -66,13 +66,43 @@ if(archive is not null){
     // mage doc
     var docCommand = new Command("doc", "Manipulate document.");
     var docRefArgument = new Argument<string>(
-        name: "Document"
+        name: "document"
+    );
+    var reflectOption = new Option<bool>(
+        name: "--reflect",
+        description: "Add the document to the bound view.",
+        getDefaultValue: () => false
     );
     docCommand.Add(docRefArgument);
-    docCommand.SetHandler((docRef) => {
-        Console.WriteLine("NOT YET IMPLEMENTED");
-    }, docRefArgument);
+    docCommand.Add(reflectOption);
+    docCommand.SetHandler((docRef, reflect) => {
+        var docID = (DocumentID)ObjectRef.ResolveDocument(archive, docRef)!;
+        var doc = (Document)archive.GetDocument(docID)!;
+
+        Console.WriteLine($"Document {doc.hash}");
+        Console.WriteLine($"\tarchive id: @{doc.id}");
+        Console.WriteLine($"\tfile name: {doc.fileName}");
+        Console.WriteLine($"\textension: {doc.extension}");
+        Console.WriteLine($"\tingest timestamp: {doc.ingestTimestamp}");
+        Console.WriteLine($"\tcomment: {(doc.comment is null ? "<none>" : doc.comment)}");
+
+        if(reflect){
+            var boundView = archive.GetBinding(ObjectType.View);
+            archive.ViewAdd(boundView, docID);
+        }
+
+    }, docRefArgument, reflectOption);
     rootCommand.Add(docCommand);
+
+    // mage doc [doc-ref] open
+    var docOpenCommand = new Command("open", "Open document with appropriate handler.");
+    docOpenCommand.SetHandler((docRef) => {
+        var docID = (DocumentID)ObjectRef.ResolveDocument(archive, docRef)!;
+        var doc = (Document)archive.GetDocument(docID)!;
+
+
+    }, docRefArgument);
+    docCommand.Add(docOpenCommand);
 
 }
 

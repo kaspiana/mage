@@ -35,6 +35,18 @@ public abstract class ObjectRef
 
         return new ObjectRef_Name(objectRefStr);
     }
+
+    public static object ParseResolve(Archive archive, string objectRefStr, ObjectType objType){
+        return Parse(objectRefStr).Resolve(archive, objType);
+    }
+
+    public static DocumentID? ResolveDocument(Archive archive, string objectRefStr){
+        return (DocumentID?)ParseResolve(archive, objectRefStr, ObjectType.Document);
+    }
+
+    public static string? ResolveView(Archive archive, string objectRefStr){
+        return (string?)ParseResolve(archive, objectRefStr, ObjectType.View);
+    }
 }
 
 public class ObjectRef_ID : ObjectRef
@@ -73,7 +85,24 @@ public class ObjectRef_Name : ObjectRef
 
     override public object Resolve(Archive archive, ObjectType objType)
     {
-        return 0; // TODO
+        switch(objType){
+            case ObjectType.View:
+                return name;
+
+            case ObjectType.Document:
+                return archive.GetDocumentID(name);
+
+            case ObjectType.Tag:
+                return null; // TODO
+
+            case ObjectType.Taxonym:
+                return null; // TODO
+
+            case ObjectType.Sequence:
+                return null;
+        }
+
+        return null;
     }
 }
 
@@ -92,7 +121,11 @@ public class ObjectRef_Binding : ObjectRef
 
     override public object Resolve(Archive archive, ObjectType objType)
     {
-        return 0; // TODO
+        return ParseResolve(
+            archive,
+            archive.GetBinding(objType),
+            objType
+        );
     }
 }
 
@@ -113,7 +146,9 @@ public class ObjectRef_ViewIndex : ObjectRef
 
     override public object Resolve(Archive archive, ObjectType objType)
     {
-        return 0; // TODO
+        var viewName = (string)view.Resolve(archive, ObjectType.View);
+        var viewData = (View)archive.ViewGet(viewName);
+        return (DocumentID?)viewData.documents[index];
     }
 }
 
