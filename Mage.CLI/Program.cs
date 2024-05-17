@@ -1,4 +1,5 @@
 ﻿using System.CommandLine;
+using System.Diagnostics;
 using Mage.Engine;
 
 var archiveDir = "C:/home/catalogue-tool/v2/test-archives/a/";
@@ -100,6 +101,14 @@ if(archive is not null){
         var docID = (DocumentID)ObjectRef.ResolveDocument(archive, docRef)!;
         var doc = (Document)archive.GetDocument(docID)!;
 
+        var viewIndex = archive.ViewAdd("open", docID);
+        var viewFilePath = $"{archive.mageDir}{Archive.VIEWS_DIR_PATH}open/{viewIndex}~{doc.hash}.{doc.extension}";
+
+        using Process fileOpener = new Process();
+
+        fileOpener.StartInfo.FileName = "\"" + viewFilePath + "\"";
+        fileOpener.StartInfo.UseShellExecute = true;
+        fileOpener.Start();
 
     }, docRefArgument);
     docCommand.Add(docOpenCommand);
