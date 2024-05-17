@@ -41,7 +41,7 @@ public abstract class ObjectRef
     }
 
     public static DocumentID? ResolveDocument(Archive archive, string objectRefStr){
-        return (DocumentID?)ParseResolve(archive, objectRefStr, ObjectType.Document);
+        return (DocumentID)ParseResolve(archive, objectRefStr, ObjectType.Document);
     }
 
     public static string? ResolveView(Archive archive, string objectRefStr){
@@ -49,7 +49,7 @@ public abstract class ObjectRef
     }
 
     public static TaxonymID? ResolveTaxonym(Archive archive, string objectRefStr){
-        return (TaxonymID?)ParseResolve(archive, objectRefStr, ObjectType.Taxonym);
+        return (TaxonymID)ParseResolve(archive, objectRefStr, ObjectType.Taxonym);
     }
 }
 
@@ -67,7 +67,7 @@ public class ObjectRef_ID : ObjectRef
         return $"id({id})";
     }
 
-    override public object Resolve(Archive archive, ObjectType objType)
+    override public object? Resolve(Archive archive, ObjectType objType)
     {
         return id;
     }
@@ -87,7 +87,7 @@ public class ObjectRef_Name : ObjectRef
         return $"namedObject({name})";
     }
 
-    override public object Resolve(Archive archive, ObjectType objType)
+    override public object? Resolve(Archive archive, ObjectType objType)
     {
         switch(objType){
             case ObjectType.View:
