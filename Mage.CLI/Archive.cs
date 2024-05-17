@@ -128,6 +128,29 @@ public struct Archive {
         Directory.CreateDirectory($"{mageDir}{VIEWS_DIR_PATH}{viewName}/");
     }
 
+    public string? ViewNumberedGenerateName(string prefix){
+        var viewsDir = $"{mageDir}{VIEWS_DIR_PATH}";
+        var viewDirsFull = Directory.GetDirectories(viewsDir);
+        var viewDirs = viewDirsFull.Select((p) => Path.GetFileName(p));
+        viewDirs = viewDirs.Where((n) => n.StartsWith(prefix));
+        viewDirs = viewDirs.Where((n) => n[prefix.Count()] != '_');
+
+        return $"{prefix}{viewDirs.Count()}";
+    }
+
+    public string? ViewUserCreate(string? name = null){
+        string? viewName = null;
+
+        if(name is not null){
+            viewName = $"user_{name}";
+        } else {
+            viewName = ViewNumberedGenerateName("user");
+        }
+
+        ViewCreate(viewName);
+        return viewName;
+    }
+
     public void ViewDelete(string viewName){
         ViewClear(viewName);
         Directory.Delete($"{mageDir}{VIEWS_DIR_PATH}{viewName}/");
