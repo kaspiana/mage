@@ -28,10 +28,31 @@ public static partial class CLICommands {
             var taxonymID = (TaxonymID)ObjectRef.ResolveTaxonym(ctx.archive, taxonymRef)!;
             var taxonym = ctx.archive.TaxonymGet(taxonymID);
 
-            if(taxonym?.id == Archive.ROOT_TAXONYM_ID){
-                Console.WriteLine($"{taxonym?.id}: <root>");
+            if(taxonymID == Archive.ROOT_TAXONYM_ID){
+                Console.WriteLine($"taxonym {taxonymID}: <root>");
             } else {
-                Console.WriteLine($"{taxonym?.id}: {taxonym?.canonicalParentID}:{taxonym?.canonicalAlias}");
+                Console.WriteLine($"taxonym {taxonymID}");
+
+                Console.WriteLine($"\tParents:");
+                var parentIDs = ctx.archive.TaxonymGetParents(taxonymID);
+                foreach(var parentID in parentIDs){
+                    var parent = ctx.archive.TaxonymGet(parentID);
+                    if(parentID == taxonym?.canonicalParentID){
+                        Console.WriteLine($"\t * {parent?.canonicalAlias} ({parentID})");
+                    } else {
+                        Console.WriteLine($"\t   {parent?.canonicalAlias} ({parentID})");
+                    }
+                }
+
+                Console.WriteLine($"\tAliases:");
+                var aliases = ctx.archive.TaxonymGetAliases(taxonymID);
+                foreach(var alias in aliases){
+                    if(alias == taxonym?.canonicalAlias){
+                        Console.WriteLine($"\t * {alias}");
+                    } else {
+                        Console.WriteLine($"\t   {alias}");
+                    }
+                }
             }
         }, taxonymRefArgument);
 

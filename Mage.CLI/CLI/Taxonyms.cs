@@ -16,7 +16,12 @@ public static partial class CLICommands {
                 if(taxonym?.id == Archive.ROOT_TAXONYM_ID){
                     Console.WriteLine($"{taxonym?.id}: <root>");
                 } else {
-                    Console.WriteLine($"{taxonym?.id}: {taxonym?.canonicalParentID}:{taxonym?.canonicalAlias}");
+                    if(taxonym?.canonicalParentID == Archive.ROOT_TAXONYM_ID){
+                        Console.WriteLine($"{taxonym?.id}: {taxonym?.canonicalAlias}");
+                    } else {
+                        var parentTaxonymName = ctx.archive.TaxonymGet((TaxonymID)taxonym?.canonicalParentID)?.canonicalAlias;
+                        Console.WriteLine($"{taxonym?.id}: {parentTaxonymName}:{taxonym?.canonicalAlias}");
+                    }
                 }
             }
         });
