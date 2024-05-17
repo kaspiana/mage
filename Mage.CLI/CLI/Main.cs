@@ -22,6 +22,8 @@ public static partial class CLICommands {
                 ComBind(ctx),
                 ComUnbind(ctx),
 
+                ComNew(ctx),
+
                 ComDocs(ctx),
                 ComDoc(ctx),
 
