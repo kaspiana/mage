@@ -200,6 +200,28 @@ public struct Archive {
         }
     }
 
+    public void ViewReflect(string targetViewName, string sourceViewName){
+        var sourceView = (View)ViewGet(sourceViewName)!;
+
+        var viewDir = $"{mageDir}{VIEWS_DIR_PATH}{targetViewName}/";
+        var filePaths = Directory.GetFiles(viewDir);
+        var newIndex = filePaths.Count();
+
+        foreach(var documentID in sourceView.documents){
+            if(documentID is not null){
+                var document = (Document)GetDocument((DocumentID)documentID)!;
+
+                FileExt.CreateHardLink(
+                    $"{viewDir}{newIndex}~{document.hash}.{document.extension}",
+                    $"{fileDir}{document.hash}",
+                    IntPtr.Zero
+                );
+
+                newIndex++;
+            }
+        }
+    }
+
     public string? GetDocumentHash(DocumentID documentID){
         ConnectDB();
 
