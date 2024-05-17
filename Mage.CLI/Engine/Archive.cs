@@ -197,6 +197,16 @@ public class Archive {
         return (index, hash);
     }
 
+    public Taxonym? TaxonymGet(TaxonymID taxonymID){
+        db.EnsureConnected();
+        return db.ReadTaxonym(taxonymID);
+    }
+
+    public TaxonymID[] TaxonymsQuery(string sqlClause){
+        db.EnsureConnected();
+        return db.QueryTaxonyms(sqlClause);
+    }
+
     public TaxonymID? TaxonymCreate(TaxonymID parentID, string name){
         db.EnsureConnected();
         var taxonymID = db.InsertTaxonym(new Taxonym(){
@@ -204,6 +214,41 @@ public class Archive {
             canonicalAlias = name
         });
         return taxonymID;
+    }
+
+    public void TaxonymDelete(TaxonymID taxonymID){
+        db.EnsureConnected();
+        db.DeleteTaxonym(taxonymID);
+    }
+
+    public void TaxonymAddAlias(TaxonymID taxonymID, string alias){
+        db.EnsureConnected();
+        db.InsertTaxonymAlias(taxonymID, alias);
+    }
+
+    public void TaxonymRemoveAlias(TaxonymID taxonymID, string alias){
+        db.EnsureConnected();
+        db.DeleteTaxonymAlias(taxonymID, alias);
+    }
+
+    public void TaxonymAddChild(TaxonymID taxonymID, TaxonymID childID){
+        db.EnsureConnected();
+        db.InsertTaxonymParent(childID, taxonymID);
+    }
+
+    public void TaxonymRemoveChild(TaxonymID taxonymID, TaxonymID childID){
+        db.EnsureConnected();
+        db.DeleteTaxonymParent(childID, taxonymID);
+    }
+
+    public void TaxonymAddParent(TaxonymID taxonymID, TaxonymID parentID){
+        db.EnsureConnected();
+        db.InsertTaxonymParent(taxonymID, parentID);
+    }
+
+    public void TaxonymRemoveParent(TaxonymID taxonymID, TaxonymID parentID){
+        db.EnsureConnected();
+        db.DeleteTaxonymParent(taxonymID, parentID);
     }
 
     public void ViewCreate(string viewName){

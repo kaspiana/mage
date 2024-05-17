@@ -137,6 +137,25 @@ public partial class DBModel {
 
     }
 
+    public TaxonymID[] QueryTaxonyms(string clause, SqliteTransaction? transaction = null){
+
+        var taxonyms = new List<TaxonymID>();
+
+        var com = db.CreateCommand();
+		com.CommandText = $"select ID from Taxonym {clause}";
+        com.Transaction = transaction;
+		
+        var reader = com.ExecuteReader();
+        while(reader.Read()){
+            taxonyms.Add((TaxonymID)reader.GetInt32(0));
+        }
+
+        reader.Close();
+        com.Dispose();
+
+        return taxonyms.ToArray();
+    }
+
     public Taxonym? ReadTaxonym(TaxonymID taxonymID, SqliteTransaction? transaction = null){
         Taxonym? taxonym = null;
 
@@ -300,6 +319,75 @@ public partial class DBModel {
         com.Transaction = transaction;
         com.ExecuteNonQuery();
         com.Dispose();
+    }
+
+    public void DeleteTaxonymAlias(TaxonymID taxonymID, string alias, SqliteTransaction? transaction = null){
+        var com = db.CreateCommand();
+		com.CommandText = $@"
+            delete from TaxonymAlias
+            where
+                TaxonymID = @TaxonymID
+                and Alias = @Alias;
+        ";
+        com.Transaction = transaction;
+        com.Parameters.AddWithValue("@TaxonymID", taxonymID);
+        com.Parameters.AddWithValue("@Alias", alias);
+        com.ExecuteNonQuery();
+        com.Dispose();
+    }
+
+    public void DeleteTaxonymParent(TaxonymID childID, TaxonymID parentID, SqliteTransaction? transaction = null){
+        var com = db.CreateCommand();
+		com.CommandText = $@"
+            delete from TaxonymParent
+            where
+                ChildID = @ChildID
+                and ParentID = @ParentID;
+        ";
+        com.Transaction = transaction;
+        com.Parameters.AddWithValue("@ChildID", childID);
+        com.Parameters.AddWithValue("@ParentID", parentID);
+        com.ExecuteNonQuery();
+        com.Dispose();
+    }
+
+    public void DeleteTaxonym(TaxonymID taxonymID, SqliteTransaction? transaction = null){
+        transaction = db.BeginTransaction();
+
+        var com = db.CreateCommand();
+		com.CommandText = $@"
+            delete from Taxonym
+            where ID = @ID;
+        ";
+        com.Transaction = transaction;
+        com.Parameters.AddWithValue("@ID", taxonymID);
+        com.ExecuteNonQuery();
+        com.Dispose();
+
+        com = db.CreateCommand();
+		com.CommandText = $@"
+            delete from TaxonymAlias
+            where TaxonymID = @TaxonymID;
+        ";
+        com.Transaction = transaction;
+        com.Parameters.AddWithValue("@TaxonymID", taxonymID);
+        com.ExecuteNonQuery();
+        com.Dispose();
+
+        com = db.CreateCommand();
+		com.CommandText = $@"
+            delete from TaxonymParent
+            where 
+                ChildID = @TaxonymID
+                or ParentID = @TaxonymID;
+        ";
+        com.Transaction = transaction;
+        com.Parameters.AddWithValue("@TaxonymID", taxonymID);
+        com.ExecuteNonQuery();
+        com.Dispose();
+
+        transaction.Commit();
+        transaction.Dispose();
     }
 
 }
