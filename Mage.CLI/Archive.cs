@@ -135,7 +135,16 @@ public struct Archive {
         viewDirs = viewDirs.Where((n) => n.StartsWith(prefix));
         viewDirs = viewDirs.Where((n) => n[prefix.Count()] != '_');
 
-        return $"{prefix}{viewDirs.Count()}";
+        var indices = viewDirs.Select((n) => int.Parse(n.Skip(prefix.Count()).ToArray()));
+        
+        var newIndex = -1;
+        if(indices.Count() == 0){
+            newIndex = 0;
+        } else {
+            newIndex = indices.Max() + 1;
+        }
+
+        return $"{prefix}{newIndex}";
     }
 
     public string? ViewUserCreate(string? name = null){
