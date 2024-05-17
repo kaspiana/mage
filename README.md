@@ -14,6 +14,7 @@ Taxonyms are tag names and tag namespaces, and are organised into a hierarchy de
 
 ```bash
 
+mage init # create an archive in the current directory
 mage ingest # ingest files in .mage/in/
 mage view in # list documents in the 'in' view: recently ingested documents
 mage doc in/0 # see information about first document in the 'in' view
