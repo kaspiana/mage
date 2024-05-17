@@ -22,10 +22,6 @@ public class Archive {
     public const int CURRENT_VERSION = 1;
     public const string DEFAULT_VIEW_NAME = "main";
 
-    public static readonly string[] BINDING_KEYS = [
-        "."
-    ];
-
     public string mageDir;
     public string fileDir;
 
@@ -425,6 +421,31 @@ public class Archive {
         }
 
         throw new UnreachableException();
+    }
+
+    public void SetBinding(ObjectType objType, string val){
+        var lines = File.ReadAllLines($"{mageDir}{BIND_FILE_PATH}");
+
+        for(int i = 0; i < lines.Count(); i++){
+            if((ObjectType)i == objType){
+                var line = lines[i];
+                var equalIndex = line.IndexOf('=');
+                var key = line[0..equalIndex];
+                lines[i] = $"{key}={val}";
+            }
+        }
+
+        File.WriteAllLines($"{mageDir}{BIND_FILE_PATH}", lines);
+    }
+
+    public void BindDocument(DocumentID? documentID){
+        if(documentID is null) SetBinding(ObjectType.Document, "");
+        else SetBinding(ObjectType.Document, $"@{documentID}");
+    }
+
+    public void BindView(string? viewName){
+        if(viewName is null) SetBinding(ObjectType.View, "main");
+        else SetBinding(ObjectType.View, viewName);
     }
 
     public string? GetDocumentHash(DocumentID documentID){

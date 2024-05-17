@@ -19,7 +19,7 @@ public abstract class ObjectRef
         if (objectRefStr[0] == '@')
             return new ObjectRef_ID(int.Parse(objectRefStr[1..]));
 
-        if (Archive.BINDING_KEYS.Contains(objectRefStr))
+        if (objectRefStr == ".")
             return new ObjectRef_Binding(objectRefStr);
 
         var slashIndex = objectRefStr.IndexOf('/');

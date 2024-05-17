@@ -30,7 +30,7 @@ if(archive is not null){
     var testCommand = new Command("test", "For debugging purposes.");
     testCommand.SetHandler(() => {
 
-
+        archive.BindDocument((DocumentID)1);
 
     });
     rootCommand.Add(testCommand);
