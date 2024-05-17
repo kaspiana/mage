@@ -113,6 +113,14 @@ if(archive is not null){
     }, docRefArgument);
     docCommand.Add(docOpenCommand);
 
+    // mage doc [doc-ref] delete
+    var docDeleteCommand = new Command("delete", "Delete document.");
+    docDeleteCommand.SetHandler((docRef) => {
+        var docID = (DocumentID)ObjectRef.ResolveDocument(archive, docRef)!;
+        archive.DocumentDelete(docID);
+    }, docRefArgument);
+    docCommand.Add(docDeleteCommand);
+
 
     // mage view [view-ref]
     var viewCommand = new Command("view", "Manipulate view.");
