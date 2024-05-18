@@ -32,16 +32,6 @@ mage view in clear # clear 'in' view
 
 ```
 
-## Roadmap
-
-- Interactive file ingestion (i.e. supplying individual comments and sources for each file ingested)
-- Document source links
-- Document series
-- Ingestion of web documents, e.g. images on Twitter, Tumblr, etc., with automatic population of sources and series.
-- Tags
-- Tag search
-- Unlikely: a GUI wrapper around the tool
-
 ## Future example
 
 ```bash
