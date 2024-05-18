@@ -55,6 +55,10 @@ public abstract class ObjectRef
     public static TaxonymID? ResolveTaxonym(Archive archive, string objectRefStr){
         return (TaxonymID)ParseResolve(archive, objectRefStr, ObjectType.Taxonym);
     }
+
+    public static TagID? ResolveTag(Archive archive, string objectRefStr){
+        return (TagID)ParseResolve(archive, objectRefStr, ObjectType.Tag);
+    }
 }
 
 public class ObjectRef_ID : ObjectRef
@@ -101,10 +105,10 @@ public class ObjectRef_Name : ObjectRef
                 return archive.GetDocumentID(name);
 
             case ObjectType.Tag:
-                return null; // TODO
+                return archive.TagFind(name);
 
             case ObjectType.Taxonym:
-                return archive.TaxonymFind(name); // TODO
+                return archive.TaxonymFind(name);
 
             case ObjectType.Series:
                 return null;

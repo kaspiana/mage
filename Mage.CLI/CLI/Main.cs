@@ -34,6 +34,9 @@ public static partial class CLICommands {
                 ComTaxonyms(ctx),
                 ComTaxonym(ctx),
 
+                ComTags(ctx),
+                ComTag(ctx),
+
                 ComSearch(ctx)
             };
         }
@@ -72,12 +75,6 @@ public static partial class CLICommands {
             var vriskaTagID = ctx.archive.db.InsertTag(new Tag(){ taxonymID = vriskaTaxID });
             var tereziTagID = ctx.archive.db.InsertTag(new Tag(){ taxonymID = tereziTaxID });
 
-            ctx.archive.db.InsertTagImplication(vriskaTagID, tereziTagID);
-
-            Console.ReadLine();
-
-            ctx.archive.db.DeleteTag(vriskaTagID);
-            ctx.archive.db.DeleteTag(tereziTagID);
 
         });
 

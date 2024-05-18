@@ -273,10 +273,10 @@ public partial class DBModel {
         com.CommandText = @"
             select *
             from Tag
-            where TagID = @TagID;
+            where ID = @ID;
         ";
         com.Transaction = transaction;
-        com.Parameters.AddWithValue("@TagID", tagID);
+        com.Parameters.AddWithValue("@ID", tagID);
 
         Tag? tag = null;
 
