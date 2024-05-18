@@ -248,10 +248,140 @@ public partial class DBModel {
         return aliases.ToArray();
     }
 
+    public TagID[] QueryTags(string clause, SqliteTransaction? transaction = null){
+
+        var tags = new List<TagID>();
+
+        var com = db.CreateCommand();
+		com.CommandText = $"select ID from Tag {clause}";
+        com.Transaction = transaction;
+		
+        var reader = com.ExecuteReader();
+        while(reader.Read()){
+            tags.Add((TagID)reader.GetInt32(0));
+        }
+
+        reader.Close();
+        com.Dispose();
+
+        return tags.ToArray();
+    }
+
+    public Tag? ReadTag(TagID tagID, SqliteTransaction? transaction = null){
+
+        var com = db.CreateCommand();
+        com.CommandText = @"
+            select *
+            from Tag
+            where TagID = @TagID;
+        ";
+        com.Transaction = transaction;
+        com.Parameters.AddWithValue("@TagID", tagID);
+
+        Tag? tag = null;
+
+        var reader = com.ExecuteReader();
+        if(reader.Read()){
+            tag = new Tag(){
+                id = tagID,
+                taxonymID = (TaxonymID)reader.GetInt32(1)
+            };
+        }
+
+        return tag;
+    }
+
+    public TagID[] ReadTagConsequents(TagID tagID, SqliteTransaction? transaction = null){
+        var consequents = new List<TagID>();
+
+        var com = db.CreateCommand();
+		com.CommandText = @"
+            select ConsequentID
+            from TagImplication
+            where AntecedentID = @ID;
+        ";
+        com.Transaction = transaction;
+        com.Parameters.AddWithValue("@ID", tagID);
+		
+        var reader = com.ExecuteReader();
+        while(reader.Read()){
+            consequents.Add((TagID)reader.GetInt32(0));
+        }
+
+        reader.Close();
+        com.Dispose();
+
+        return consequents.ToArray();
+    }
+
+    public TagID[] ReadTagAntecedents(TagID tagID, SqliteTransaction? transaction = null){
+        var antecedents = new List<TagID>();
+
+        var com = db.CreateCommand();
+		com.CommandText = @"
+            select AntecedentID
+            from TagImplication
+            where ConsequentID = @ID;
+        ";
+        com.Transaction = transaction;
+        com.Parameters.AddWithValue("@ID", tagID);
+		
+        var reader = com.ExecuteReader();
+        while(reader.Read()){
+            antecedents.Add((TagID)reader.GetInt32(0));
+        }
+
+        reader.Close();
+        com.Dispose();
+
+        return antecedents.ToArray();
+    }
+
 }
 
 // Insertion
 public partial class DBModel {
+
+    public TagID InsertTag(Tag tag, SqliteTransaction? transaction = null){
+
+        var com = db.CreateCommand();
+        com.CommandText = @"
+            insert into Tag (
+                TaxonymID
+            )
+            values (
+                @TaxonymID
+            );
+        ";
+        com.Transaction = transaction;
+        com.Parameters.AddWithValue("@TaxonymID", tag.taxonymID);
+        com.ExecuteNonQuery();
+        com.Dispose();
+
+        var tagID = (TagID)ReadLastInsertRowID();
+        return tagID;
+    }
+
+    public void InsertTagImplication(TagID antecedentID, TagID consequentID, SqliteTransaction? transaction = null){
+
+        var com = db.CreateCommand();
+        com.CommandText = @"
+            insert into TagImplication (
+                AntecedentID,
+                ConsequentID
+            )
+            values (
+                @AntecedentID,
+                @ConsequentID
+            );
+        ";
+        com.Transaction = transaction;
+        com.Parameters.AddWithValue("@AntecedentID", antecedentID);
+        com.Parameters.AddWithValue("@ConsequentID", consequentID);
+        com.ExecuteNonQuery();
+        com.Dispose();
+
+    }
 
     public DocumentID InsertDocument(Document document, SqliteTransaction? transaction = null){
 
@@ -347,6 +477,36 @@ public partial class DBModel {
 
 // Deletion
 public partial class DBModel {
+
+    public void DeleteTag(TagID tagID, SqliteTransaction? transaction = null){
+        var com = db.CreateCommand();
+		com.CommandText = $@"
+            delete from TagImplication
+            where AntecedentID = @ID or ConsequentID = @ID;
+
+            delete from Tag
+            where ID = @ID;
+        ";
+        com.Transaction = transaction;
+        com.Parameters.AddWithValue("@ID", tagID);
+        com.ExecuteNonQuery();
+        com.Dispose();
+    }
+
+    public void DeleteTagImplication(TagID antecedentID, TagID consequentID, SqliteTransaction? transaction = null){
+        var com = db.CreateCommand();
+        com.CommandText = @"
+            delete from TagImplication
+            where
+                AntecedentID = @AntecedentID
+                and ConsequentID = @ConsequentID;
+        ";
+        com.Transaction = transaction;
+        com.Parameters.AddWithValue("@AntecedentID", antecedentID);
+        com.Parameters.AddWithValue("@ConsequentID", consequentID);
+        com.ExecuteNonQuery();
+        com.Dispose();
+    }
 
     public void DeleteDocument(DocumentID documentID, SqliteTransaction? transaction = null){
         var com = db.CreateCommand();
