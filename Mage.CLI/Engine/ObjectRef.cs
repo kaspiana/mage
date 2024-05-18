@@ -16,12 +16,15 @@ public abstract class ObjectRef
 
     public static ObjectRef Parse(string objectRefStr)
     {
-        if ("0123456789".Contains(objectRefStr[0]))
-            return new ObjectRef_ID(int.Parse(objectRefStr));
+        // id references
+        if (objectRefStr[0] == '/')
+            return new ObjectRef_ID(int.Parse(objectRefStr[1..]));
 
+        // bound references
         if (objectRefStr == ".")
             return new ObjectRef_Binding(objectRefStr);
 
+        // view index references
         var slashIndex = objectRefStr.IndexOf('/');
         if (slashIndex != -1)
         {
@@ -33,6 +36,7 @@ public abstract class ObjectRef
             );
         }
 
+        // name references
         return new ObjectRef_Name(objectRefStr);
     }
 

@@ -29,18 +29,18 @@ public static partial class CLICommands {
             var taxonym = ctx.archive.TaxonymGet(taxonymID);
 
             if(taxonymID == Archive.ROOT_TAXONYM_ID){
-                Console.WriteLine($"taxonym {taxonymID}: <root>");
+                Console.WriteLine($"taxonym /{taxonymID}: <root>");
             } else {
-                Console.WriteLine($"taxonym {taxonymID}");
+                Console.WriteLine($"taxonym /{taxonymID}");
 
                 Console.WriteLine($"\tParents:");
                 var parentIDs = ctx.archive.TaxonymGetParents(taxonymID);
                 foreach(var parentID in parentIDs){
                     var parent = ctx.archive.TaxonymGet(parentID);
                     if(parentID == taxonym?.canonicalParentID){
-                        Console.WriteLine($"\t * {parent?.canonicalAlias} ({parentID})");
+                        Console.WriteLine($"\t * {parent?.canonicalAlias} (/{parentID})");
                     } else {
-                        Console.WriteLine($"\t   {parent?.canonicalAlias} ({parentID})");
+                        Console.WriteLine($"\t   {parent?.canonicalAlias} (/{parentID})");
                     }
                 }
 
@@ -131,9 +131,9 @@ public static partial class CLICommands {
 
             foreach(var taxonym in children){
                 if(taxonym?.id == Archive.ROOT_TAXONYM_ID){
-                    Console.WriteLine($"{taxonym?.id}: <root>");
+                    Console.WriteLine($"/{taxonym?.id}: <root>");
                 } else {
-                    Console.WriteLine($"{taxonym?.id}: {taxonym?.canonicalParentID}:{taxonym?.canonicalAlias}");
+                    Console.WriteLine($"/{taxonym?.id}: /{taxonym?.canonicalParentID}:{taxonym?.canonicalAlias}");
                 }
             }
 
@@ -154,9 +154,9 @@ public static partial class CLICommands {
 
             foreach(var taxonym in parents){
                 if(taxonym?.id == Archive.ROOT_TAXONYM_ID){
-                    Console.WriteLine($"{taxonym?.id}: <root>");
+                    Console.WriteLine($"/{taxonym?.id}: <root>");
                 } else {
-                    Console.WriteLine($"{taxonym?.id}: {taxonym?.canonicalParentID}:{taxonym?.canonicalAlias}");
+                    Console.WriteLine($"/{taxonym?.id}: /{taxonym?.canonicalParentID}:{taxonym?.canonicalAlias}");
                 }
             }
 
