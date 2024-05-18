@@ -1,6 +1,7 @@
 using System.CommandLine;
 using System.Security.Cryptography.X509Certificates;
 using Mage.Engine;
+using Sprache;
 using SQLitePCL;
 
 public static partial class CLICommands {
@@ -67,14 +68,10 @@ public static partial class CLICommands {
         var com = new Command("test", "For debugging purposes.");
         com.SetHandler(() => {
             
-            ctx.archive.db.EnsureConnected();
+            var query = QueryParser.Query.Parse("(rose_lalonde AND dirk_strider) OR homestuck2");
+            Console.WriteLine(query.root);
 
-            var vriskaTaxID = (TaxonymID)ctx.archive.TaxonymFind("vriska_serket");
-            var tereziTaxID = (TaxonymID)ctx.archive.TaxonymFind("terezi_pyrope");
-            
-            var vriskaTagID = ctx.archive.db.InsertTag(new Tag(){ taxonymID = vriskaTaxID });
-            var tereziTagID = ctx.archive.db.InsertTag(new Tag(){ taxonymID = tereziTaxID });
-
+            query.GetResults(ctx.archive);
 
         });
 
