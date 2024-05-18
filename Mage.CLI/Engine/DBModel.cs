@@ -291,6 +291,25 @@ public partial class DBModel {
         return tag;
     }
 
+    public TagID? ReadTagID(TaxonymID taxonymID, SqliteTransaction? transaction = null){
+
+        var com = db.CreateCommand();
+        com.CommandText = @"
+            select ID
+            from Tag
+            where TaxonymID = @TaxonymID;
+        ";
+        com.Transaction = transaction;
+        com.Parameters.AddWithValue("@TaxonymID", taxonymID);
+
+        var reader = com.ExecuteReader();
+        if(reader.Read()){
+            return (TagID)reader.GetInt32(0);
+        }
+
+        return null;
+    }
+
     public TagID[] ReadTagConsequents(TagID tagID, SqliteTransaction? transaction = null){
         var consequents = new List<TagID>();
 
