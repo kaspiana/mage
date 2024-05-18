@@ -14,7 +14,7 @@ Taxonyms generalise the notion of names and namespaces with respect to tags. Tax
 
 A reference denotes an object like a document, tag, or view, but does not itself communicate the type of the object. There are four kinds of references:
 
-- ID references; e.g. `786`.
+- ID references; e.g. `/786`.
 - Name references; e.g. view names, document hashes, tag names.
 - Bound references, written with the `.` operator.
 - View index references, which refer to a document in a view; e.g. `main/0`, `./6`.
