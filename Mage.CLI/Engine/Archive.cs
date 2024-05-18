@@ -241,6 +241,21 @@ public class Archive {
         return db.ReadTagAntecedents(tagID);
     }
 
+    public TagID[] DocumentGetTags(DocumentID documentID){
+        db.EnsureConnected();
+        return db.ReadDocumentTags(documentID);
+    }
+
+    public void DocumentAddTag(DocumentID documentID, TagID tagID){
+        db.EnsureConnected();
+        db.InsertDocumentTag(documentID, tagID);
+    }
+
+    public void DocumentRemoveTag(DocumentID documentID, TagID tagID){
+        db.EnsureConnected();
+        db.DeleteDocumentTag(documentID, tagID);
+    }
+
     public Taxonym? TaxonymGet(TaxonymID taxonymID){
         db.EnsureConnected();
         return db.ReadTaxonym(taxonymID);

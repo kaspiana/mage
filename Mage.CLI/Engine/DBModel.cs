@@ -356,10 +356,54 @@ public partial class DBModel {
         return antecedents.ToArray();
     }
 
+    public TagID[] ReadDocumentTags(DocumentID documentID, SqliteTransaction? transaction = null){
+        var tagIDs = new List<TagID>();
+
+        var com = db.CreateCommand();
+		com.CommandText = @"
+            select TagID
+            from DocumentTag
+            where DocumentID = @DocumentID;
+        ";
+        com.Transaction = transaction;
+        com.Parameters.AddWithValue("@DocumentID", documentID);
+		
+        var reader = com.ExecuteReader();
+        while(reader.Read()){
+            tagIDs.Add((TagID)reader.GetInt32(0));
+        }
+
+        reader.Close();
+        com.Dispose();
+
+        return tagIDs.ToArray();
+    }
+
 }
 
 // Insertion
 public partial class DBModel {
+
+    public void InsertDocumentTag(DocumentID documentID, TagID tagID, SqliteTransaction? transaction = null){
+
+        var com = db.CreateCommand();
+        com.CommandText = @"
+            insert into DocumentTag (
+                DocumentID,
+                TagID
+            )
+            values (
+                @DocumentID,
+                @TagID
+            );
+        ";
+        com.Transaction = transaction;
+        com.Parameters.AddWithValue("@DocumentID", documentID);
+        com.Parameters.AddWithValue("@TagID", tagID);
+        com.ExecuteNonQuery();
+        com.Dispose();
+
+    }
 
     public TagID InsertTag(Tag tag, SqliteTransaction? transaction = null){
 
@@ -496,6 +540,21 @@ public partial class DBModel {
 
 // Deletion
 public partial class DBModel {
+
+    public void DeleteDocumentTag(DocumentID documentID, TagID tagID, SqliteTransaction? transaction = null){
+        var com = db.CreateCommand();
+		com.CommandText = $@"
+            delete from DocumentTag
+            where 
+                DocumentID = @DocumentID 
+                and TagID = @TagID;
+        ";
+        com.Transaction = transaction;
+        com.Parameters.AddWithValue("@DocumentID", documentID);
+        com.Parameters.AddWithValue("@TagID", tagID);
+        com.ExecuteNonQuery();
+        com.Dispose();
+    }
 
     public void DeleteTag(TagID tagID, SqliteTransaction? transaction = null){
         var com = db.CreateCommand();
