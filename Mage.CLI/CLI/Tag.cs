@@ -12,7 +12,11 @@ public static partial class CLICommands {
         );
 
         var com = new Command("tag", "Manipulate tag."){
-            tagRefArgument
+            tagRefArgument,
+            ComTagImplications(ctx, tagRefArgument),
+            ComTagAntecedents(ctx, tagRefArgument),
+            ComTagImply(ctx, tagRefArgument),
+            ComTagUnimply(ctx, tagRefArgument)
         };
 
         com.SetHandler((tagRef) => {
@@ -31,6 +35,104 @@ public static partial class CLICommands {
             
 
         }, tagRefArgument);
+
+        return com;
+
+    }
+
+    public static Command ComTagImplications(CLIContext ctx, Argument<string?> tagRefArgument){
+
+        var com = new Command("implications", "List direct implications of this tag.");
+
+        com.SetHandler((tagRef) => {
+
+            var tagID = (TagID)ObjectRef.ResolveTag(ctx.archive!, tagRef!)!;
+
+            var consequentIDs = ctx.archive.TagGetImplications(tagID);
+
+            foreach(var consequentID in consequentIDs){
+                var tag = ctx.archive?.TagGet(consequentID);
+                var taxonym = ctx.archive?.TaxonymGet((TaxonymID)tag?.taxonymID!);
+                var parentTaxonym = ctx.archive?.TaxonymGet((TaxonymID)taxonym?.canonicalParentID!);
+
+                if(parentTaxonym is not null)
+                    Console.WriteLine($"* {parentTaxonym?.canonicalAlias}:{taxonym?.canonicalAlias} (/{taxonym?.id})");
+                else
+                    Console.WriteLine($"* {taxonym?.canonicalAlias} (/{taxonym?.id})");
+            }
+
+        }, tagRefArgument);
+
+        return com;
+    }
+
+    public static Command ComTagAntecedents(CLIContext ctx, Argument<string?> tagRefArgument){
+
+        var com = new Command("antecedents", "List direct antecedents of this tag.");
+
+        com.SetHandler((tagRef) => {
+
+            var tagID = (TagID)ObjectRef.ResolveTag(ctx.archive!, tagRef!)!;
+
+            var antecedentIDs = ctx.archive.TagGetAntecedents(tagID);
+
+            foreach(var antecedentID in antecedentIDs){
+                var tag = ctx.archive?.TagGet(antecedentID);
+                var taxonym = ctx.archive?.TaxonymGet((TaxonymID)tag?.taxonymID!);
+                var parentTaxonym = ctx.archive?.TaxonymGet((TaxonymID)taxonym?.canonicalParentID!);
+
+                if(parentTaxonym is not null)
+                    Console.WriteLine($"* {parentTaxonym?.canonicalAlias}:{taxonym?.canonicalAlias} (/{taxonym?.id})");
+                else
+                    Console.WriteLine($"* {taxonym?.canonicalAlias} (/{taxonym?.id})");
+            }
+
+        }, tagRefArgument);
+
+        return com;
+    }
+
+    public static Command ComTagImply(CLIContext ctx, Argument<string?> tagRefArgument){
+
+        var conseqRefArgument = new Argument<string?>(
+            name: "implication"
+        );
+
+        var com = new Command("imply", "Denote tag as implication of this tag."){
+            conseqRefArgument
+        };
+
+        com.SetHandler((tagRef, conseqRef) => {
+
+            var tagID = (TagID)ObjectRef.ResolveTag(ctx.archive!, tagRef!)!;
+            var conseqID = (TagID)ObjectRef.ResolveTag(ctx.archive!, conseqRef!)!;
+
+            ctx.archive.TagAddImplication(tagID, conseqID);
+
+        }, tagRefArgument, conseqRefArgument);
+
+        return com;
+
+    }
+
+    public static Command ComTagUnimply(CLIContext ctx, Argument<string?> tagRefArgument){
+
+        var conseqRefArgument = new Argument<string?>(
+            name: "implication"
+        );
+
+        var com = new Command("unimply", "Remove tag as implication of this tag."){
+            conseqRefArgument
+        };
+
+        com.SetHandler((tagRef, conseqRef) => {
+
+            var tagID = (TagID)ObjectRef.ResolveTag(ctx.archive!, tagRef!)!;
+            var conseqID = (TagID)ObjectRef.ResolveTag(ctx.archive!, conseqRef!)!;
+
+            ctx.archive.TagRemoveImplication(tagID, conseqID);
+
+        }, tagRefArgument, conseqRefArgument);
 
         return com;
 

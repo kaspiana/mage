@@ -221,14 +221,24 @@ public class Archive {
         db.DeleteTag(tagID);
     }
 
-    public void TagImply(TagID tagID, TagID consequentID){
+    public void TagAddImplication(TagID tagID, TagID consequentID){
         db.EnsureConnected();
         db.InsertTagImplication(tagID, consequentID);
+    }
+
+    public void TagRemoveImplication(TagID tagID, TagID consequentID){
+        db.EnsureConnected();
+        db.DeleteTagImplication(tagID, consequentID);
     }
 
     public TagID[] TagGetImplications(TagID tagID){
         db.EnsureConnected();
         return db.ReadTagConsequents(tagID);
+    }
+
+    public TagID[] TagGetAntecedents(TagID tagID){
+        db.EnsureConnected();
+        return db.ReadTagAntecedents(tagID);
     }
 
     public Taxonym? TaxonymGet(TaxonymID taxonymID){

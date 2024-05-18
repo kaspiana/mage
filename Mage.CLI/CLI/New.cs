@@ -68,7 +68,7 @@ public static partial class CLICommands {
 
             foreach(var implRef in implicationRefs){
                 var implTagID = (TagID)ObjectRef.ResolveTag(ctx.archive, implRef);
-                ctx.archive.TagImply(tagID, implTagID);
+                ctx.archive.TagAddImplication(tagID, implTagID);
             }
 
             Console.WriteLine($"/{tagID}: {parentID}:{name}");
