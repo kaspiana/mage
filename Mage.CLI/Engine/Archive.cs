@@ -197,6 +197,65 @@ public class Archive {
         return (index, hash);
     }
 
+    public Tag? TagGet(TagID tagID){
+        db.EnsureConnected();
+        return db.ReadTag(tagID);
+    }
+
+    public TagID? TagFind(string qualifiedName){
+        db.EnsureConnected();
+        return db.ReadTagID((TaxonymID)TaxonymFind(qualifiedName)!);
+    }
+
+    public TagID? TagCreate(TaxonymID taxonymID){
+        db.EnsureConnected();
+        return db.InsertTag(new Tag(){ taxonymID = taxonymID });
+    }
+
+    public TagID? TagCreate(TaxonymID parentID, string name){
+        return TagCreate((TaxonymID)TaxonymCreate(parentID, name)!);
+    }
+
+    public void TagDelete(TagID tagID){
+        db.EnsureConnected();
+        db.DeleteTag(tagID);
+    }
+
+    public void TagAddImplication(TagID tagID, TagID consequentID){
+        db.EnsureConnected();
+        db.InsertTagImplication(tagID, consequentID);
+    }
+
+    public void TagRemoveImplication(TagID tagID, TagID consequentID){
+        db.EnsureConnected();
+        db.DeleteTagImplication(tagID, consequentID);
+    }
+
+    public TagID[] TagGetImplications(TagID tagID){
+        db.EnsureConnected();
+        return db.ReadTagConsequents(tagID);
+    }
+
+    public TagID[] TagGetAntecedents(TagID tagID){
+        db.EnsureConnected();
+        return db.ReadTagAntecedents(tagID);
+    }
+
+    public TagID[] DocumentGetTags(DocumentID documentID){
+        db.EnsureConnected();
+        return db.ReadDocumentTags(documentID);
+    }
+
+    public void DocumentAddTag(DocumentID documentID, TagID tagID){
+        db.EnsureConnected();
+        db.InsertDocumentTag(documentID, tagID);
+    }
+
+    public void DocumentRemoveTag(DocumentID documentID, TagID tagID){
+        db.EnsureConnected();
+        db.DeleteDocumentTag(documentID, tagID);
+    }
+
     public Taxonym? TaxonymGet(TaxonymID taxonymID){
         db.EnsureConnected();
         return db.ReadTaxonym(taxonymID);

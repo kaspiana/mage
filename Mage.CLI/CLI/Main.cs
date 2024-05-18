@@ -34,6 +34,9 @@ public static partial class CLICommands {
                 ComTaxonyms(ctx),
                 ComTaxonym(ctx),
 
+                ComTags(ctx),
+                ComTag(ctx),
+
                 ComSearch(ctx)
             };
         }
@@ -64,11 +67,14 @@ public static partial class CLICommands {
         var com = new Command("test", "For debugging purposes.");
         com.SetHandler(() => {
             
-            Console.WriteLine(ctx.archive.TaxonymFind("general:character:vriska_serket"));
-            Console.WriteLine(ctx.archive.TaxonymFind("general:vriska"));
-            Console.WriteLine(ctx.archive.TaxonymFind("homestuck:vriska"));
-            Console.WriteLine(ctx.archive.TaxonymFind("vriska_serket"));
-            Console.WriteLine(ctx.archive.TaxonymFind("vriska"));
+            ctx.archive.db.EnsureConnected();
+
+            var vriskaTaxID = (TaxonymID)ctx.archive.TaxonymFind("vriska_serket");
+            var tereziTaxID = (TaxonymID)ctx.archive.TaxonymFind("terezi_pyrope");
+            
+            var vriskaTagID = ctx.archive.db.InsertTag(new Tag(){ taxonymID = vriskaTaxID });
+            var tereziTagID = ctx.archive.db.InsertTag(new Tag(){ taxonymID = tereziTaxID });
+
 
         });
 

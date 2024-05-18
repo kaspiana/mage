@@ -8,7 +8,8 @@ public static partial class CLICommands {
     public static Command ComDelete(CLIContext ctx){
         var com = new Command("delete", "Delete an object."){
             ComDeleteDoc(ctx),
-            ComDeleteTaxonym(ctx)
+            ComDeleteTaxonym(ctx),
+            ComDeleteTag(ctx)
         };
         return com;
     }
@@ -43,6 +44,23 @@ public static partial class CLICommands {
             var taxonymID = (TaxonymID)ObjectRef.ResolveTaxonym(ctx.archive, taxonymRef)!;
             ctx.archive.TaxonymDelete(taxonymID);
         }, taxonymRefArgument);
+
+        return com;
+    }
+
+    public static Command ComDeleteTag(CLIContext ctx){
+        var tagRefArgument = new Argument<string>(
+            name: "tag"
+        );
+
+        var com = new Command("tag", "Delete tag."){
+            tagRefArgument
+        };
+
+        com.SetHandler((tagRef) => {
+            var tagID = (TagID)ObjectRef.ResolveTag(ctx.archive, tagRef)!;
+            ctx.archive.TagDelete(tagID);
+        }, tagRefArgument);
 
         return com;
     }
