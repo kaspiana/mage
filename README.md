@@ -22,23 +22,43 @@ A reference denotes an object like a document, tag, or view, but does not itself
 ## Working example
 
 ```bash
-
 mage init # create an archive in the current directory
-mage ingest # ingest files in .mage/in/
-mage view in # list documents in the 'in' view: recently ingested documents
-mage doc in/0 # see information about first document in the 'in' view
-mage view . reflect in # reflect recently ingested documents in main view.
-mage view in clear # clear 'in' view
-
 ```
-
-## Future example
 
 ```bash
-
-mage new taxonym --top-level general # create general namespace
-mage new taxonym general character --alias char # create character namespace
-mage new tag char vriska_serket --alias vriska # create vriska tag
-mage doc ./0 tags add vriska # add vriska tag to document
-
+mage ingest # ingest files in .mage/in/
 ```
+
+```bash
+mage view in # list documents in the 'in' view: recently ingested documents
+mage view main reflect in # reflect recently ingested documents in main view.
+mage bind view main # bind main view to context
+mage view in clear # clear 'in' view
+```
+
+```bash
+mage doc ./0 # see information about first document in the bound view
+mage doc ./0 open # open document on desktop
+```
+
+```bash
+mage new tag character vriska_serket # add new tag
+mage taxoym vriska_serket alias vriska # add alias to taxonym
+mage doc main/0 tag vriska # add vriska tag to document
+mage search "vriska" # find all documents tagged with vriska
+```
+
+```bash
+mage new tag species troll
+mage tag vriska imply troll # add tag implication
+mage search "troll" # find all documents tagged with troll or with tags that imply troll
+```
+
+```bash
+# more complex queries
+mage search "troll human yuri"
+mage search "kanaya_maryam OR vriska_serket"
+mage search "terezi_pyrope -karkat_vantas"
+mage search "-karkat_vantas OR (transfem!karkat_vantas)"
+```
+
