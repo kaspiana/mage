@@ -32,7 +32,7 @@ public class Archive {
     public string? name;
     public int version;
 
-    public DBModel db;
+    public DBEngine db;
 
     public static Archive Init(string archiveDir, string? name = null){
         var fileDir = archiveDir;
@@ -102,7 +102,7 @@ public class Archive {
             fileDir = fileDir,
             name = name,
             version = version,
-            db = new DBModel(){ dbPath = $"{mageDir}{DB_FILE_PATH}" }
+            db = new DBEngine(){ dbPath = $"{mageDir}{DB_FILE_PATH}" }
         };
 
         return archive;

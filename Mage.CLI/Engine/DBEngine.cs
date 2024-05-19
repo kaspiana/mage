@@ -4,7 +4,7 @@ using Microsoft.Data.Sqlite;
 
 namespace Mage.Engine;
 
-public partial class DBModel {
+public partial class DBEngine {
 
     public string dbPath;
     public SqliteConnection? db;
@@ -37,7 +37,7 @@ public partial class DBModel {
 }
 
 // Reading
-public partial class DBModel {
+public partial class DBEngine {
 
     public long ReadLastInsertRowID(SqliteTransaction? transaction = null){
         var com = new SqliteCommand("select last_insert_rowid()", db, transaction);
@@ -400,7 +400,7 @@ public partial class DBModel {
 }
 
 // Insertion
-public partial class DBModel {
+public partial class DBEngine {
 
     public void InsertDocumentTag(DocumentID documentID, TagID tagID, SqliteTransaction? transaction = null){
 
@@ -557,7 +557,7 @@ public partial class DBModel {
 
 
 // Deletion
-public partial class DBModel {
+public partial class DBEngine {
 
     public void DeleteDocumentTag(DocumentID documentID, TagID tagID, SqliteTransaction? transaction = null){
         var com = db.CreateCommand();
