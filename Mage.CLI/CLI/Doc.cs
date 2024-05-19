@@ -36,7 +36,7 @@ public static partial class CLICommands {
             Console.WriteLine($"  Archive ID: /{doc.id}");
             Console.WriteLine($"  File name: {doc.fileName}");
             Console.WriteLine($"  Extension: {doc.extension}");
-            Console.WriteLine($"  Ingest timestamp: {doc.ingestTimestamp}");
+            Console.WriteLine($"  Ingest timestamp: {doc.ingestedAt}");
             Console.WriteLine($"  Comment: {(doc.comment is null ? "<none>" : doc.comment)}");
             
             var tagNames = ctx.archive.DocumentGetTags(docID).Select(tagID => ctx.archive.TagAsString(tagID));
@@ -84,12 +84,12 @@ public static partial class CLICommands {
             foreach(var tagID in tagIDs){
                 var tag = ctx.archive?.TagGet(tagID);
                 var taxonym = ctx.archive?.TaxonymGet((TaxonymID)tag?.taxonymID!);
-                var parentTaxonym = ctx.archive?.TaxonymGet((TaxonymID)taxonym?.canonicalParentID!);
+                var parentTaxonym = ctx.archive?.TaxonymGet((TaxonymID)taxonym?.canonParentID!);
 
                 if(parentTaxonym is not null)
-                    Console.WriteLine($" * {parentTaxonym?.canonicalAlias}:{taxonym?.canonicalAlias} (/{taxonym?.id})");
+                    Console.WriteLine($" * {parentTaxonym?.canonAlias}:{taxonym?.canonAlias} (/{taxonym?.id})");
                 else
-                    Console.WriteLine($" * {taxonym?.canonicalAlias} (/{taxonym?.id})");
+                    Console.WriteLine($" * {taxonym?.canonAlias} (/{taxonym?.id})");
             }
 
         }, docRefArgument);

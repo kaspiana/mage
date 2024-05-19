@@ -5,6 +5,6 @@ public struct Document {
     public DocumentID? id;
     public string fileName;
     public string extension;
-    public DateTime ingestTimestamp;
+    public DateTime ingestedAt;
     public string? comment;
 }

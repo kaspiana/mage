@@ -29,8 +29,8 @@ public partial class DBModel {
 
     public void RunResourceScript(string resourcePath){
         var setupCommand = db.CreateCommand();
-		setupCommand.CommandText = ResourceLoader.Load($"Resources.DB.{resourcePath}");
-		setupCommand.ExecuteNonQuery();
+        setupCommand.CommandText = ResourceLoader.Load($"Resources.DB.{resourcePath}");
+        setupCommand.ExecuteNonQuery();
         setupCommand.Dispose();
     }
 
@@ -41,8 +41,8 @@ public partial class DBModel {
 
     public long ReadLastInsertRowID(SqliteTransaction? transaction = null){
         var com = new SqliteCommand("select last_insert_rowid()", db, transaction);
-		long lastRowID = (long)com.ExecuteScalar()!;
-		com.Dispose();
+        long lastRowID = (long)com.ExecuteScalar()!;
+        com.Dispose();
 
         return lastRowID;
     }
@@ -52,9 +52,9 @@ public partial class DBModel {
         var documents = new List<DocumentID>();
 
         var com = db.CreateCommand();
-		com.CommandText = $"select id from document {clause}";
+        com.CommandText = $"select id from document {clause}";
         com.Transaction = transaction;
-		
+        
         var reader = com.ExecuteReader();
         while(reader.Read()){
             documents.Add((DocumentID)reader.GetInt32(0));
@@ -71,10 +71,10 @@ public partial class DBModel {
         Document? document = null;
 
         var com = db.CreateCommand();
-		com.CommandText = $"select * from document where id = @id;";
+        com.CommandText = $"select * from document where id = @id;";
         com.Transaction = transaction;
         com.Parameters.AddWithValue("id", documentID);
-		
+        
         var reader = com.ExecuteReader();
         if(reader.Read()){
             var ingestTimestamp = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
@@ -85,7 +85,7 @@ public partial class DBModel {
                 id = documentID,
                 fileName = reader.GetString(2),
                 extension = reader.GetString(3),
-                ingestTimestamp = ingestTimestamp,
+                ingestedAt = ingestTimestamp,
                 comment = reader.IsDBNull(5) ? null : reader.GetString(5)
             };
         }
@@ -101,7 +101,7 @@ public partial class DBModel {
         string? documentHash = null;
 
         var com = db.CreateCommand();
-		com.CommandText = $"select hash from document where id = @id;";
+        com.CommandText = $"select hash from document where id = @id;";
         com.Transaction = transaction;
         com.Parameters.AddWithValue("id", documentID);
 
@@ -121,7 +121,7 @@ public partial class DBModel {
         DocumentID? documentID = null;
 
         var com = db.CreateCommand();
-		com.CommandText = $"select id from document where hash = @hash;";
+        com.CommandText = $"select id from document where hash = @hash;";
         com.Transaction = transaction;
         com.Parameters.AddWithValue("hash", documentHash);
 
@@ -142,9 +142,9 @@ public partial class DBModel {
         var taxonyms = new List<TaxonymID>();
 
         var com = db.CreateCommand();
-		com.CommandText = $"select id from taxonym {clause}";
+        com.CommandText = $"select id from taxonym {clause}";
         com.Transaction = transaction;
-		
+        
         var reader = com.ExecuteReader();
         while(reader.Read()){
             taxonyms.Add((TaxonymID)reader.GetInt32(0));
@@ -168,8 +168,8 @@ public partial class DBModel {
         if(reader.Read()){
             taxonym = new Taxonym(){
                 id = taxonymID,
-                canonicalParentID = reader.IsDBNull(1) ? null : (TaxonymID)reader.GetInt32(1),
-                canonicalAlias = reader.GetString(2)
+                canonParentID = reader.IsDBNull(1) ? null : (TaxonymID)reader.GetInt32(1),
+                canonAlias = reader.GetString(2)
             };
         }
 
@@ -253,9 +253,9 @@ public partial class DBModel {
         var tags = new List<TagID>();
 
         var com = db.CreateCommand();
-		com.CommandText = $"select id from tag {clause}";
+        com.CommandText = $"select id from tag {clause}";
         com.Transaction = transaction;
-		
+        
         var reader = com.ExecuteReader();
         while(reader.Read()){
             tags.Add((TagID)reader.GetInt32(0));
@@ -314,14 +314,14 @@ public partial class DBModel {
         var consequents = new List<TagID>();
 
         var com = db.CreateCommand();
-		com.CommandText = @"
+        com.CommandText = @"
             select consequent_id
             from tag_implication
             where antecedent_id = @id;
         ";
         com.Transaction = transaction;
         com.Parameters.AddWithValue("@id", tagID);
-		
+        
         var reader = com.ExecuteReader();
         while(reader.Read()){
             consequents.Add((TagID)reader.GetInt32(0));
@@ -337,14 +337,14 @@ public partial class DBModel {
         var antecedents = new List<TagID>();
 
         var com = db.CreateCommand();
-		com.CommandText = @"
+        com.CommandText = @"
             select antecedent_id
             from tag_implication
             where consequent_id = @id;
         ";
         com.Transaction = transaction;
         com.Parameters.AddWithValue("@id", tagID);
-		
+        
         var reader = com.ExecuteReader();
         while(reader.Read()){
             antecedents.Add((TagID)reader.GetInt32(0));
@@ -360,14 +360,14 @@ public partial class DBModel {
         var tagIDs = new List<TagID>();
 
         var com = db.CreateCommand();
-		com.CommandText = @"
+        com.CommandText = @"
             select tag_id
             from document_tag
             where document_id = @document_id;
         ";
         com.Transaction = transaction;
         com.Parameters.AddWithValue("@document_id", documentID);
-		
+        
         var reader = com.ExecuteReader();
         while(reader.Read()){
             tagIDs.Add((TagID)reader.GetInt32(0));
@@ -467,7 +467,7 @@ public partial class DBModel {
     public DocumentID InsertDocument(Document document, SqliteTransaction? transaction = null){
 
         var com = db.CreateCommand();
-		com.CommandText = $@"
+        com.CommandText = $@"
             insert into document (
                 hash,
                 file_name,
@@ -487,7 +487,7 @@ public partial class DBModel {
         com.Parameters.AddWithValue("@hash", document.hash);
         com.Parameters.AddWithValue("@file_name", document.fileName);
         com.Parameters.AddWithValue("@extension", document.extension);
-        com.Parameters.AddWithValue("@ingested_at", ((DateTimeOffset)(document.ingestTimestamp)).ToUnixTimeSeconds());
+        com.Parameters.AddWithValue("@ingested_at", ((DateTimeOffset)(document.ingestedAt)).ToUnixTimeSeconds());
         com.Parameters.AddWithValue("@comment", document.comment is null ? System.DBNull.Value : document.comment);
         com.ExecuteNonQuery();
         com.Dispose();
@@ -499,7 +499,7 @@ public partial class DBModel {
 
     public void InsertTaxonymAlias(TaxonymID taxonymID, string alias, SqliteTransaction? transaction = null){
         var com = db.CreateCommand();
-		com.CommandText = $@"
+        com.CommandText = $@"
             insert into taxonym_alias
             (taxonym_id, alias)
             values (@taxonym_id, @alias);
@@ -513,7 +513,7 @@ public partial class DBModel {
 
     public void InsertTaxonymParent(TaxonymID childID, TaxonymID parentID, SqliteTransaction? transaction = null){
         var com = db.CreateCommand();
-		com.CommandText = $@"
+        com.CommandText = $@"
             insert into taxonym_parent
             (child_id, parent_id)
             values (@child_id, @parent_id);
@@ -536,16 +536,16 @@ public partial class DBModel {
             values (@canon_parent_id, @canon_alias)
         ";
         com.Transaction = transaction;
-        com.Parameters.AddWithValue("@canon_parent_id", ((object?)taxonym.canonicalParentID) ?? DBNull.Value);
-		com.Parameters.AddWithValue("@canon_alias", taxonym.canonicalAlias);
-		com.ExecuteNonQuery();
-		com.Dispose();
+        com.Parameters.AddWithValue("@canon_parent_id", ((object?)taxonym.canonParentID) ?? DBNull.Value);
+        com.Parameters.AddWithValue("@canon_alias", taxonym.canonAlias);
+        com.ExecuteNonQuery();
+        com.Dispose();
 
         var taxonymID = (TaxonymID)ReadLastInsertRowID(transaction);
 
-        InsertTaxonymAlias(taxonymID, taxonym.canonicalAlias, transaction);
-        if(taxonym.canonicalParentID is not null)
-            InsertTaxonymParent(taxonymID, (TaxonymID)taxonym.canonicalParentID, transaction);
+        InsertTaxonymAlias(taxonymID, taxonym.canonAlias, transaction);
+        if(taxonym.canonParentID is not null)
+            InsertTaxonymParent(taxonymID, (TaxonymID)taxonym.canonParentID, transaction);
 
         transaction.Commit();
         transaction.Dispose();
@@ -561,7 +561,7 @@ public partial class DBModel {
 
     public void DeleteDocumentTag(DocumentID documentID, TagID tagID, SqliteTransaction? transaction = null){
         var com = db.CreateCommand();
-		com.CommandText = $@"
+        com.CommandText = $@"
             delete from document_tag
             where 
                 document_id = @document_id 
@@ -576,7 +576,7 @@ public partial class DBModel {
 
     public void DeleteTag(TagID tagID, SqliteTransaction? transaction = null){
         var com = db.CreateCommand();
-		com.CommandText = $@"
+        com.CommandText = $@"
             delete from tag_implication
             where antecedent_id = @id or consequent_id = @id;
 
@@ -606,7 +606,7 @@ public partial class DBModel {
 
     public void DeleteDocument(DocumentID documentID, SqliteTransaction? transaction = null){
         var com = db.CreateCommand();
-		com.CommandText = $@"
+        com.CommandText = $@"
             delete from document
             where id = @id;
         ";
@@ -618,7 +618,7 @@ public partial class DBModel {
 
     public void DeleteAllDocuments(SqliteTransaction? transaction = null){
         var com = db.CreateCommand();
-		com.CommandText = $@"delete from document;";
+        com.CommandText = $@"delete from document;";
         com.Transaction = transaction;
         com.ExecuteNonQuery();
         com.Dispose();
@@ -626,7 +626,7 @@ public partial class DBModel {
 
     public void DeleteTaxonymAlias(TaxonymID taxonymID, string alias, SqliteTransaction? transaction = null){
         var com = db.CreateCommand();
-		com.CommandText = $@"
+        com.CommandText = $@"
             delete from taxonym_alias
             where
                 taxonym_id = @taxonym_id
@@ -641,7 +641,7 @@ public partial class DBModel {
 
     public void DeleteTaxonymParent(TaxonymID childID, TaxonymID parentID, SqliteTransaction? transaction = null){
         var com = db.CreateCommand();
-		com.CommandText = $@"
+        com.CommandText = $@"
             delete from taxonym_parent
             where
                 child_id = @child_id
@@ -658,7 +658,7 @@ public partial class DBModel {
         transaction = db.BeginTransaction();
 
         var com = db.CreateCommand();
-		com.CommandText = $@"
+        com.CommandText = $@"
             delete from taxonym
             where id = @id;
         ";
@@ -668,7 +668,7 @@ public partial class DBModel {
         com.Dispose();
 
         com = db.CreateCommand();
-		com.CommandText = $@"
+        com.CommandText = $@"
             delete from taxonym_alias
             where taxonym_id = @taxonym_id;
         ";
@@ -678,7 +678,7 @@ public partial class DBModel {
         com.Dispose();
 
         com = db.CreateCommand();
-		com.CommandText = $@"
+        com.CommandText = $@"
             delete from taxonym_parent
             where 
                 child_id = @taxonym_id

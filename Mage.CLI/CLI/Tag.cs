@@ -23,14 +23,14 @@ public static partial class CLICommands {
             var tagID = (TagID)ObjectRef.ResolveTag(ctx.archive!, tagRef!)!;
             var tag = ctx.archive?.TagGet(tagID);
             var taxonym = ctx.archive?.TaxonymGet((TaxonymID)tag?.taxonymID!);
-            var parentTaxonym = ctx.archive?.TaxonymGet((TaxonymID)taxonym?.canonicalParentID!);
+            var parentTaxonym = ctx.archive?.TaxonymGet((TaxonymID)taxonym?.canonParentID!);
 
             Console.WriteLine($"tag /{tagID}");
 
             if(parentTaxonym is not null)
-                Console.WriteLine($"  Taxonym: {parentTaxonym?.canonicalAlias}:{taxonym?.canonicalAlias} (/{taxonym?.id})");
+                Console.WriteLine($"  Taxonym: {parentTaxonym?.canonAlias}:{taxonym?.canonAlias} (/{taxonym?.id})");
             else
-                Console.WriteLine($"  Taxonym: {taxonym?.canonicalAlias} (/{taxonym?.id})");
+                Console.WriteLine($"  Taxonym: {taxonym?.canonAlias} (/{taxonym?.id})");
 
             Console.WriteLine($"  Document count: {ctx.archive.db.CountTagDocuments(tagID)}");
 
@@ -53,12 +53,12 @@ public static partial class CLICommands {
             foreach(var consequentID in consequentIDs){
                 var tag = ctx.archive?.TagGet(consequentID);
                 var taxonym = ctx.archive?.TaxonymGet((TaxonymID)tag?.taxonymID!);
-                var parentTaxonym = ctx.archive?.TaxonymGet((TaxonymID)taxonym?.canonicalParentID!);
+                var parentTaxonym = ctx.archive?.TaxonymGet((TaxonymID)taxonym?.canonParentID!);
 
                 if(parentTaxonym is not null)
-                    Console.WriteLine($" * {parentTaxonym?.canonicalAlias}:{taxonym?.canonicalAlias} (/{taxonym?.id})");
+                    Console.WriteLine($" * {parentTaxonym?.canonAlias}:{taxonym?.canonAlias} (/{taxonym?.id})");
                 else
-                    Console.WriteLine($" * {taxonym?.canonicalAlias} (/{taxonym?.id})");
+                    Console.WriteLine($" * {taxonym?.canonAlias} (/{taxonym?.id})");
             }
 
         }, tagRefArgument);
@@ -79,12 +79,12 @@ public static partial class CLICommands {
             foreach(var antecedentID in antecedentIDs){
                 var tag = ctx.archive?.TagGet(antecedentID);
                 var taxonym = ctx.archive?.TaxonymGet((TaxonymID)tag?.taxonymID!);
-                var parentTaxonym = ctx.archive?.TaxonymGet((TaxonymID)taxonym?.canonicalParentID!);
+                var parentTaxonym = ctx.archive?.TaxonymGet((TaxonymID)taxonym?.canonParentID!);
 
                 if(parentTaxonym is not null)
-                    Console.WriteLine($" * {parentTaxonym?.canonicalAlias}:{taxonym?.canonicalAlias} (/{taxonym?.id})");
+                    Console.WriteLine($" * {parentTaxonym?.canonAlias}:{taxonym?.canonAlias} (/{taxonym?.id})");
                 else
-                    Console.WriteLine($" * {taxonym?.canonicalAlias} (/{taxonym?.id})");
+                    Console.WriteLine($" * {taxonym?.canonAlias} (/{taxonym?.id})");
             }
 
         }, tagRefArgument);

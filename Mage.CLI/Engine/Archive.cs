@@ -152,7 +152,7 @@ public class Archive {
             hash = hash,
             fileName = fileName,
             extension = extension,
-            ingestTimestamp = DateTime.Now,
+            ingestedAt = DateTime.Now,
             comment = comment
         });
 
@@ -207,11 +207,11 @@ public class Archive {
         var taxonym = TaxonymGet(taxonymID!);
         if(taxonym?.id == ROOT_TAXONYM_ID)
             return "<root>";
-        var parentTaxonym = TaxonymGet((TaxonymID)taxonym?.canonicalParentID!);
+        var parentTaxonym = TaxonymGet((TaxonymID)taxonym?.canonParentID!);
         if(parentTaxonym is not null)
-            return $"{parentTaxonym?.canonicalAlias}:{taxonym?.canonicalAlias}";
+            return $"{parentTaxonym?.canonAlias}:{taxonym?.canonAlias}";
         else
-            return $"{taxonym?.canonicalAlias}";
+            return $"{taxonym?.canonAlias}";
     }
 
     public string TagAsString(TagID tagID){
@@ -295,46 +295,46 @@ public class Archive {
                 return [(TaxonymID)context];
             }
         }
-		
-		var target = qualifiedNameParts.First();
+        
+        var target = qualifiedNameParts.First();
 
         // replace wild cards with regex
         target = target.Replace("*", ".*");
 
-		List<TaxonymID> layerIDs = [];
-		List<(TaxonymID taxonymID, string alias)> layerAliases = [];
-		
-		var seedID = context is null ? (TaxonymID)1 : (TaxonymID)context;
-		var seedAlias = TaxonymGet(seedID)?.canonicalAlias;
-		layerIDs.Add(seedID);
-		layerAliases.Add((seedID, seedAlias));
+        List<TaxonymID> layerIDs = [];
+        List<(TaxonymID taxonymID, string alias)> layerAliases = [];
+        
+        var seedID = context is null ? (TaxonymID)1 : (TaxonymID)context;
+        var seedAlias = TaxonymGet(seedID)?.canonAlias;
+        layerIDs.Add(seedID);
+        layerAliases.Add((seedID, seedAlias));
 
         var taxonymIDs = new HashSet<TaxonymID>();
 
-		while(layerIDs.Count() > 0){
-			foreach(var (taxonymID, alias) in layerAliases){
-				if(Regex.IsMatch(alias, target)){
-					if(qualifiedNameParts.Count() == 1){
+        while(layerIDs.Count() > 0){
+            foreach(var (taxonymID, alias) in layerAliases){
+                if(Regex.IsMatch(alias, target)){
+                    if(qualifiedNameParts.Count() == 1){
                         taxonymIDs.Add(taxonymID);
-					} else {
-						taxonymIDs.UnionWith(TaxonymFindFuzzy(qualifiedNameParts.Skip(1), taxonymID));
-					}
-				}
-			}
+                    } else {
+                        taxonymIDs.UnionWith(TaxonymFindFuzzy(qualifiedNameParts.Skip(1), taxonymID));
+                    }
+                }
+            }
 
-			var idCount = layerIDs.Count();
-			var idList = String.Join(',', layerIDs.Take(idCount));
+            var idCount = layerIDs.Count();
+            var idList = String.Join(',', layerIDs.Take(idCount));
             for(int i = 0; i < idCount; i++){
                 var id = layerIDs[i];
                 layerIDs.AddRange(TaxonymGetChildren(id));
             }
-			layerIDs.RemoveRange(0, idCount);
+            layerIDs.RemoveRange(0, idCount);
             
             layerAliases.Clear();
             foreach(var id in layerIDs){
                 layerAliases.AddRange(TaxonymGetAliases(id).Select((alias) => (id, alias)));
             }
-		}
+        }
 
         return taxonymIDs.ToArray();
     }
@@ -344,8 +344,8 @@ public class Archive {
     }
     
     public TaxonymID? TaxonymFind(string qualifiedName, TaxonymID? context = null){
-		return TaxonymFind(qualifiedName.Split(':'), context);
-	}
+        return TaxonymFind(qualifiedName.Split(':'), context);
+    }
 
     public TaxonymID[] TaxonymGetChildren(TaxonymID taxonymID){
         db.EnsureConnected();
@@ -365,8 +365,8 @@ public class Archive {
     public TaxonymID? TaxonymCreate(TaxonymID parentID, string name){
         db.EnsureConnected();
         var taxonymID = db.InsertTaxonym(new Taxonym(){
-            canonicalParentID = parentID,
-            canonicalAlias = name
+            canonParentID = parentID,
+            canonAlias = name
         });
         return taxonymID;
     }

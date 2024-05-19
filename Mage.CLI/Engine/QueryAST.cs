@@ -142,8 +142,8 @@ public class Query {
         var documents = new List<DocumentID>();
 
         var com = db.CreateCommand();
-		com.CommandText = @$"select distinct id from ({root.ToSQL(archive)});";
-		
+        com.CommandText = @$"select distinct id from ({root.ToSQL(archive)});";
+        
         Console.WriteLine("SQL: " + com.CommandText);
 
         var reader = com.ExecuteReader();
