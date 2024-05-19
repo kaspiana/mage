@@ -1,123 +1,115 @@
-create table Document (
-    ID integer not null primary key autoincrement,
-    Hash text not null,
-    FileName text not null,
-    Extension text not null,
-    IngestTimestamp integer not null,
-    Comment text
+create table document (
+    id integer not null primary key autoincrement,
+    hash text not null,
+    file_name text not null,
+    extension text not null,
+    ingested_at integer not null,
+    comment text
 );
 
-create table TaxonymAlias (
-	TaxonymID integer not null,
-	Alias text not null,
+create table taxonym_alias (
+	taxonym_id integer not null,
+	alias text not null,
 
-	foreign key (TaxonymID) references Taxonym(ID)
+	foreign key (taxonym_id) references taxonym(id)
 		deferrable initially deferred,
-	primary key (TaxonymID, Alias)
+	primary key (taxonym_id, alias)
 );
 
-create table TaxonymParent (
-	ChildID integer not null,
-	ParentID integer not null,
+create table taxonym_parent (
+	child_id integer not null,
+	parent_id integer not null,
 
-	foreign key (ChildID) references Taxonym(ID)
+	foreign key (child_id) references taxonym(id)
         deferrable initially deferred,
-	foreign key (ParentID) references Taxonym(ID)
+	foreign key (parent_id) references taxonym(id)
         deferrable initially deferred,
-	primary key (ChildID, ParentID)
+	primary key (child_id, parent_id)
 );
 
-create table Taxonym (
-	ID integer not null primary key autoincrement,
-	CanonicalParentID integer,
-	CanonicalAlias text not null,
+create table taxonym (
+	id integer not null primary key autoincrement,
+	canon_parent_id integer,
+	canon_alias text not null,
 
-	foreign key (CanonicalParentID) references Taxonym(ID),
-	foreign key (ID, CanonicalAlias) references TaxonymAlias(TaxonymID, Alias)
+	foreign key (canon_parent_id) references taxonym(id),
+	foreign key (id, canon_alias) references taxonym_alias(taxonym_id, alias)
 		deferrable initially deferred,
-	foreign key (ID, CanonicalParentID) references TaxonymParent(ChildID, ParentID)
+	foreign key (id, canon_parent_id) references taxonym_parent(child_id, parent_id)
 		deferrable initially deferred,
-	unique(CanonicalParentID, CanonicalAlias)
+	unique(canon_parent_id, canon_alias)
 );
 
 begin transaction;
-insert into TaxonymAlias (TaxonymID, Alias) values (1, "");
-insert into Taxonym (CanonicalParentID, CanonicalAlias) values (null, ""); -- root taxonym
+insert into taxonym_alias (taxonym_id, alias) values (1, "");
+insert into taxonym (canon_parent_id, canon_alias) values (null, ""); -- root taxonym
 commit;
 
 
 
 
 
-create table Tag (
-	ID integer not null primary key autoincrement,
-	TaxonymID integer not null,
+create table tag (
+	id integer not null primary key autoincrement,
+	taxonym_id integer not null,
 
-	foreign key (TaxonymID) references Taxonym(ID),
-	unique (TaxonymID)
+	foreign key (taxonym_id) references taxonym(id),
+	unique (taxonym_id)
 );
 
-create table DocumentTag (
-	DocumentID integer not null,
-   TagID integer not null,
+create table document_tag (
+	document_id integer not null,
+    tag_id integer not null,
 	
-	foreign key (DocumentID) references Document(ID),
-	foreign key (TagID) references Tag(ID),
-	primary key (DocumentID, TagID)
+	foreign key (document_id) references document(id),
+	foreign key (tag_id) references tag(id),
+	primary key (document_id, tag_id)
 );
 
-create table TagParameterisation (
-	TagID integer not null primary key,
+create table tag_parameter (
+	tag_id integer not null primary key,
 
-	foreign key (TagID) references Tag(ID)
+	foreign key (tag_id) references tag(id)
 );
 
-create table DocumentTagParameter (
-	DocumentID integer not null,
-   TagID integer not null,
-	Value integer not null,
+create table document_tag_parameter (
+	document_id integer not null,
+    tag_id integer not null,
+	value integer not null,
 
-	foreign key (DocumentID, TagID) references DocumentTag(DocumentID, TagID),
-	foreign key (TagID) references TagParameterisation(TagID),
-	primary key (DocumentID, TagID)
+	foreign key (document_id, tag_id) references document_tag(document_id, tag_id),
+	foreign key (tag_id) references tag_parameter(tag_id),
+	primary key (document_id, tag_id)
 );
 
-
-
-create table TagImplication (
-	AntecedentID integer not null,
-	ConsequentID integer not null,
+create table tag_implication (
+	antecedent_id integer not null,
+	consequent_id integer not null,
 	
-	foreign key (AntecedentID) references Tag(ID),
-	foreign key (ConsequentID) references Tag(ID),
-	primary key (AntecedentID, ConsequentID)
+	foreign key (antecedent_id) references tag(id),
+	foreign key (consequent_id) references tag(id),
+	primary key (antecedent_id, consequent_id)
 );
 
-create table Series (
-	ID integer not null primary key autoincrement,
-	Title text,
-	Comment text
+create table collection (
+	id integer not null primary key autoincrement,
+	title text,
+	comment text
 );
 
-create table SeriesDocument (
-	SeriesID integer not null,
-	DocumentID integer not null,
+create table collection_document (
+	collection_id integer not null,
+	document_id integer not null,
 
-	foreign key (SeriesID) references Series(ID),
-	foreign key (DocumentID) references Document(ID),
-	primary key (SeriesID, DocumentID)
+	foreign key (collection_id) references collection(id),
+	foreign key (document_id) references document(id),
+	primary key (collection_id, document_id)
 );
 
-create table Source (
-	ID integer not null primary key autoincrement,
-	URL text not null
-);
-
-create table DocumentSource (
-	DocumentID integer not null,
-	SourceID integer not null, 
+create table document_source (
+	document_id integer not null,
+	url text not null, 
 	
-	foreign key (DocumentID) references Document(ID),
-	foreign key (SourceID) references Source(ID),
-	primary key (SourceID, DocumentID)
+	foreign key (document_id) references document(id),
+	primary key (document_id, url)
 );

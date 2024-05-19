@@ -16,11 +16,11 @@ public static partial class CLICommands {
 
             foreach(var tag in tags){
                 var taxonym = ctx.archive.TaxonymGet((TaxonymID)tag?.taxonymID);
-                if(taxonym?.canonicalParentID == Archive.ROOT_TAXONYM_ID){
-                    Console.WriteLine($" * /{tag?.id}: {taxonym?.canonicalAlias}");
+                if(taxonym?.canonParentID == Archive.ROOT_TAXONYM_ID){
+                    Console.WriteLine($" * /{tag?.id}: {taxonym?.canonAlias}");
                 } else {
-                    var parentTaxonymName = ctx.archive.TaxonymGet((TaxonymID)taxonym?.canonicalParentID)?.canonicalAlias;
-                    Console.WriteLine($" * /{tag?.id}: {parentTaxonymName}:{taxonym?.canonicalAlias}");
+                    var parentTaxonymName = ctx.archive.TaxonymGet((TaxonymID)taxonym?.canonParentID)?.canonAlias;
+                    Console.WriteLine($" * /{tag?.id}: {parentTaxonymName}:{taxonym?.canonAlias}");
                 }
             }
         });
