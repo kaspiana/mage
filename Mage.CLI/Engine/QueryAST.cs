@@ -24,7 +24,7 @@ public class QueryNodeNone : QueryNode {
 
     public override string ToSQL(Archive archive)
     {
-        return $"select DocumentID, TagID from DocumentTag where 1=0";
+        return $"select ID from Document where 1=0";
     }
 }
 public class QueryNodeTagExplicit : QueryNode {
@@ -37,7 +37,7 @@ public class QueryNodeTagExplicit : QueryNode {
 
     public override string ToSQL(Archive archive)
     {
-        return $"select DocumentID, TagID from DocumentTag where TagID = {tagID}";
+        return $"select DocumentID ID from DocumentTag where TagID = {tagID}";
     }
 }
 public class QueryNodeTag : QueryNode {
@@ -69,7 +69,7 @@ public class QueryNodeNegation : QueryNode {
     public override string ToSQL(Archive archive){
         var a = Query.tempTableIndex++;
         var b = Query.tempTableIndex++;
-        return $"{Query.documentTagNormalised} where DocumentID not in (select DocumentID from ({arg.ToSQL(archive)}))";
+        return $"{Query.documentTagNormalised} where ID not in (select ID from ({arg.ToSQL(archive)}))";
     }
 }
 public abstract class QueryNodeJunction : QueryNode {
@@ -100,7 +100,7 @@ public class QueryNodeConjunction : QueryNodeJunction {
         }
         var a = Query.tempTableIndex++;
         var b = Query.tempTableIndex++;
-        var sql = $"select t{a}.DocumentID, t{b}.TagID from ({lhs}) t{a} inner join ({rhs}) t{b} on t{a}.DocumentID = t{b}.DocumentID";
+        var sql = $"select t{a}.ID from ({lhs}) t{a} inner join ({rhs}) t{b} on t{a}.ID = t{b}.ID";
         return sql;
     }
 }
@@ -119,7 +119,7 @@ public class QueryNodeDisjunction : QueryNodeJunction {
 public class Query {
     public QueryNode root;
     public static int tempTableIndex = 0;
-    public static string documentTagNormalised = "select DocumentID, TagID from (select DocumentID, TagID from DocumentTag union select ID DocumentID, null from Document)";
+    public static string documentTagNormalised = "select ID from Document";
 
     public DocumentID[] GetResults(Archive archive){
 
@@ -129,7 +129,7 @@ public class Query {
         var documents = new List<DocumentID>();
 
         var com = db.CreateCommand();
-		com.CommandText = @$"select distinct DocumentID from ({root.ToSQL(archive)});";
+		com.CommandText = @$"select distinct ID from ({root.ToSQL(archive)});";
 		
         Console.WriteLine("SQL: " + com.CommandText);
 
