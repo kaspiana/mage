@@ -24,7 +24,7 @@ public class QueryNodeNone : QueryNode {
 
     public override string ToSQL(Archive archive)
     {
-        return $"select ID from Document where 1=0";
+        return $"select id from document where 1=0";
     }
 }
 public class QueryNodeTagExplicit : QueryNode {
@@ -37,7 +37,7 @@ public class QueryNodeTagExplicit : QueryNode {
 
     public override string ToSQL(Archive archive)
     {
-        return $"select DocumentID ID from DocumentTag where TagID = {tagID}";
+        return $"select document_id id from document_tag where tag_id = {tagID}";
     }
 }
 public class QueryNodeTag : QueryNode {
@@ -82,7 +82,7 @@ public class QueryNodeNegation : QueryNode {
     public override string ToSQL(Archive archive){
         var a = Query.tempTableIndex++;
         var b = Query.tempTableIndex++;
-        return $"{Query.documentTagNormalised} where ID not in (select ID from ({arg.ToSQL(archive)}))";
+        return $"{Query.documentTagNormalised} where id not in (select id from ({arg.ToSQL(archive)}))";
     }
 }
 public abstract class QueryNodeJunction : QueryNode {
@@ -132,7 +132,7 @@ public class QueryNodeDisjunction : QueryNodeJunction {
 public class Query {
     public QueryNode root;
     public static int tempTableIndex = 0;
-    public static string documentTagNormalised = "select ID from Document";
+    public static string documentTagNormalised = "select id from document";
 
     public DocumentID[] GetResults(Archive archive){
 
@@ -142,7 +142,7 @@ public class Query {
         var documents = new List<DocumentID>();
 
         var com = db.CreateCommand();
-		com.CommandText = @$"select distinct ID from ({root.ToSQL(archive)});";
+		com.CommandText = @$"select distinct id from ({root.ToSQL(archive)});";
 		
         Console.WriteLine("SQL: " + com.CommandText);
 
