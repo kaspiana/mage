@@ -13,7 +13,7 @@ public class QueryNodeAll : QueryNode {
     }
 
     public override string ToSQL(Archive archive){
-        return $"select DocumentID, TagID from {Query.documentTagNormalised}";
+        return $"{Query.documentTagNormalised}";
     }
 }
 public class QueryNodeNone : QueryNode {
@@ -69,7 +69,7 @@ public class QueryNodeNegation : QueryNode {
     public override string ToSQL(Archive archive){
         var a = Query.tempTableIndex++;
         var b = Query.tempTableIndex++;
-        return $"select DocumentID, TagID from {Query.documentTagNormalised} where DocumentID not in (select DocumentID from ({arg.ToSQL(archive)}))";
+        return $"{Query.documentTagNormalised} where DocumentID not in (select DocumentID from ({arg.ToSQL(archive)}))";
     }
 }
 public abstract class QueryNodeJunction : QueryNode {
@@ -119,7 +119,7 @@ public class QueryNodeDisjunction : QueryNodeJunction {
 public class Query {
     public QueryNode root;
     public static int tempTableIndex = 0;
-    public static string documentTagNormalised = "(select DocumentID, TagID from (select DocumentID, TagID from DocumentTag union select ID DocumentID, null from Document))";
+    public static string documentTagNormalised = "select DocumentID, TagID from (select DocumentID, TagID from DocumentTag union select ID DocumentID, null from Document)";
 
     public DocumentID[] GetResults(Archive archive){
 
@@ -131,7 +131,7 @@ public class Query {
         var com = db.CreateCommand();
 		com.CommandText = @$"select distinct DocumentID from ({root.ToSQL(archive)});";
 		
-        //Console.WriteLine("SQL: " + com.CommandText);
+        Console.WriteLine("SQL: " + com.CommandText);
 
         var reader = com.ExecuteReader();
         while(reader.Read()){
