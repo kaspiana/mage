@@ -6,7 +6,7 @@ public static class QueryParser {
 
     static readonly Parser<string> Tag =
         from head in Sprache.Parse.Lower.Once()
-        from tail in Sprache.Parse.LetterOrDigit.XOr(Sprache.Parse.Char('_')).Many()
+        from tail in Sprache.Parse.LetterOrDigit.XOr(Sprache.Parse.Char('_')).XOr(Sprache.Parse.Char(':')).Many()
         select new string(head.Concat(tail).ToArray());
 
     static readonly Parser<AST.QueryNodeTag> NodeTag =
