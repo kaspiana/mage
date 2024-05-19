@@ -50,12 +50,25 @@ public class QueryNodeTag : QueryNode {
 
     public override string ToSQL(Archive archive)
     {
-        var tagID = (TagID)archive.TagFind(tag);
-        var antecedents = archive.TagGetAntecedents(tagID);
-        return (new QueryNodeDisjunction(){
-            args = antecedents.Prepend(tagID).Select((id) 
-                => new QueryNodeTagExplicit(){tagID = id})
-        }).ToSQL(archive);
+        if(tag.Contains('*')){
+
+            IEnumerable<TagID> tagIDs = archive.TagFindFuzzy(tag);
+            var antecedents = tagIDs.Select((tagID) => archive.TagGetAntecedents(tagID).Prepend(tagID)).SelectMany(x => x);
+            return (new QueryNodeDisjunction(){
+                args = antecedents.Select((id) 
+                    => new QueryNodeTagExplicit(){tagID = id})
+            }).ToSQL(archive);
+
+        } else {
+
+            var tagID = (TagID)archive.TagFind(tag);
+            var antecedents = archive.TagGetAntecedents(tagID);
+            return (new QueryNodeDisjunction(){
+                args = antecedents.Prepend(tagID).Select((id) 
+                    => new QueryNodeTagExplicit(){tagID = id})
+            }).ToSQL(archive);
+
+        }
     }
 }
 public class QueryNodeNegation : QueryNode {

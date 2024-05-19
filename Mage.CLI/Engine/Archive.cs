@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using Mage.IO;
 using System.Text;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 namespace Mage.Engine;
 
@@ -207,6 +208,11 @@ public class Archive {
         return db.ReadTagID((TaxonymID)TaxonymFind(qualifiedName)!);
     }
 
+    public TagID[] TagFindFuzzy(string qualifiedNameFuzzy){
+        db.EnsureConnected();
+        return TaxonymFindFuzzy(qualifiedNameFuzzy).Select(id => (TagID)db.ReadTagID(id)).ToArray();
+    }
+
     public TagID? TagCreate(TaxonymID taxonymID){
         db.EnsureConnected();
         return db.InsertTag(new Tag(){ taxonymID = taxonymID });
@@ -262,11 +268,22 @@ public class Archive {
     }
 
     public TaxonymID? TaxonymFind(IEnumerable<string> qualifiedNameParts, TaxonymID? context = null){
-        
-        if(qualifiedNameParts.Count() == 0)
-			return context is null ? (TaxonymID)1 : (TaxonymID)context;
+        return TaxonymFindFuzzy(qualifiedNameParts, context).First();
+    }
+
+    public TaxonymID[] TaxonymFindFuzzy(IEnumerable<string> qualifiedNameParts, TaxonymID? context = null){
+        if(qualifiedNameParts.Count() == 0){
+            if(context is null){
+                return [(TaxonymID)1];
+            } else {
+                return [(TaxonymID)context];
+            }
+        }
 		
 		var target = qualifiedNameParts.First();
+
+        // replace wild cards with regex
+        target = target.Replace("*", ".*");
 
 		List<TaxonymID> layerIDs = [];
 		List<(TaxonymID taxonymID, string alias)> layerAliases = [];
@@ -276,13 +293,15 @@ public class Archive {
 		layerIDs.Add(seedID);
 		layerAliases.Add((seedID, seedAlias));
 
+        var taxonymIDs = new HashSet<TaxonymID>();
+
 		while(layerIDs.Count() > 0){
 			foreach(var (taxonymID, alias) in layerAliases){
-				if(alias == target){
+				if(Regex.IsMatch(alias, target)){
 					if(qualifiedNameParts.Count() == 1){
-						return taxonymID;
+                        taxonymIDs.Add(taxonymID);
 					} else {
-						return TaxonymFind(qualifiedNameParts.Skip(1), taxonymID);
+						taxonymIDs.UnionWith(TaxonymFindFuzzy(qualifiedNameParts.Skip(1), taxonymID));
 					}
 				}
 			}
@@ -301,7 +320,11 @@ public class Archive {
             }
 		}
 
-        return null;
+        return taxonymIDs.ToArray();
+    }
+
+    public TaxonymID[] TaxonymFindFuzzy(string qualifiedNameFuzzy, TaxonymID? context = null){
+        return TaxonymFindFuzzy(qualifiedNameFuzzy.Split(':'), context);
     }
     
     public TaxonymID? TaxonymFind(string qualifiedName, TaxonymID? context = null){
