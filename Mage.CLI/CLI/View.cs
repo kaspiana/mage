@@ -31,9 +31,9 @@ public static partial class CLICommands {
             for(int i = 0; i < view.documents.Count(); i++){
                 var documentID = view.documents[i];
                 if(documentID is null){
-                    Console.WriteLine($"\t/{i}: <missing>");
+                    Console.WriteLine($" * /{i}: <missing>");
                 } else {
-                    Console.WriteLine($"\t/{i}: {ctx.archive.GetDocumentHash((DocumentID)documentID)}");
+                    Console.WriteLine($" * /{i}: {ctx.archive.GetDocumentHash((DocumentID)documentID)}");
                 }
             }
 

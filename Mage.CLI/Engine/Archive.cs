@@ -203,6 +203,22 @@ public class Archive {
         return db.ReadTag(tagID);
     }
 
+    public string TaxonymAsString(TaxonymID taxonymID){
+        var taxonym = TaxonymGet(taxonymID!);
+        if(taxonym?.id == ROOT_TAXONYM_ID)
+            return "<root>";
+        var parentTaxonym = TaxonymGet((TaxonymID)taxonym?.canonicalParentID!);
+        if(parentTaxonym is not null)
+            return $"{parentTaxonym?.canonicalAlias}:{taxonym?.canonicalAlias}";
+        else
+            return $"{taxonym?.canonicalAlias}";
+    }
+
+    public string TagAsString(TagID tagID){
+        var tag = TagGet(tagID);
+        return TaxonymAsString((TaxonymID)tag?.taxonymID);
+    }
+
     public TagID? TagFind(string qualifiedName){
         db.EnsureConnected();
         return db.ReadTagID((TaxonymID)TaxonymFind(qualifiedName)!);

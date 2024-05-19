@@ -38,19 +38,19 @@ public static partial class CLICommands {
                 foreach(var parentID in parentIDs){
                     var parent = ctx.archive.TaxonymGet(parentID);
                     if(parentID == taxonym?.canonicalParentID){
-                        Console.WriteLine($"\t * {parent?.canonicalAlias} (/{parentID})");
+                        Console.WriteLine($"   * {parent?.canonicalAlias} (/{parentID})");
                     } else {
-                        Console.WriteLine($"\t   {parent?.canonicalAlias} (/{parentID})");
+                        Console.WriteLine($"     {parent?.canonicalAlias} (/{parentID})");
                     }
                 }
 
-                Console.WriteLine($"\tAliases:");
+                Console.WriteLine($"  Aliases:");
                 var aliases = ctx.archive.TaxonymGetAliases(taxonymID);
                 foreach(var alias in aliases){
                     if(alias == taxonym?.canonicalAlias){
-                        Console.WriteLine($"\t * {alias}");
+                        Console.WriteLine($"   * {alias}");
                     } else {
-                        Console.WriteLine($"\t   {alias}");
+                        Console.WriteLine($"     {alias}");
                     }
                 }
             }
@@ -70,9 +70,9 @@ public static partial class CLICommands {
 
             foreach(var alias in aliases){
                 if(alias == taxonym?.canonicalAlias){
-                    Console.WriteLine($"* {alias}");
+                    Console.WriteLine($" * {alias}");
                 } else {
-                    Console.WriteLine($"  {alias}");
+                    Console.WriteLine($"   {alias}");
                 }
             }
         }, taxonymRefArgument);
@@ -131,9 +131,9 @@ public static partial class CLICommands {
 
             foreach(var taxonym in children){
                 if(taxonym?.id == Archive.ROOT_TAXONYM_ID){
-                    Console.WriteLine($"/{taxonym?.id}: <root>");
+                    Console.WriteLine($" * /{taxonym?.id}: <root>");
                 } else {
-                    Console.WriteLine($"/{taxonym?.id}: /{taxonym?.canonicalParentID}:{taxonym?.canonicalAlias}");
+                    Console.WriteLine($" * /{taxonym?.id}: /{taxonym?.canonicalParentID}:{taxonym?.canonicalAlias}");
                 }
             }
 
@@ -154,9 +154,9 @@ public static partial class CLICommands {
 
             foreach(var taxonym in parents){
                 if(taxonym?.id == Archive.ROOT_TAXONYM_ID){
-                    Console.WriteLine($"/{taxonym?.id}: <root>");
+                    Console.WriteLine($" * /{taxonym?.id}: <root>");
                 } else {
-                    Console.WriteLine($"/{taxonym?.id}: /{taxonym?.canonicalParentID}:{taxonym?.canonicalAlias}");
+                    Console.WriteLine($" * /{taxonym?.id}: /{taxonym?.canonicalParentID}:{taxonym?.canonicalAlias}");
                 }
             }
 

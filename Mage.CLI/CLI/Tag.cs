@@ -28,11 +28,11 @@ public static partial class CLICommands {
             Console.WriteLine($"tag /{tagID}");
 
             if(parentTaxonym is not null)
-                Console.WriteLine($"\tTaxonym: {parentTaxonym?.canonicalAlias}:{taxonym?.canonicalAlias} (/{taxonym?.id})");
+                Console.WriteLine($"  Taxonym: {parentTaxonym?.canonicalAlias}:{taxonym?.canonicalAlias} (/{taxonym?.id})");
             else
-                Console.WriteLine($"\tTaxonym: {taxonym?.canonicalAlias} (/{taxonym?.id})");
+                Console.WriteLine($"  Taxonym: {taxonym?.canonicalAlias} (/{taxonym?.id})");
 
-            Console.WriteLine($"\tDocuments: {ctx.archive.db.CountTagDocuments(tagID)}");
+            Console.WriteLine($"  Document count: {ctx.archive.db.CountTagDocuments(tagID)}");
 
         }, tagRefArgument);
 
@@ -56,9 +56,9 @@ public static partial class CLICommands {
                 var parentTaxonym = ctx.archive?.TaxonymGet((TaxonymID)taxonym?.canonicalParentID!);
 
                 if(parentTaxonym is not null)
-                    Console.WriteLine($"* {parentTaxonym?.canonicalAlias}:{taxonym?.canonicalAlias} (/{taxonym?.id})");
+                    Console.WriteLine($" * {parentTaxonym?.canonicalAlias}:{taxonym?.canonicalAlias} (/{taxonym?.id})");
                 else
-                    Console.WriteLine($"* {taxonym?.canonicalAlias} (/{taxonym?.id})");
+                    Console.WriteLine($" * {taxonym?.canonicalAlias} (/{taxonym?.id})");
             }
 
         }, tagRefArgument);
@@ -82,9 +82,9 @@ public static partial class CLICommands {
                 var parentTaxonym = ctx.archive?.TaxonymGet((TaxonymID)taxonym?.canonicalParentID!);
 
                 if(parentTaxonym is not null)
-                    Console.WriteLine($"* {parentTaxonym?.canonicalAlias}:{taxonym?.canonicalAlias} (/{taxonym?.id})");
+                    Console.WriteLine($" * {parentTaxonym?.canonicalAlias}:{taxonym?.canonicalAlias} (/{taxonym?.id})");
                 else
-                    Console.WriteLine($"* {taxonym?.canonicalAlias} (/{taxonym?.id})");
+                    Console.WriteLine($" * {taxonym?.canonicalAlias} (/{taxonym?.id})");
             }
 
         }, tagRefArgument);

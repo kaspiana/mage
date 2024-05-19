@@ -11,7 +11,7 @@ public static partial class CLICommands {
         com.SetHandler(() => {
             var views = ctx.archive.ViewsGetAll();
             foreach(var view in views){
-                Console.WriteLine($"* {view}");
+                Console.WriteLine($" * {view}");
             }
         });
         
