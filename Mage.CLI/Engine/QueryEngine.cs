@@ -5,9 +5,7 @@ namespace Mage.Engine;
 public static class QueryParser {
 
     static readonly Parser<string> Tag =
-        from head in Sprache.Parse.Lower.Once()
-        from tail in Sprache.Parse.LetterOrDigit.XOr(Sprache.Parse.Char('_')).XOr(Sprache.Parse.Char(':')).Many()
-        select new string(head.Concat(tail).ToArray());
+        Sprache.Parse.LetterOrDigit.XOr(Sprache.Parse.Chars('_', ':', '*', '!')).Many().Text();
 
     static readonly Parser<AST.QueryNodeTag> NodeTag =
         from tag in Tag
