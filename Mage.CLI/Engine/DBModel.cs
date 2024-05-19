@@ -379,6 +379,24 @@ public partial class DBModel {
         return tagIDs.ToArray();
     }
 
+    public int CountTagDocuments(TagID tagID, SqliteTransaction? transaction = null){
+        var com = db.CreateCommand();
+        com.CommandText = @"
+            select count(DocumentID)
+            from DocumentTag
+            where TagID = @TagID;
+        ";
+        com.Transaction = transaction;
+        com.Parameters.AddWithValue("@TagID", tagID);
+
+        var reader = com.ExecuteReader();
+        if(reader.Read()){
+            return reader.GetInt32(0);
+        }
+
+        return 0;
+    }
+
 }
 
 // Insertion

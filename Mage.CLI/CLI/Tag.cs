@@ -32,7 +32,7 @@ public static partial class CLICommands {
             else
                 Console.WriteLine($"\tTaxonym: {taxonym?.canonicalAlias} (/{taxonym?.id})");
 
-            
+            Console.WriteLine($"\tDocuments: {ctx.archive.db.CountTagDocuments(tagID)}");
 
         }, tagRefArgument);
 
