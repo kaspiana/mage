@@ -25,6 +25,27 @@ public static class QueryParser {
             };
     }
 
+    static AST.QueryNodeJunction JunctionFlatten(AST.QueryNodeJunction node){
+        if(node is AST.QueryNodeDisjunction){
+            node.args = node.args.SelectMany(x => {
+                if(x is AST.QueryNodeDisjunction){
+                    return JunctionFlatten((AST.QueryNodeDisjunction)x).args;
+                } else {
+                    return [x];
+                }
+            });
+        } else if(node is AST.QueryNodeConjunction){
+            node.args = node.args.SelectMany(x => {
+                if(x is AST.QueryNodeConjunction){
+                    return JunctionFlatten((AST.QueryNodeConjunction)x).args;
+                } else {
+                    return [x];
+                }
+            });
+        }
+        return node;
+    }
+
     static readonly Parser<AST.QueryNodeJunction> NodeJunction =
         from inner in Sprache.Parse.ChainOperator(
             Sprache.Parse.String("OR").Text().Token()
@@ -33,7 +54,7 @@ public static class QueryParser {
             Sprache.Parse.Ref(()=>InnerNode),
             (op, lhs, rhs) => {
                 if(op == "OR"){
-                    return (AST.QueryNode)(new AST.QueryNodeDisjunction(){ 
+                    return (AST.QueryNode)(new AST.QueryNodeDisjunction(){
                         args = [lhs, rhs]
                     });
                 } else {
@@ -43,7 +64,7 @@ public static class QueryParser {
                 }
             }
         )
-        select NodeToJunction(inner);
+        select JunctionFlatten(NodeToJunction(inner));
 
     static readonly Parser<AST.QueryNode> Group =
         from lparen in Sprache.Parse.Char('(').Token()

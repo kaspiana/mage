@@ -50,25 +50,21 @@ public class QueryNodeTag : QueryNode {
 
     public override string ToSQL(Archive archive)
     {
+        IEnumerable<TagID> antecedents;
+
         if(tag.Contains('*')){
 
             IEnumerable<TagID> tagIDs = archive.TagFindFuzzy(tag);
-            var antecedents = tagIDs.Select((tagID) => archive.TagGetAntecedents(tagID).Prepend(tagID)).SelectMany(x => x);
-            return (new QueryNodeDisjunction(){
-                args = antecedents.Select((id) 
-                    => new QueryNodeTagExplicit(){tagID = id})
-            }).ToSQL(archive);
+            antecedents = tagIDs.Select((tagID) => archive.TagGetAntecedents(tagID).Prepend(tagID)).SelectMany(x => x);
 
         } else {
 
             var tagID = (TagID)archive.TagFind(tag);
-            var antecedents = archive.TagGetAntecedents(tagID);
-            return (new QueryNodeDisjunction(){
-                args = antecedents.Prepend(tagID).Select((id) 
-                    => new QueryNodeTagExplicit(){tagID = id})
-            }).ToSQL(archive);
+            antecedents = archive.TagGetAntecedents(tagID).Prepend(tagID);
 
         }
+
+        return $"select document_id id from document_tag where tag_id in ({string.Join(", ", antecedents)})";
     }
 }
 public class QueryNodeNegation : QueryNode {
@@ -97,24 +93,23 @@ public class QueryNodeConjunction : QueryNodeJunction {
 
     public override string ToSQL(Archive archive)
     {
-        string? lhs;
-        string? rhs;
-
+        if(args.Count() == 0){
+            return new QueryNodeNone().ToSQL(archive);
+        }
         if(args.Count() == 1){
             return args.First().ToSQL(archive);
-        } else if(args.Count() == 2){
-            lhs = args.First().ToSQL(archive);
-            rhs = args.Skip(1).First().ToSQL(archive);
         } else {
-            lhs = args.First().ToSQL(archive);
-            rhs = (new QueryNodeConjunction(){
-                args = args.Skip(1)
-            }).ToSQL(archive);
+            var head = args.First();
+            var tail = args.Skip(1);
+            var i = Query.tempTableIndex++;
+            var j = Query.tempTableIndex++;
+
+            return $"select t{i}.id from ({head.ToSQL(archive)}) t{i} {string.Join(" ", tail.Select((x) => {
+                var s = $"inner join ({x.ToSQL(archive)}) t{j} on t{i}.id = t{j}.id";
+                j = Query.tempTableIndex++;
+                return s;
+            }))}";
         }
-        var a = Query.tempTableIndex++;
-        var b = Query.tempTableIndex++;
-        var sql = $"select t{a}.ID from ({lhs}) t{a} inner join ({rhs}) t{b} on t{a}.ID = t{b}.ID";
-        return sql;
     }
 }
 public class QueryNodeDisjunction : QueryNodeJunction {
