@@ -7,4 +7,5 @@ public struct Document {
     public string extension;
     public DateTime ingestedAt;
     public string? comment;
+    public bool isDeleted;
 }

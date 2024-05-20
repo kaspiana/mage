@@ -90,4 +90,10 @@ public static class DBCommands {
 
     }
 
+    public static class Update {
+
+        public const string DocumentIsDeletedWhereID = "update document set is_deleted = @is_deleted where id = @id";
+
+    }
+
 }

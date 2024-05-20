@@ -9,7 +9,8 @@ create table document (
     file_name       text not null,
     extension       text not null,
     ingested_at     integer not null,
-    comment         text
+    comment         text,
+    is_deleted      integer not null default 0
 );
 
 ---
