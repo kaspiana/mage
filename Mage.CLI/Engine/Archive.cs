@@ -115,7 +115,7 @@ public class Archive {
     public const string DB_FILE_PATH = "db.sqlite";
 
     public static readonly SemanticVersion VERSION = new SemanticVersion(){
-        releaseType = 0,
+        releaseType = -1,
         major = 8,
         minor = 0,
         patch = 0
