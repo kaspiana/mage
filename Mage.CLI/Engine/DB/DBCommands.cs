@@ -6,8 +6,8 @@ public static class DBCommands {
 
     public static class Select {
 
-        public const string Document = "select * from document";
-        public static string DocumentIDClause(string clause) => $"select id from document {clause}";
+        public static string Document(bool public_ = true) => $"select * from {(public_ ? "public_" : "")}document";
+        public static string DocumentIDClause(string clause, bool public_ = true) => $"select id from {(public_ ? "public_" : "")}document {clause}";
         public const string DocumentWherePK = "select * from document where id = @id";
         public const string DocumentWhereHash = "select * from document where hash = @hash";
         public const string DocumentHashWhereID = "select hash from document where id = @id";
@@ -30,15 +30,15 @@ public static class DBCommands {
         public const string TagAntecedentIDWhereID = "select antecedent_id from tag_implication where consequent_id = @consequent_id";
         public const string TagConsequentIDWhereID = "select consequent_id from tag_implication where antecedent_id = @antecedent_id";
 
-        public const string DocumentTag = "select * from document_tag";
+        public static string DocumentTag(bool public_ = true) => $"select * from {(public_ ? "public_" : "")}document_tag";
         public const string DocumentTagIDWhereDocumentID = "select tag_id from document_tag where document_id = @document_id";
-        public const string TagDocumentIDWhereTagID = "select document_id from document_tag where tag_id = @tag_id";
+        public static string TagDocumentIDWhereTagID(bool public_ = true) => $"select document_id from {(public_ ? "public_" : "")}document_tag where tag_id = @tag_id";
     
     }
 
     public static class Count {
 
-        public const string DocumentTagWhereTagID = "select count(*) from document_tag where tag_id = @tag_id";
+        public static string DocumentTagWhereTagID(bool public_ = true) => $"select count(*) from {(public_ ? "public_" : "")}document_tag where tag_id = @tag_id";
         public const string DocumentTagWhereDocumentID = "select count(*) from document_tag where document_id = @document_id";
    
     }
@@ -87,6 +87,12 @@ public static class DBCommands {
         public const string DocumentTagWhereDocumentID = "delete from document_tag where document_id = @document_id";
         public const string DocumentTagWhereTagID = "delete from document_tag where tag_id = @tag_id";
 
+
+    }
+
+    public static class Update {
+
+        public const string DocumentIsDeletedWhereID = "update document set is_deleted = @is_deleted where id = @id";
 
     }
 

@@ -25,6 +25,8 @@ public static partial class CLICommands {
 
         com.SetHandler((docRef) => {
             var documentID = (DocumentID)ObjectRef.ResolveDocument(ctx.archive, docRef)!;
+            var documentHash = ctx.archive.GetDocumentHash(documentID);
+            Console.WriteLine($"document {documentHash} marked for deletion");
             ctx.archive.DocumentDelete(documentID);
         }, docRefArgument);
 

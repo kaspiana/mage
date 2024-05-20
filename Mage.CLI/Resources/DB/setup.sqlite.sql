@@ -9,8 +9,19 @@ create table document (
     file_name       text not null,
     extension       text not null,
     ingested_at     integer not null,
-    comment         text
+    comment         text,
+    is_deleted      integer not null default 0
 );
+
+create view public_document as 
+    select * 
+    from document 
+    where is_deleted = 0;
+
+create view deleted_document as 
+    select * 
+    from document 
+    where is_deleted = 1;
 
 ---
 --- TAXONYMS
@@ -95,6 +106,13 @@ create table document_tag_parameter (
 	primary key (document_id, tag_id)
 );
 
+create view public_document_tag as
+    select document_tag.*
+    from 
+        document_tag inner join document
+        on document.id = document_tag.document_id
+    where document.is_deleted = 0;
+
 ---
 --- COLLECTIONS
 ---
@@ -114,6 +132,13 @@ create table collection_document (
 	primary key (collection_id, document_id)
 );
 
+create view collection_public_document as
+    select collection_document.*
+    from
+        collection_document inner join document
+        on document.id = collection_document.document_id
+    where document.is_deleted = 0;
+
 ---
 --- SOURCES
 ---
@@ -125,3 +150,10 @@ create table document_source (
 	foreign key (document_id) references document(id),
 	primary key (document_id, url)
 );
+
+create view public_document_source as
+    select document_source.*
+    from 
+        document_source inner join document
+        on document.id = document_source.document_id
+    where document.is_deleted = 0;

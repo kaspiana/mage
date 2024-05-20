@@ -107,7 +107,8 @@ public partial class DBEngine {
                 fileName = r.GetString(2),
                 extension = r.GetString(3),
                 ingestedAt = ingestTimestamp,
-                comment = r.IsDBNull(5) ? null : r.GetString(5)
+                comment = r.IsDBNull(5) ? null : r.GetString(5),
+                isDeleted = r.GetBoolean(6)
             };
         });
     }
@@ -263,7 +264,7 @@ public partial class DBEngine {
     public int CountTagDocuments(TagID tagID, SqliteTransaction? transaction = null){
         
         using var com = GenCommand(
-            DBCommands.Count.DocumentTagWhereTagID,
+            DBCommands.Count.DocumentTagWhereTagID(),
             ("tag_id", tagID)
         );
         com.Transaction = transaction;
@@ -507,6 +508,21 @@ public partial class DBEngine {
         RunNonQuery(com3);
 
         transaction.Commit();
+    }
+
+}
+
+// Update
+public partial class DBEngine {
+
+    public void UpdateDocumentIsDeleted(DocumentID documentID, bool isDeleted, SqliteTransaction? transaction = null){
+        using var com = GenCommand(
+            DBCommands.Update.DocumentIsDeletedWhereID,
+            ("id", documentID),
+            ("is_deleted", isDeleted)
+        );
+        com.Transaction = transaction;
+        RunNonQuery(com);
     }
 
 }

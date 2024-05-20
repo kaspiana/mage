@@ -163,6 +163,7 @@ public class Archive {
 
     public void DocumentDelete(DocumentID documentID){
 
+        /*
         var doc = (Document)DocumentGet(documentID)!;
 
         File.Move($"{fileDir}{doc.hash}", $"{mageDir}{OUT_DIR_PATH}{doc.fileName}.{doc.extension}");
@@ -177,6 +178,10 @@ public class Archive {
         
         db.EnsureConnected();
         db.DeleteDocument(documentID);
+        */
+
+        db.EnsureConnected();
+        db.UpdateDocumentIsDeleted(documentID, true);
 
     }
 
