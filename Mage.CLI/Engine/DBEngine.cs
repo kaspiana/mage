@@ -400,13 +400,20 @@ public partial class DBEngine {
         com1.Transaction = transaction;
 
         using var com2 = GenCommand(
-            DBCommands.Delete.TagWherePK,
-            ("id", tagID)
+            DBCommands.Delete.DocumentTagWhereTagID,
+            ("tag_id", tagID)
         );
         com2.Transaction = transaction;
 
+        using var com3 = GenCommand(
+            DBCommands.Delete.TagWherePK,
+            ("id", tagID)
+        );
+        com3.Transaction = transaction;
+
         RunNonQuery(com1);
         RunNonQuery(com2);
+        RunNonQuery(com3);
     }
 
     public void DeleteTagImplication(TagID antecedentID, TagID consequentID, SqliteTransaction? transaction = null){
@@ -422,18 +429,34 @@ public partial class DBEngine {
 
     public void DeleteDocument(DocumentID documentID, SqliteTransaction? transaction = null){
         
-        using var com = GenCommand(
+        using var com1 = GenCommand(
+            DBCommands.Delete.DocumentTagWhereDocumentID,
+            ("document_id", documentID)
+        );
+        com1.Transaction = transaction;
+
+        using var com2 = GenCommand(
             DBCommands.Delete.DocumentWherePK,
             ("id", documentID)
         );
-        com.Transaction = transaction;
-        RunNonQuery(com);
+        com2.Transaction = transaction;
+
+        RunNonQuery(com1);
+        RunNonQuery(com2);
     }
 
     public void DeleteAllDocuments(SqliteTransaction? transaction = null){
-        using var com = GenCommand(DBCommands.Delete.Document);
-        com.Transaction = transaction;
-        RunNonQuery(com);
+
+        using var com1 = GenCommand(
+            DBCommands.Delete.DocumentTag
+        );
+        com1.Transaction = transaction;
+
+        using var com2 = GenCommand(DBCommands.Delete.Document);
+        com2.Transaction = transaction;
+        
+        RunNonQuery(com1);
+        RunNonQuery(com2);
     }
 
     public void DeleteTaxonymAlias(TaxonymID taxonymID, string alias, SqliteTransaction? transaction = null){

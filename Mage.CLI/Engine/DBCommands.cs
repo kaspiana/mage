@@ -82,6 +82,7 @@ public static class DBCommands {
         public const string TagImplicationWhereAntecedentID = "delete from tag_implication where antecedent_id = @antecedent_id";
         public const string TagImplicationWhereConsequentID = "delete from tag_implication where consequent_id = @consequent_id";
 
+        public const string DocumentTag = "delete from document_tag";
         public const string DocumentTagWherePK = "delete from document_tag where document_id = @document_id and tag_id = @tag_id";
         public const string DocumentTagWhereDocumentID = "delete from document_tag where document_id = @document_id";
         public const string DocumentTagWhereTagID = "delete from document_tag where tag_id = @tag_id";
