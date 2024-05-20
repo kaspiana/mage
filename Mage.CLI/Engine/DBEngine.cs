@@ -41,11 +41,11 @@ public partial class DBEngine {
 // Reading
 public partial class DBEngine {
 
-    public SqliteCommand GenCommand(string comString, params (string, object)[] param){
+    public SqliteCommand GenCommand(string comString, params (string, object?)[] param){
         var com = db.CreateCommand();
         com.CommandText = comString;
         foreach(var p in param){
-            com.Parameters.AddWithValue(p.Item1, p.Item2);
+            com.Parameters.AddWithValue(p.Item1, p.Item2 is null ? System.DBNull.Value : p.Item2);
         }
         return com;
     }
@@ -278,40 +278,23 @@ public partial class DBEngine {
 
     public void InsertDocumentTag(DocumentID documentID, TagID tagID, SqliteTransaction? transaction = null){
 
-        var com = db.CreateCommand();
-        com.CommandText = @"
-            insert into document_tag (
-                document_id,
-                tag_id
-            )
-            values (
-                @document_id,
-                @tag_id
-            );
-        ";
+        using var com = GenCommand(
+            DBCommands.Insert.DocumentTag,
+            ("document_id", documentID),
+            ("tag_id", tagID)
+        );
         com.Transaction = transaction;
-        com.Parameters.AddWithValue("@document_id", documentID);
-        com.Parameters.AddWithValue("@tag_id", tagID);
-        com.ExecuteNonQuery();
-        com.Dispose();
-
+        RunNonQuery(com);
     }
 
     public TagID InsertTag(Tag tag, SqliteTransaction? transaction = null){
 
-        var com = db.CreateCommand();
-        com.CommandText = @"
-            insert into tag (
-                taxonym_id
-            )
-            values (
-                @taxonym_id
-            );
-        ";
+        using var com = GenCommand(
+            DBCommands.Insert.Tag,
+            ("taxonym_id", tag.taxonymID)
+        );
         com.Transaction = transaction;
-        com.Parameters.AddWithValue("@taxonym_id", tag.taxonymID);
-        com.ExecuteNonQuery();
-        com.Dispose();
+        RunNonQuery(com);
 
         var tagID = (TagID)ReadLastInsertRowID();
         return tagID;
@@ -319,52 +302,27 @@ public partial class DBEngine {
 
     public void InsertTagImplication(TagID antecedentID, TagID consequentID, SqliteTransaction? transaction = null){
 
-        var com = db.CreateCommand();
-        com.CommandText = @"
-            insert into tag_implication (
-                antecedent_id,
-                consequent_id
-            )
-            values (
-                @antecedent_id,
-                @consequent_id
-            );
-        ";
+        using var com = GenCommand(
+            DBCommands.Insert.TagImplication,
+            ("antecedent_id", antecedentID),
+            ("consequent_id", consequentID)
+        );
         com.Transaction = transaction;
-        com.Parameters.AddWithValue("@antecedent_id", antecedentID);
-        com.Parameters.AddWithValue("@consequent_id", consequentID);
-        com.ExecuteNonQuery();
-        com.Dispose();
-
+        RunNonQuery(com);
     }
 
     public DocumentID InsertDocument(Document document, SqliteTransaction? transaction = null){
 
-        var com = db.CreateCommand();
-        com.CommandText = $@"
-            insert into document (
-                hash,
-                file_name,
-                extension,
-                ingested_at,
-                comment
-            )
-            values (
-                @hash,
-                @file_name,
-                @extension,
-                @ingested_at,
-                @comment
-            );
-        ";
+        using var com = GenCommand(
+            DBCommands.Insert.Document,
+            ("hash", document.hash),
+            ("file_name", document.fileName),
+            ("extension", document.extension),
+            ("ingested_at", ((DateTimeOffset)(document.ingestedAt)).ToUnixTimeSeconds()),
+            ("comment", document.comment)
+        );
         com.Transaction = transaction;
-        com.Parameters.AddWithValue("@hash", document.hash);
-        com.Parameters.AddWithValue("@file_name", document.fileName);
-        com.Parameters.AddWithValue("@extension", document.extension);
-        com.Parameters.AddWithValue("@ingested_at", ((DateTimeOffset)(document.ingestedAt)).ToUnixTimeSeconds());
-        com.Parameters.AddWithValue("@comment", document.comment is null ? System.DBNull.Value : document.comment);
-        com.ExecuteNonQuery();
-        com.Dispose();
+        RunNonQuery(com);
 
         var documentID = (DocumentID)ReadLastInsertRowID();
         return documentID;
@@ -372,48 +330,38 @@ public partial class DBEngine {
     }
 
     public void InsertTaxonymAlias(TaxonymID taxonymID, string alias, SqliteTransaction? transaction = null){
-        var com = db.CreateCommand();
-        com.CommandText = $@"
-            insert into taxonym_alias
-            (taxonym_id, alias)
-            values (@taxonym_id, @alias);
-        ";
+        
+        using var com = GenCommand(
+            DBCommands.Insert.TaxonymAlias,
+            ("taxonym_id", taxonymID),
+            ("alias", alias)
+        );
         com.Transaction = transaction;
-        com.Parameters.AddWithValue("@taxonym_id", taxonymID);
-        com.Parameters.AddWithValue("@alias", alias);
-        com.ExecuteNonQuery();
-        com.Dispose();
+        RunNonQuery(com);
     }
 
     public void InsertTaxonymParent(TaxonymID childID, TaxonymID parentID, SqliteTransaction? transaction = null){
-        var com = db.CreateCommand();
-        com.CommandText = $@"
-            insert into taxonym_parent
-            (child_id, parent_id)
-            values (@child_id, @parent_id);
-        ";
+        
+        using var com = GenCommand(
+            DBCommands.Insert.TaxonymRelationship,
+            ("child_id", childID),
+            ("parent_id", parentID)
+        );
         com.Transaction = transaction;
-        com.Parameters.AddWithValue("@child_id", childID);
-        com.Parameters.AddWithValue("@parent_id", parentID);
-        com.ExecuteNonQuery();
-        com.Dispose();
+        RunNonQuery(com);
     }
 
     public TaxonymID InsertTaxonym(Taxonym taxonym){
 
-        var transaction = db.BeginTransaction();
+        using var transaction = db.BeginTransaction();
 
-        var com = db.CreateCommand();
-        com.CommandText = $@"
-            insert into taxonym
-            (canon_parent_id, canon_alias)
-            values (@canon_parent_id, @canon_alias)
-        ";
+        using var com = GenCommand(
+            DBCommands.Insert.Taxonym,
+            ("canon_parent_id", taxonym.canonParentID),
+            ("canon_alias", taxonym.canonAlias)
+        );
         com.Transaction = transaction;
-        com.Parameters.AddWithValue("@canon_parent_id", ((object?)taxonym.canonParentID) ?? DBNull.Value);
-        com.Parameters.AddWithValue("@canon_alias", taxonym.canonAlias);
-        com.ExecuteNonQuery();
-        com.Dispose();
+        RunNonQuery(com);
 
         var taxonymID = (TaxonymID)ReadLastInsertRowID(transaction);
 
@@ -422,7 +370,6 @@ public partial class DBEngine {
             InsertTaxonymParent(taxonymID, (TaxonymID)taxonym.canonParentID, transaction);
 
         transaction.Commit();
-        transaction.Dispose();
 
         return taxonymID;
     }
