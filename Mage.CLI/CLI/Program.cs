@@ -10,8 +10,17 @@ var ctx = new CLIContext(){
     archive = null
 };
 
-if(Directory.Exists(ctx.mageDir))
-    ctx.archive = Archive.Load(ctx.mageDir, archiveDir);
+try {
+    if(Directory.Exists(ctx.mageDir))
+        ctx.archive = Archive.Load(ctx.mageDir, archiveDir);
+} catch(Archive.IncompatibleArchiveException ex){
+    var ogFGColor = Console.ForegroundColor;
+    Console.ForegroundColor = ConsoleColor.Red;
+    Console.Write("ERROR: ");
+    Console.ForegroundColor = ogFGColor;
+    Console.WriteLine(ex);
+    return;
+}
 
 var rootCommand = CLICommands.CreateRoot(ctx);
 rootCommand.Invoke(args);
