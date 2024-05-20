@@ -93,6 +93,9 @@ public class QueryNodeConjunction : QueryNodeJunction {
 
     public override string ToSQL(Archive archive)
     {
+        return string.Join(" intersect ", args.Select((l) => l.ToSQL(archive)));
+
+        /*
         if(args.Count() == 0){
             return new QueryNodeNone().ToSQL(archive);
         }
@@ -109,7 +112,7 @@ public class QueryNodeConjunction : QueryNodeJunction {
                 j = Query.tempTableIndex++;
                 return s;
             }))}";
-        }
+        }*/
     }
 }
 public class QueryNodeDisjunction : QueryNodeJunction {
