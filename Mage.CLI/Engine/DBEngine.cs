@@ -1,3 +1,5 @@
+using System.CommandLine;
+using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.Resources;
 using Microsoft.Data.Sqlite;
@@ -39,6 +41,36 @@ public partial class DBEngine {
 // Reading
 public partial class DBEngine {
 
+    public SqliteCommand GenCommand(string comString, params (string, object)[] param){
+        var com = db.CreateCommand();
+        com.CommandText = comString;
+        foreach(var p in param){
+            com.Parameters.AddWithValue(p.Item1, p.Item2);
+        }
+        return com;
+    }
+
+    public static IEnumerable<T> RunQuery<T>(SqliteCommand com, Func<SqliteDataReader, T> read){
+        var reader = com.ExecuteReader();
+        while(reader.Read()){
+            yield return read(reader);
+        }
+        reader.Close();
+    }
+
+    public static T? RunQuerySingle<T>(SqliteCommand com, Func<SqliteDataReader, T> read) {
+        var reader = com.ExecuteReader();
+        if(reader.Read()){
+            return read(reader);
+        }
+        reader.Close();
+        return default(T?);
+    }
+
+    public void RunNonQuery(SqliteCommand com){
+        com.ExecuteNonQuery();
+    }
+
     public long ReadLastInsertRowID(SqliteTransaction? transaction = null){
         var com = new SqliteCommand("select last_insert_rowid()", db, transaction);
         long lastRowID = (long)com.ExecuteScalar()!;
@@ -49,352 +81,194 @@ public partial class DBEngine {
 
     public DocumentID[] QueryDocuments(string clause, SqliteTransaction? transaction = null){
 
-        var documents = new List<DocumentID>();
-
-        var com = db.CreateCommand();
-        com.CommandText = $"select id from document {clause}";
+        using var com = GenCommand(
+            DBCommands.Select.DocumentIDWhere(clause)
+        );
         com.Transaction = transaction;
-        
-        var reader = com.ExecuteReader();
-        while(reader.Read()){
-            documents.Add((DocumentID)reader.GetInt32(0));
-        }
 
-        reader.Close();
-        com.Dispose();
-
-        return documents.ToArray();
+        return RunQuery<DocumentID>(com, (r) => (DocumentID)r.GetInt32(0)).ToArray();
     }
 
     public Document? ReadDocument(DocumentID documentID, SqliteTransaction? transaction = null){
 
-        Document? document = null;
-
-        var com = db.CreateCommand();
-        com.CommandText = $"select * from document where id = @id;";
+        using var com = GenCommand(
+            DBCommands.Select.DocumentWhereID,
+            ("id", documentID)
+        );
         com.Transaction = transaction;
-        com.Parameters.AddWithValue("id", documentID);
-        
-        var reader = com.ExecuteReader();
-        if(reader.Read()){
+
+        return RunQuerySingle<Document>(com, (r) => {
             var ingestTimestamp = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
-            ingestTimestamp = ingestTimestamp.AddSeconds(reader.GetInt32(4)).ToLocalTime();
+            ingestTimestamp = ingestTimestamp.AddSeconds(r.GetInt32(4)).ToLocalTime();
 
-            document = new Document(){
-                hash = reader.GetString(1),
+            return new Document(){
+                hash = r.GetString(1),
                 id = documentID,
-                fileName = reader.GetString(2),
-                extension = reader.GetString(3),
+                fileName = r.GetString(2),
+                extension = r.GetString(3),
                 ingestedAt = ingestTimestamp,
-                comment = reader.IsDBNull(5) ? null : reader.GetString(5)
+                comment = r.IsDBNull(5) ? null : r.GetString(5)
             };
-        }
-
-        reader.Close();
-        com.Dispose();
-
-        return document;
+        });
     }
 
     public string? ReadDocumentHash(DocumentID documentID, SqliteTransaction? transaction = null){
 
-        string? documentHash = null;
-
-        var com = db.CreateCommand();
-        com.CommandText = $"select hash from document where id = @id;";
+        using var com = GenCommand(
+            DBCommands.Select.DocumentHashWhereID,
+            ("id", documentID)
+        );
         com.Transaction = transaction;
-        com.Parameters.AddWithValue("id", documentID);
 
-        var reader = com.ExecuteReader();
-        if(reader.Read()){
-            documentHash = reader.GetString(0);
-        }
-
-        reader.Close();
-        com.Dispose();
-        
-        return documentHash;
+        return RunQuerySingle<string>(com, (r) => r.GetString(0));
     }
 
     public DocumentID? ReadDocumentID(string documentHash, SqliteTransaction? transaction = null){
 
-        DocumentID? documentID = null;
-
-        var com = db.CreateCommand();
-        com.CommandText = $"select id from document where hash = @hash;";
+        using var com = GenCommand(
+            DBCommands.Select.DocumentWhereHash,
+            ("hash", documentHash)
+        );
         com.Transaction = transaction;
-        com.Parameters.AddWithValue("hash", documentHash);
 
-        var reader = com.ExecuteReader();
-        if(reader.Read()){
-            documentID = (DocumentID)reader.GetInt32(0);
-        }
-
-        reader.Close();
-        com.Dispose();
-        
-        return documentID;
-
+        return RunQuerySingle<DocumentID>(com, (r) => (DocumentID)r.GetInt32(0));
     }
 
     public TaxonymID[] QueryTaxonyms(string clause, SqliteTransaction? transaction = null){
 
-        var taxonyms = new List<TaxonymID>();
-
-        var com = db.CreateCommand();
-        com.CommandText = $"select id from taxonym {clause}";
+        using var com = GenCommand(
+            DBCommands.Select.TaxonymIDWhere(clause)
+        );
         com.Transaction = transaction;
-        
-        var reader = com.ExecuteReader();
-        while(reader.Read()){
-            taxonyms.Add((TaxonymID)reader.GetInt32(0));
-        }
 
-        reader.Close();
-        com.Dispose();
-
-        return taxonyms.ToArray();
+        return RunQuery<TaxonymID>(com, (r) => (TaxonymID)r.GetInt32(0)).ToArray();
     }
 
     public Taxonym? ReadTaxonym(TaxonymID taxonymID, SqliteTransaction? transaction = null){
-        Taxonym? taxonym = null;
-
-        var com = db.CreateCommand();
-        com.CommandText = $"select * from taxonym where id = @id";
+        
+        using var com = GenCommand(
+            DBCommands.Select.TaxonymWhereID,
+            ("id", taxonymID)
+        );
         com.Transaction = transaction;
-        com.Parameters.AddWithValue("id", taxonymID);
 
-        var reader = com.ExecuteReader();
-        if(reader.Read()){
-            taxonym = new Taxonym(){
-                id = taxonymID,
-                canonParentID = reader.IsDBNull(1) ? null : (TaxonymID)reader.GetInt32(1),
-                canonAlias = reader.GetString(2)
-            };
-        }
-
-        reader.Close();
-        com.Dispose();
-
-        return taxonym;
+        return RunQuerySingle<Taxonym>(com, (r) => new Taxonym(){
+            id = taxonymID,
+            canonParentID = r.IsDBNull(1) ? null : (TaxonymID)r.GetInt32(1),
+            canonAlias = r.GetString(2)
+        });
     }
 
     public TaxonymID[] ReadTaxonymChildren(TaxonymID taxonymID, SqliteTransaction? transaction = null){
-        var taxonymIDs = new List<TaxonymID>();
-
-        var com = db.CreateCommand();
-        com.CommandText = $@"
-            select child_id
-            from taxonym_parent
-            where taxonym_parent.parent_id = @parent_id;
-        ";
+        
+        using var com = GenCommand(
+            DBCommands.Select.TaxonymChildIDWhereID,
+            ("parent_id", taxonymID)
+        );
         com.Transaction = transaction;
-        com.Parameters.AddWithValue("parent_id", taxonymID);
 
-        var reader = com.ExecuteReader();
-        while(reader.Read()){
-            taxonymIDs.Add((TaxonymID)reader.GetInt32(0));
-        }
-
-        reader.Close();
-        com.Dispose();
-
-        return taxonymIDs.ToArray();
+        return RunQuery<TaxonymID>(com, (r) => (TaxonymID)r.GetInt32(0)).ToArray();
     }
 
     public TaxonymID[] ReadTaxonymParents(TaxonymID taxonymID, SqliteTransaction? transaction = null){
-        var taxonymIDs = new List<TaxonymID>();
-
-        var com = db.CreateCommand();
-        com.CommandText = $@"
-            select parent_id
-            from taxonym_parent
-            where taxonym_parent.child_id = @child_id;
-        ";
+        
+        using var com = GenCommand(
+            DBCommands.Select.TaxonymParentIDWhereID,
+            ("child_id", taxonymID)
+        );
         com.Transaction = transaction;
-        com.Parameters.AddWithValue("child_id", taxonymID);
 
-        var reader = com.ExecuteReader();
-        while(reader.Read()){
-            taxonymIDs.Add((TaxonymID)reader.GetInt32(0));
-        }
-
-        reader.Close();
-        com.Dispose();
-
-        return taxonymIDs.ToArray();
+        return RunQuery<TaxonymID>(com, (r) => (TaxonymID)r.GetInt32(0)).ToArray();
     }
 
     public string[] ReadTaxonymAliases(TaxonymID taxonymID, SqliteTransaction? transaction = null){
-        var aliases = new List<string>();
-
-        var com = db.CreateCommand();
-        com.CommandText = @"
-            select alias
-            from taxonym_alias
-            where taxonym_id = @taxonym_id;
-        ";
+        
+        using var com = GenCommand(
+            DBCommands.Select.TaxonymAliasWhereID,
+            ("taxonym_id", taxonymID)
+        );
         com.Transaction = transaction;
-        com.Parameters.AddWithValue("@taxonym_id", taxonymID);
 
-        var reader = com.ExecuteReader();
-        while(reader.Read()){
-            aliases.Add(reader.GetString(0));
-        }
-
-        reader.Close();
-        com.Dispose();
-
-        return aliases.ToArray();
+        return RunQuery<string>(com, (r) => r.GetString(0)).ToArray();
     }
 
     public TagID[] QueryTags(string clause, SqliteTransaction? transaction = null){
 
-        var tags = new List<TagID>();
-
-        var com = db.CreateCommand();
-        com.CommandText = $"select id from tag {clause}";
+        using var com = GenCommand(
+            DBCommands.Select.TagIDWhere(clause)
+        );
         com.Transaction = transaction;
-        
-        var reader = com.ExecuteReader();
-        while(reader.Read()){
-            tags.Add((TagID)reader.GetInt32(0));
-        }
 
-        reader.Close();
-        com.Dispose();
-
-        return tags.ToArray();
+        return RunQuery<TagID>(com, (r) => (TagID)r.GetInt32(0)).ToArray();
     }
 
     public Tag? ReadTag(TagID tagID, SqliteTransaction? transaction = null){
 
-        var com = db.CreateCommand();
-        com.CommandText = @"
-            select *
-            from tag
-            where id = @id;
-        ";
+        using var com = GenCommand(
+            DBCommands.Select.TagWhereID,
+            ("id", tagID)
+        );
         com.Transaction = transaction;
-        com.Parameters.AddWithValue("@id", tagID);
 
-        Tag? tag = null;
-
-        var reader = com.ExecuteReader();
-        if(reader.Read()){
-            tag = new Tag(){
-                id = tagID,
-                taxonymID = (TaxonymID)reader.GetInt32(1)
-            };
-        }
-
-        return tag;
+        return RunQuerySingle(com, (r) => new Tag(){
+            id = tagID,
+            taxonymID = (TaxonymID)r.GetInt32(1)
+        });
     }
 
     public TagID? ReadTagID(TaxonymID taxonymID, SqliteTransaction? transaction = null){
 
-        var com = db.CreateCommand();
-        com.CommandText = @"
-            select id
-            from tag
-            where taxonym_id = @taxonym_id;
-        ";
+        using var com = GenCommand(
+            DBCommands.Select.TagIDWhereTaxonymID,
+            ("taxonym_id", taxonymID)
+        );
         com.Transaction = transaction;
-        com.Parameters.AddWithValue("@taxonym_id", taxonymID);
 
-        var reader = com.ExecuteReader();
-        if(reader.Read()){
-            return (TagID)reader.GetInt32(0);
-        }
-
-        return null;
+        return RunQuerySingle<TagID>(com, (r) => (TagID)r.GetInt32(0));
     }
 
     public TagID[] ReadTagConsequents(TagID tagID, SqliteTransaction? transaction = null){
-        var consequents = new List<TagID>();
-
-        var com = db.CreateCommand();
-        com.CommandText = @"
-            select consequent_id
-            from tag_implication
-            where antecedent_id = @id;
-        ";
-        com.Transaction = transaction;
-        com.Parameters.AddWithValue("@id", tagID);
         
-        var reader = com.ExecuteReader();
-        while(reader.Read()){
-            consequents.Add((TagID)reader.GetInt32(0));
-        }
+        using var com = GenCommand(
+            DBCommands.Select.TagConsequentIDWhereID,
+            ("antecedent_id", tagID)
+        );
+        com.Transaction = transaction;
 
-        reader.Close();
-        com.Dispose();
-
-        return consequents.ToArray();
+        return RunQuery<TagID>(com, (r) => (TagID)r.GetInt32(0)).ToArray();
     }
 
     public TagID[] ReadTagAntecedents(TagID tagID, SqliteTransaction? transaction = null){
-        var antecedents = new List<TagID>();
-
-        var com = db.CreateCommand();
-        com.CommandText = @"
-            select antecedent_id
-            from tag_implication
-            where consequent_id = @id;
-        ";
-        com.Transaction = transaction;
-        com.Parameters.AddWithValue("@id", tagID);
         
-        var reader = com.ExecuteReader();
-        while(reader.Read()){
-            antecedents.Add((TagID)reader.GetInt32(0));
-        }
+        using var com = GenCommand(
+            DBCommands.Select.TagAntecedentIDWhereID,
+            ("consequent_id", tagID)
+        );
+        com.Transaction = transaction;
 
-        reader.Close();
-        com.Dispose();
-
-        return antecedents.ToArray();
+        return RunQuery<TagID>(com, (r) => (TagID)r.GetInt32(0)).ToArray();
     }
 
     public TagID[] ReadDocumentTags(DocumentID documentID, SqliteTransaction? transaction = null){
-        var tagIDs = new List<TagID>();
-
-        var com = db.CreateCommand();
-        com.CommandText = @"
-            select tag_id
-            from document_tag
-            where document_id = @document_id;
-        ";
-        com.Transaction = transaction;
-        com.Parameters.AddWithValue("@document_id", documentID);
         
-        var reader = com.ExecuteReader();
-        while(reader.Read()){
-            tagIDs.Add((TagID)reader.GetInt32(0));
-        }
+        using var com = GenCommand(
+            DBCommands.Select.DocumentTagIDWhereDocumentID,
+            ("document_id", documentID)
+        );
+        com.Transaction = transaction;
 
-        reader.Close();
-        com.Dispose();
-
-        return tagIDs.ToArray();
+        return RunQuery<TagID>(com, (r) => (TagID)r.GetInt32(0)).ToArray();
     }
 
     public int CountTagDocuments(TagID tagID, SqliteTransaction? transaction = null){
-        var com = db.CreateCommand();
-        com.CommandText = @"
-            select count(document_id)
-            from document_tag
-            where tag_id = @tag_id;
-        ";
+        
+        using var com = GenCommand(
+            DBCommands.Count.DocumentTagWhereTagID,
+            ("tag_id", tagID)
+        );
         com.Transaction = transaction;
-        com.Parameters.AddWithValue("@tag_id", tagID);
 
-        var reader = com.ExecuteReader();
-        if(reader.Read()){
-            return reader.GetInt32(0);
-        }
-
-        return 0;
+        return RunQuerySingle<int>(com, (r) => r.GetInt32(0));
     }
 
 }
