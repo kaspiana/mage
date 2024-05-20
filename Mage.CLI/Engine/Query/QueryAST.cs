@@ -132,7 +132,7 @@ public class Query {
     public static int tempTableIndex = 0;
     public static string documentTagNormalised = "select id from document";
 
-    public DocumentID[] GetResults(Archive archive){
+    public DocumentID[] GetResults(Archive archive, bool public_ = true){
 
         archive.db.EnsureConnected();
         var db = archive.db.db;
@@ -140,7 +140,12 @@ public class Query {
         var documents = new List<DocumentID>();
 
         var com = db.CreateCommand();
-        com.CommandText = @$"select distinct id from ({root.ToSQL(archive)});";
+        com.CommandText = @$"
+select distinct result.id from 
+    ({root.ToSQL(archive)}) result
+    inner join {(public_ ? "public_": "")}document
+    on result.id = public_document.id;
+        ";
         
         Console.WriteLine("SQL: " + com.CommandText);
 

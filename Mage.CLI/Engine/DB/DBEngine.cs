@@ -264,7 +264,7 @@ public partial class DBEngine {
     public int CountTagDocuments(TagID tagID, SqliteTransaction? transaction = null){
         
         using var com = GenCommand(
-            DBCommands.Count.DocumentTagWhereTagID,
+            DBCommands.Count.DocumentTagWhereTagID(),
             ("tag_id", tagID)
         );
         com.Transaction = transaction;
