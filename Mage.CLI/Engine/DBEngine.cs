@@ -82,7 +82,7 @@ public partial class DBEngine {
     public DocumentID[] QueryDocuments(string clause, SqliteTransaction? transaction = null){
 
         using var com = GenCommand(
-            DBCommands.Select.DocumentIDWhere(clause)
+            DBCommands.Select.DocumentIDClause(clause)
         );
         com.Transaction = transaction;
 
@@ -92,7 +92,7 @@ public partial class DBEngine {
     public Document? ReadDocument(DocumentID documentID, SqliteTransaction? transaction = null){
 
         using var com = GenCommand(
-            DBCommands.Select.DocumentWhereID,
+            DBCommands.Select.DocumentWherePK,
             ("id", documentID)
         );
         com.Transaction = transaction;
@@ -137,7 +137,7 @@ public partial class DBEngine {
     public TaxonymID[] QueryTaxonyms(string clause, SqliteTransaction? transaction = null){
 
         using var com = GenCommand(
-            DBCommands.Select.TaxonymIDWhere(clause)
+            DBCommands.Select.TaxonymIDClause(clause)
         );
         com.Transaction = transaction;
 
@@ -147,7 +147,7 @@ public partial class DBEngine {
     public Taxonym? ReadTaxonym(TaxonymID taxonymID, SqliteTransaction? transaction = null){
         
         using var com = GenCommand(
-            DBCommands.Select.TaxonymWhereID,
+            DBCommands.Select.TaxonymWherePK,
             ("id", taxonymID)
         );
         com.Transaction = transaction;
@@ -195,7 +195,7 @@ public partial class DBEngine {
     public TagID[] QueryTags(string clause, SqliteTransaction? transaction = null){
 
         using var com = GenCommand(
-            DBCommands.Select.TagIDWhere(clause)
+            DBCommands.Select.TagIDClause(clause)
         );
         com.Transaction = transaction;
 
@@ -205,7 +205,7 @@ public partial class DBEngine {
     public Tag? ReadTag(TagID tagID, SqliteTransaction? transaction = null){
 
         using var com = GenCommand(
-            DBCommands.Select.TagWhereID,
+            DBCommands.Select.TagWherePK,
             ("id", tagID)
         );
         com.Transaction = transaction;
@@ -381,137 +381,109 @@ public partial class DBEngine {
 public partial class DBEngine {
 
     public void DeleteDocumentTag(DocumentID documentID, TagID tagID, SqliteTransaction? transaction = null){
-        var com = db.CreateCommand();
-        com.CommandText = $@"
-            delete from document_tag
-            where 
-                document_id = @document_id 
-                and tag_id = @tag_id;
-        ";
+        
+        using var com = GenCommand(
+            DBCommands.Delete.DocumentTagWherePK,
+            ("document_id", documentID),
+            ("tag_id", tagID)
+        );
         com.Transaction = transaction;
-        com.Parameters.AddWithValue("@document_id", documentID);
-        com.Parameters.AddWithValue("@tag_id", tagID);
-        com.ExecuteNonQuery();
-        com.Dispose();
+        RunNonQuery(com);
     }
 
     public void DeleteTag(TagID tagID, SqliteTransaction? transaction = null){
-        var com = db.CreateCommand();
-        com.CommandText = $@"
-            delete from tag_implication
-            where antecedent_id = @id or consequent_id = @id;
 
-            delete from tag
-            where id = @id;
-        ";
-        com.Transaction = transaction;
-        com.Parameters.AddWithValue("@id", tagID);
-        com.ExecuteNonQuery();
-        com.Dispose();
+        using var com1 = GenCommand(
+            DBCommands.Delete.TagImplicationWhereEitherID,
+            ("id", tagID)
+        );
+        com1.Transaction = transaction;
+
+        using var com2 = GenCommand(
+            DBCommands.Delete.TagWherePK,
+            ("id", tagID)
+        );
+        com2.Transaction = transaction;
+
+        RunNonQuery(com1);
+        RunNonQuery(com2);
     }
 
     public void DeleteTagImplication(TagID antecedentID, TagID consequentID, SqliteTransaction? transaction = null){
-        var com = db.CreateCommand();
-        com.CommandText = @"
-            delete from tag_implication
-            where
-                antecedent_id = @antecedent_id
-                and consequent_id = @consequent_id;
-        ";
+        
+        using var com = GenCommand(
+            DBCommands.Delete.TagImplicationWherePK,
+            ("antecedent_id", antecedentID),
+            ("consequent_id", consequentID)
+        );
         com.Transaction = transaction;
-        com.Parameters.AddWithValue("@antecedent_id", antecedentID);
-        com.Parameters.AddWithValue("@consequent_id", consequentID);
-        com.ExecuteNonQuery();
-        com.Dispose();
+        RunNonQuery(com);
     }
 
     public void DeleteDocument(DocumentID documentID, SqliteTransaction? transaction = null){
-        var com = db.CreateCommand();
-        com.CommandText = $@"
-            delete from document
-            where id = @id;
-        ";
+        
+        using var com = GenCommand(
+            DBCommands.Delete.DocumentWherePK,
+            ("id", documentID)
+        );
         com.Transaction = transaction;
-        com.Parameters.AddWithValue("@id", documentID);
-        com.ExecuteNonQuery();
-        com.Dispose();
+        RunNonQuery(com);
     }
 
     public void DeleteAllDocuments(SqliteTransaction? transaction = null){
-        var com = db.CreateCommand();
-        com.CommandText = $@"delete from document;";
+        using var com = GenCommand(DBCommands.Delete.Document);
         com.Transaction = transaction;
-        com.ExecuteNonQuery();
-        com.Dispose();
+        RunNonQuery(com);
     }
 
     public void DeleteTaxonymAlias(TaxonymID taxonymID, string alias, SqliteTransaction? transaction = null){
-        var com = db.CreateCommand();
-        com.CommandText = $@"
-            delete from taxonym_alias
-            where
-                taxonym_id = @taxonym_id
-                and alias = @alias;
-        ";
+        
+        using var com = GenCommand(
+            DBCommands.Delete.TaxonymAliasWherePK,
+            ("taxonym_id", taxonymID),
+            ("alias", alias)
+        );
         com.Transaction = transaction;
-        com.Parameters.AddWithValue("@taxonym_id", taxonymID);
-        com.Parameters.AddWithValue("@alias", alias);
-        com.ExecuteNonQuery();
-        com.Dispose();
+        RunNonQuery(com);
     }
 
     public void DeleteTaxonymParent(TaxonymID childID, TaxonymID parentID, SqliteTransaction? transaction = null){
-        var com = db.CreateCommand();
-        com.CommandText = $@"
-            delete from taxonym_parent
-            where
-                child_id = @child_id
-                and parent_id = @parent_id;
-        ";
+        
+        using var com = GenCommand(
+            DBCommands.Delete.TaxonymRelationshipWherePK,
+            ("child_id", childID),
+            ("parent_id", parentID)
+        );
         com.Transaction = transaction;
-        com.Parameters.AddWithValue("@child_id", childID);
-        com.Parameters.AddWithValue("@parent_id", parentID);
-        com.ExecuteNonQuery();
-        com.Dispose();
+        RunNonQuery(com);
     }
 
-    public void DeleteTaxonym(TaxonymID taxonymID, SqliteTransaction? transaction = null){
-        transaction = db.BeginTransaction();
+    public void DeleteTaxonym(TaxonymID taxonymID){
+        using var transaction = db.BeginTransaction();
 
-        var com = db.CreateCommand();
-        com.CommandText = $@"
-            delete from taxonym
-            where id = @id;
-        ";
-        com.Transaction = transaction;
-        com.Parameters.AddWithValue("@id", taxonymID);
-        com.ExecuteNonQuery();
-        com.Dispose();
+        using var com1 = GenCommand(
+            DBCommands.Delete.TaxonymWherePK,
+            ("id", taxonymID)
+        );
+        com1.Transaction = transaction;
 
-        com = db.CreateCommand();
-        com.CommandText = $@"
-            delete from taxonym_alias
-            where taxonym_id = @taxonym_id;
-        ";
-        com.Transaction = transaction;
-        com.Parameters.AddWithValue("@taxonym_id", taxonymID);
-        com.ExecuteNonQuery();
-        com.Dispose();
+        using var com2 = GenCommand(
+            DBCommands.Delete.TaxonymAliasWhereTaxonymID,
+            ("taxonym_idid", taxonymID)
+        );
+        com2.Transaction = transaction;
 
-        com = db.CreateCommand();
-        com.CommandText = $@"
-            delete from taxonym_parent
-            where 
-                child_id = @taxonym_id
-                or parent_id = @taxonym_id;
-        ";
-        com.Transaction = transaction;
-        com.Parameters.AddWithValue("@taxonym_id", taxonymID);
-        com.ExecuteNonQuery();
-        com.Dispose();
+        using var com3 = GenCommand(
+            DBCommands.Delete.TaxonymRelationshipWhereEitherID,
+            ("id", taxonymID)
+        );
+        com3.Transaction = transaction;
+        
+        RunNonQuery(com1);
+        RunNonQuery(com2);
+        RunNonQuery(com3);
 
         transaction.Commit();
-        transaction.Dispose();
     }
 
 }
