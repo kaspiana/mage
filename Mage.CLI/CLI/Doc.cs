@@ -38,7 +38,8 @@ public static partial class CLICommands {
             Console.WriteLine($"  Extension: {doc.extension}");
             Console.WriteLine($"  Ingest timestamp: {doc.ingestedAt}");
             Console.WriteLine($"  Comment: {(doc.comment is null ? "<none>" : doc.comment)}");
-            
+            Console.WriteLine($"  Deleted: {(doc.isDeleted ? "yes" : "no")}");
+
             var tagNames = ctx.archive.DocumentGetTags(docID).Select(tagID => ctx.archive.TagAsString(tagID));
             Console.WriteLine($"  Tags: {string.Join(" ", tagNames)}");
 
