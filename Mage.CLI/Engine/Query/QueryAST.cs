@@ -93,7 +93,7 @@ public class QueryNodeConjunction : QueryNodeJunction {
 
     public override string ToSQL(Archive archive)
     {
-        return string.Join(" intersect ", args.Select((l) => l.ToSQL(archive)));
+        return string.Join(" intersect ", args.Select((l) => $"select * from ({l.ToSQL(archive)})"));
 
         /*
         if(args.Count() == 0){
@@ -123,7 +123,7 @@ public class QueryNodeDisjunction : QueryNodeJunction {
     }
 
     public override string ToSQL(Archive archive){
-        return string.Join(" union ", args.Select((l) => l.ToSQL(archive)));
+        return string.Join(" union ", args.Select((l) => $"select * from ({l.ToSQL(archive)})"));
     }
 }
 
