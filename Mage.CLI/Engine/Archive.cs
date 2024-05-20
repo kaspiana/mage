@@ -10,7 +10,101 @@ using System.Text.RegularExpressions;
 
 namespace Mage.Engine;
 
+public struct SemanticVersion {
+
+    public int releaseType;
+    public int major;
+    public int minor;
+    public int patch;
+
+    public static string ToString(int releaseType, int major, int minor, int patch){
+        var releaseTypeStr = "";
+        switch(releaseType){
+            default:
+            case -1: releaseTypeStr = "alpha_"; break;
+            case 0: releaseTypeStr = "beta_"; break;
+        }
+        return $"{releaseTypeStr}{major}.{minor}.{patch}";
+    }
+
+    public override string ToString()
+    {
+        return SemanticVersion.ToString(releaseType, major, minor, patch);
+    }
+
+    public static SemanticVersion FromString(string versionStr){
+        int[] numericalParts;
+        var semVer = new SemanticVersion(){
+            releaseType = 1,
+            major = 1,
+            minor = 0,
+            patch = 0
+        };
+
+        if(versionStr.Contains('_')){
+            var parts = versionStr.Split('_');
+            var releaseTypeStr = parts[0];
+            var numericalStr = parts[1];
+            numericalParts = numericalStr
+                                .Split('.')
+                                .Select(s => int.Parse(s))
+                                .ToArray();
+
+            if(releaseTypeStr == "alpha") semVer.releaseType = -1;
+            else if(releaseTypeStr == "beta") semVer.releaseType = 0;
+
+        } else {
+            numericalParts = versionStr
+                                .Split('.')
+                                .Select(s => int.Parse(s))
+                                .ToArray();
+        }
+
+        switch(numericalParts.Count()){
+            case 0: break;
+            case 1: 
+                semVer.major = numericalParts[0]; break;
+            case 2:
+                semVer.major = numericalParts[0];
+                semVer.minor = numericalParts[1]; break;
+            case >= 3:
+                semVer.major = numericalParts[0];
+                semVer.minor = numericalParts[1]; 
+                semVer.patch = numericalParts[2]; break;
+        }
+
+        return semVer;
+    }
+
+    public static bool operator ==(SemanticVersion lhs, SemanticVersion rhs){
+        return lhs.releaseType == rhs.releaseType
+                && lhs.major == rhs.major
+                && lhs.minor == rhs.minor
+                && lhs.patch == rhs.patch;
+    }
+
+    public static bool operator !=(SemanticVersion lhs, SemanticVersion rhs){
+        return !(lhs == rhs);
+    }
+}
+
 public class Archive {
+
+    public class IncompatibleArchiveException : Exception {
+        SemanticVersion expected;
+        SemanticVersion actual;
+
+        public IncompatibleArchiveException(
+            SemanticVersion expected, SemanticVersion actual){
+            
+            this.expected = expected;
+            this.actual = actual;
+        }
+
+        override public string ToString(){
+            return $"Archive made in version {actual} is incompatible with Mage {expected}";
+        }
+    }
 
     public const string MAGE_DIR_PATH = ".mage/";
     public const string IN_DIR_PATH = "in/";
@@ -20,7 +114,13 @@ public class Archive {
     public const string BIND_FILE_PATH = "bind";
     public const string DB_FILE_PATH = "db.sqlite";
 
-    public const int CURRENT_VERSION = 7;
+    public static readonly SemanticVersion VERSION = new SemanticVersion(){
+        releaseType = 0,
+        major = 8,
+        minor = 0,
+        patch = 0
+    };
+
     public const string IN_VIEW_NAME = "in";
     public const string OPEN_VIEW_NAME = "open";
     public const string DEFAULT_VIEW_NAME = "main";
@@ -30,7 +130,7 @@ public class Archive {
     public string fileDir;
 
     public string? name;
-    public int version;
+    public SemanticVersion version;
 
     public DBEngine db;
 
@@ -49,7 +149,7 @@ public class Archive {
 
         if(name is not null)
             infoMap["name"] = name;
-        infoMap["version"] = CURRENT_VERSION.ToString();
+        infoMap["version"] = VERSION.ToString();
 
         var infoLines = new List<string>();
         foreach(var kv in infoMap){
@@ -94,8 +194,18 @@ public class Archive {
             infoMap[infoKey] = infoValue;
         }
 
+        string versionStr = infoMap["version"];
+
+        var version = SemanticVersion.FromString(versionStr);
+
+        if(version != VERSION){
+            if(version.releaseType != VERSION.releaseType 
+                || version.major != VERSION.major){
+                throw new IncompatibleArchiveException(VERSION, version);
+            }
+        }
+
         string? name = infoMap.ContainsKey("name") ? infoMap["name"] : null;
-        int version = int.Parse(infoMap["version"]);
 
         var archive = new Archive(){
             mageDir = mageDir,
