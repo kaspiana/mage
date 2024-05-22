@@ -2,17 +2,16 @@
 using System.Diagnostics;
 using Mage.Engine;
 
-var archiveDir = Directory.GetCurrentDirectory().Replace('\\', '/') + "/";
+var _archiveDir = Directory.GetCurrentDirectory().Replace('\\', '/') + "/";
 
 var ctx = new CLIContext(){
-    archiveDir = archiveDir,
-    mageDir = $"{archiveDir}.mage/",
+    archiveDir = _archiveDir,
     archive = null
 };
 
 try {
-    if(Directory.Exists(ctx.mageDir))
-        ctx.archive = Archive.Load(ctx.mageDir, archiveDir);
+    if(Archive.Exists(ctx.archiveDir))
+        ctx.archive = Archive.Load(ctx.archiveDir);
     else {
         var ogFGColor = Console.ForegroundColor;
         Console.ForegroundColor = ConsoleColor.Yellow;

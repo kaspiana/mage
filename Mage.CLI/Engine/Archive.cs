@@ -106,17 +106,18 @@ public class Archive {
         }
     }
 
-    public const string MAGE_DIR_PATH = ".mage/";
     public const string IN_DIR_PATH = "in/";
     public const string OUT_DIR_PATH = "out/";
+    public const string FILES_DIR_PATH = "files/";
     public const string VIEWS_DIR_PATH = "views/";
-    public const string INFO_FILE_PATH = "info";
-    public const string BIND_FILE_PATH = "bind";
-    public const string DB_FILE_PATH = "db.sqlite";
+    public const string DATA_DIR_PATH = "data/";
+    public const string INFO_FILE_PATH = DATA_DIR_PATH + "info.ini";
+    public const string BIND_FILE_PATH = DATA_DIR_PATH + "bind.ini";
+    public const string DB_FILE_PATH = DATA_DIR_PATH + "db.sqlite";
 
     public static readonly SemanticVersion VERSION = new SemanticVersion(){
         releaseType = -1,
-        major = 8,
+        major = 9,
         minor = 0,
         patch = 0
     };
@@ -126,23 +127,26 @@ public class Archive {
     public const string DEFAULT_VIEW_NAME = "main";
     public const TaxonymID ROOT_TAXONYM_ID = (TaxonymID)1;
 
-    public string mageDir;
-    public string fileDir;
+    public string archiveDir;
 
     public string? name;
     public SemanticVersion version;
 
     public DBEngine db;
 
+    public static bool Exists(string archiveDir){
+        return File.Exists($"{archiveDir}{INFO_FILE_PATH}");
+    }
+
     public static Archive Init(string archiveDir, string? name = null){
         var fileDir = archiveDir;
-        var mageDir = $"{archiveDir}{MAGE_DIR_PATH}";
 
         // setup directory structure
-        Directory.CreateDirectory($"{mageDir}");
-        Directory.CreateDirectory($"{mageDir}{IN_DIR_PATH}");
-        Directory.CreateDirectory($"{mageDir}{OUT_DIR_PATH}");
-        Directory.CreateDirectory($"{mageDir}{VIEWS_DIR_PATH}");
+        Directory.CreateDirectory($"{archiveDir}{FILES_DIR_PATH}");
+        Directory.CreateDirectory($"{archiveDir}{IN_DIR_PATH}");
+        Directory.CreateDirectory($"{archiveDir}{OUT_DIR_PATH}");
+        Directory.CreateDirectory($"{archiveDir}{VIEWS_DIR_PATH}");
+        Directory.CreateDirectory($"{archiveDir}{DATA_DIR_PATH}");
         
         // write info file
         var infoMap = new Dictionary<string, string>();
@@ -155,10 +159,10 @@ public class Archive {
         foreach(var kv in infoMap){
             infoLines.Add($"{kv.Key}={kv.Value}");
         }
-        File.WriteAllLines($"{mageDir}{INFO_FILE_PATH}", infoLines);
+        File.WriteAllLines($"{archiveDir}{INFO_FILE_PATH}", infoLines);
 
         // create bind file
-        File.WriteAllLines($"{mageDir}{BIND_FILE_PATH}", [
+        File.WriteAllLines($"{archiveDir}{BIND_FILE_PATH}", [
             $"doc=",
             $"tag=",
             $"taxonym=/1",
@@ -166,7 +170,7 @@ public class Archive {
             $"view={DEFAULT_VIEW_NAME}"
         ]);
 
-        var archive = Load(mageDir, fileDir);
+        var archive = Load(archiveDir);
         
         // setup db
         archive.db.EnsureConnected();
@@ -184,10 +188,10 @@ public class Archive {
         db.Disconnect();
     }
 
-    public static Archive Load(string mageDir, string fileDir){
+    public static Archive Load(string archiveDir){
 
         var infoMap = new Dictionary<string, string>();
-        foreach(var line in File.ReadAllLines($"{mageDir}{INFO_FILE_PATH}")){
+        foreach(var line in File.ReadAllLines($"{archiveDir}{INFO_FILE_PATH}")){
             var splitIndex = line.IndexOf('=');
             var infoKey = line[..splitIndex];
             var infoValue = line[(splitIndex+1)..];
@@ -208,11 +212,10 @@ public class Archive {
         string? name = infoMap.ContainsKey("name") ? infoMap["name"] : null;
 
         var archive = new Archive(){
-            mageDir = mageDir,
-            fileDir = fileDir,
+            archiveDir = archiveDir,
             name = name,
             version = version,
-            db = new DBEngine(){ dbPath = $"{mageDir}{DB_FILE_PATH}" }
+            db = new DBEngine(){ dbPath = $"{archiveDir}{DB_FILE_PATH}" }
         };
 
         return archive;
@@ -242,7 +245,7 @@ public class Archive {
     }
 
     public void Ingest(){
-        var inboxFiles = Directory.GetFiles($"{mageDir}{IN_DIR_PATH}");
+        var inboxFiles = Directory.GetFiles($"{archiveDir}{IN_DIR_PATH}");
 
         foreach(var filePath in inboxFiles){
             IngestFile(filePath);
@@ -255,7 +258,7 @@ public class Archive {
         var extension = Path.GetExtension(filePath)[1..];
         var hash = HashFile(filePath);
 
-        File.Copy(filePath, $"{fileDir}{hash}");
+        File.Copy(filePath, $"{archiveDir}{FILES_DIR_PATH}{hash}");
 
         db.EnsureConnected();
         var documentID = db.InsertDocument(new Document(){
@@ -297,7 +300,7 @@ public class Archive {
 
     public void DocumentsDeleteAll(){
 
-        foreach(var filePath in Directory.GetFiles($"{fileDir}")){
+        foreach(var filePath in Directory.GetFiles($"{archiveDir}{FILES_DIR_PATH}")){
             File.Delete(filePath);
         }
 
@@ -527,11 +530,11 @@ public class Archive {
     }
 
     public void ViewCreate(string viewName){
-        Directory.CreateDirectory($"{mageDir}{VIEWS_DIR_PATH}{viewName}/");
+        Directory.CreateDirectory($"{archiveDir}{VIEWS_DIR_PATH}{viewName}/");
     }
 
     public string? ViewGenerateNumberedName(string prefix){
-        var viewsDir = $"{mageDir}{VIEWS_DIR_PATH}";
+        var viewsDir = $"{archiveDir}{VIEWS_DIR_PATH}";
         var viewDirsFull = Directory.GetDirectories(viewsDir);
         var viewDirs = viewDirsFull.Select((p) => Path.GetFileName(p));
         viewDirs = viewDirs.Where((n) => n.StartsWith(prefix));
@@ -570,11 +573,11 @@ public class Archive {
 
     public void ViewDelete(string viewName){
         ViewClear(viewName);
-        Directory.Delete($"{mageDir}{VIEWS_DIR_PATH}{viewName}/");
+        Directory.Delete($"{archiveDir}{VIEWS_DIR_PATH}{viewName}/");
     }
 
     public string[] ViewsGetAll(){
-        var viewsDir = $"{mageDir}{VIEWS_DIR_PATH}";
+        var viewsDir = $"{archiveDir}{VIEWS_DIR_PATH}";
         var viewDirsFull = Directory.GetDirectories(viewsDir);
         var viewDirs = viewDirsFull.Select((p) => Path.GetFileName(p));
         return viewDirs.ToArray();
@@ -593,7 +596,7 @@ public class Archive {
         if(viewType is null)
             return null;
 
-        var viewsDir = $"{mageDir}{VIEWS_DIR_PATH}";
+        var viewsDir = $"{archiveDir}{VIEWS_DIR_PATH}";
         var viewDirsFull = Directory.GetDirectories(viewsDir);
         var documentIDs = new List<(int, DocumentID?)>();
 
@@ -624,7 +627,7 @@ public class Archive {
     }
 
     public int ViewAdd(string viewName, DocumentID documentID){
-        var viewDir = $"{mageDir}{VIEWS_DIR_PATH}{viewName}/";
+        var viewDir = $"{archiveDir}{VIEWS_DIR_PATH}{viewName}/";
 
         var document = (Document)DocumentGet(documentID)!;
 
@@ -633,7 +636,7 @@ public class Archive {
 
         FileExt.CreateHardLink(
             $"{viewDir}{newIndex}~{document.hash}.{document.extension}",
-            $"{fileDir}{document.hash}",
+            $"{archiveDir}{FILES_DIR_PATH}{document.hash}",
             IntPtr.Zero
         );
 
@@ -641,7 +644,7 @@ public class Archive {
     }
 
     public void ViewClear(string viewName){
-        var viewDir = $"{mageDir}{VIEWS_DIR_PATH}{viewName}/";
+        var viewDir = $"{archiveDir}{VIEWS_DIR_PATH}{viewName}/";
         
         foreach(var filePath in Directory.GetFiles(viewDir)){
             File.Delete(filePath);
@@ -651,7 +654,7 @@ public class Archive {
     public void ViewReflect(string targetViewName, string sourceViewName){
         var sourceView = (View)ViewGet(sourceViewName)!;
 
-        var viewDir = $"{mageDir}{VIEWS_DIR_PATH}{targetViewName}/";
+        var viewDir = $"{archiveDir}{VIEWS_DIR_PATH}{targetViewName}/";
         var filePaths = Directory.GetFiles(viewDir);
         var newIndex = filePaths.Count();
 
@@ -661,7 +664,7 @@ public class Archive {
 
                 FileExt.CreateHardLink(
                     $"{viewDir}{newIndex}~{document.hash}.{document.extension}",
-                    $"{fileDir}{document.hash}",
+                    $"{archiveDir}{FILES_DIR_PATH}{document.hash}",
                     IntPtr.Zero
                 );
 
@@ -680,7 +683,7 @@ public class Archive {
     }
 
     public string BindingGet(ObjectType objType){
-        var lines = File.ReadAllLines($"{mageDir}{BIND_FILE_PATH}");
+        var lines = File.ReadAllLines($"{archiveDir}{BIND_FILE_PATH}");
 
         var kw = "";
         switch(objType){
@@ -701,7 +704,7 @@ public class Archive {
     }
 
     public void BindingSet(ObjectType objType, string val){
-        var lines = File.ReadAllLines($"{mageDir}{BIND_FILE_PATH}");
+        var lines = File.ReadAllLines($"{archiveDir}{BIND_FILE_PATH}");
 
         for(int i = 0; i < lines.Count(); i++){
             if((ObjectType)i == objType){
@@ -712,7 +715,7 @@ public class Archive {
             }
         }
 
-        File.WriteAllLines($"{mageDir}{BIND_FILE_PATH}", lines);
+        File.WriteAllLines($"{archiveDir}{BIND_FILE_PATH}", lines);
     }
 
     public void BindDocument(DocumentID? documentID){

@@ -61,7 +61,7 @@ public static partial class CLICommands {
             var doc = (Document)ctx.archive.DocumentGet(docID)!;
 
             var viewIndex = ctx.archive.ViewAdd(Archive.OPEN_VIEW_NAME, docID);
-            var viewFilePath = $"{ctx.archive.mageDir}{Archive.VIEWS_DIR_PATH}{Archive.OPEN_VIEW_NAME}/{viewIndex}~{doc.hash}.{doc.extension}";
+            var viewFilePath = $"{ctx.archive.archiveDir}{Archive.VIEWS_DIR_PATH}{Archive.OPEN_VIEW_NAME}/{viewIndex}~{doc.hash}.{doc.extension}";
 
             using Process fileOpener = new Process();
 
