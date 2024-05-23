@@ -35,7 +35,7 @@ public static class DBCommands {
         public static string TagDocumentIDWhereTagID(bool public_ = true) => $"select document_id from {(public_ ? "public_" : "")}document_tag where tag_id = @tag_id";
     
         public static string DocumentSource(bool public_ = true) => $"select * from {(public_ ? "public_" : "")}document_source";
-        public const string DocumentSourceWhereID = $"select * from document_source where document_id = @document_id";
+        public const string DocumentSourceWhereID = $"select url from document_source where document_id = @document_id";
     }
 
     public static class Count {

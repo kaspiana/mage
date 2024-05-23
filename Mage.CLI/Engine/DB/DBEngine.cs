@@ -1,4 +1,5 @@
 using System.CommandLine;
+using System.Data;
 using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.Resources;
@@ -133,6 +134,16 @@ public partial class DBEngine {
         com.Transaction = transaction;
 
         return RunQuerySingle<DocumentID>(com, (r) => (DocumentID)r.GetInt32(0));
+    }
+
+    public string[] ReadDocumentSources(DocumentID documentID, SqliteTransaction? transaction = null){
+        using var com = GenCommand(
+            DBCommands.Select.DocumentSourceWhereID,
+            ("document_id", documentID)
+        );
+        com.Transaction = transaction;
+
+        return RunQuery<string>(com, (r) => r.GetString(0)).ToArray();
     }
 
     public TaxonymID[] QueryTaxonyms(string clause, SqliteTransaction? transaction = null){
@@ -288,6 +299,16 @@ public partial class DBEngine {
         RunNonQuery(com);
     }
 
+    public void InsertDocumentSource(DocumentID documentID, string url, SqliteTransaction? transaction = null){
+        using var com = GenCommand(
+            DBCommands.Insert.DocumentSource,
+            ("document_id", documentID),
+            ("url", url)
+        );
+        com.Transaction = transaction;
+        RunNonQuery(com);
+    }
+
     public TagID InsertTag(Tag tag, SqliteTransaction? transaction = null){
 
         using var com = GenCommand(
@@ -387,6 +408,16 @@ public partial class DBEngine {
             DBCommands.Delete.DocumentTagWherePK,
             ("document_id", documentID),
             ("tag_id", tagID)
+        );
+        com.Transaction = transaction;
+        RunNonQuery(com);
+    }
+
+    public void DeleteDocumentSource(DocumentID documentID, string url, SqliteTransaction? transaction = null){
+        using var com = GenCommand(
+            DBCommands.Delete.DocumentSourceWherePK,
+            ("document_id", documentID),
+            ("url", url)
         );
         com.Transaction = transaction;
         RunNonQuery(com);
