@@ -51,6 +51,12 @@ public static partial class CLICommands {
                 ctx.archive.ViewAdd(boundView, docID);
             }
 
+            var sources = ctx.archive.DocumentGetSources(docID);
+            Console.WriteLine($"  Sources: {(sources.Count() == 0 ? "<none>" : "")}");
+            foreach(var source in sources){
+                Console.WriteLine($"   * {source}");
+            }
+
         }, docRefArgument, reflectOption);
         
         return com;
