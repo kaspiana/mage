@@ -82,21 +82,26 @@ public class QueryNodeTag : QueryNode {
 
     public override string ToSQL(Archive archive)
     {
-        IEnumerable<TagID> antecedents;
+        IEnumerable<TagID> tagIDs;
+
 
         if(tag.Contains('*')){
-
-            IEnumerable<TagID> tagIDs = archive.TagFindFuzzy(tag);
-            antecedents = tagIDs.Select((tagID) => archive.TagGetAntecedents(tagID).Prepend(tagID)).SelectMany(x => x);
-
+            tagIDs = archive.TagFindFuzzy(tag);
         } else {
-
-            var tagID = (TagID)archive.TagFind(tag);
-            antecedents = archive.TagGetAntecedents(tagID).Prepend(tagID);
-
+            tagIDs = [(TagID)archive.TagFind(tag)];
         }
 
-        return $"select document_id id from document_tag where tag_id in ({string.Join(", ", antecedents)})";
+        return @$"
+select document_id id from (document_tag
+inner join (with recursive antecedent_tag (id) as (
+values ({string.Join("),(", tagIDs)})
+union select tag_implication.antecedent_id from 
+antecedent_tag inner join tag_implication
+on tag_implication.consequent_id = antecedent_tag.id)
+select tag.id from antecedent_tag 
+inner join tag
+on antecedent_tag.id = tag.id) antecedent_tag
+on document_tag.tag_id = antecedent_tag.id)";
     }
 }
 public class QueryNodeNegation : QueryNode {
@@ -186,10 +191,9 @@ public class Query {
         var com = db.CreateCommand();
         com.CommandText = @$"
 select distinct result.id from 
-    ({root.ToSQL(archive)}) result
-    inner join {(public_ ? "public_": "")}document
-    on result.id = public_document.id;
-        ";
+({root.ToSQL(archive)}) result
+inner join {(public_ ? "public_": "")}document
+on result.id = {(public_ ? "public_": "")}document.id;";
         
         Console.WriteLine("SQL: " + com.CommandText);
 
