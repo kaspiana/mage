@@ -60,7 +60,12 @@ public static partial class CLICommands {
             Console.WriteLine($"  Deleted: {(doc.isDeleted ? "yes" : "no")}");
 
             var tagNames = ctx.archive.DocumentGetTags(docID).Select(tagID => ctx.archive.TagAsString(tagID));
-            Console.WriteLine($"  Tags: {string.Join(" ", tagNames)}");
+            if(tagNames.Count() == 0)
+                Console.WriteLine("$  Tags: <none>");
+            else {
+                Console.WriteLine($"  Tags:");
+                Console.WriteLine($"   {string.Join(" ", tagNames)}");
+            }
 
             if(reflect){
                 var boundView = ctx.archive.BindingGet(ObjectType.View);
