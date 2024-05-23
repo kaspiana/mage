@@ -127,6 +127,18 @@ public class QueryNodeDisjunction : QueryNodeJunction {
     }
 }
 
+public class QueryNodeExclusiveDisjunction : QueryNodeJunction {
+    public override string ToString()
+    {
+        return $"(xor {(string.Join(' ', args))})";
+    }
+    
+    public override string ToSQL(Archive archive){
+        var inDisj = string.Join(" union all ", args.Select((l) => $"select * from ({l.ToSQL(archive)})"));
+        return $"select result.id id from (select *, row_number() over (order by id) rn from ({inDisj})) result group by result.id having count(*) = 1";
+    }
+}
+
 public class Query {
     public QueryNode root;
     public static int tempTableIndex = 0;
