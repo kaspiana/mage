@@ -27,19 +27,6 @@ public class QueryNodeNone : QueryNode {
         return $"select id from document where 1=0";
     }
 }
-public class QueryNodeTagExplicit : QueryNode {
-    public TagID tagID;
-
-    public override string ToString()
-    {
-        return $"'/{tagID}'";
-    }
-
-    public override string ToSQL(Archive archive)
-    {
-        return $"select document_id id from document_tag where tag_id = {tagID}";
-    }
-}
 public class QueryNodeTag : QueryNode {
     public string tag;
 
