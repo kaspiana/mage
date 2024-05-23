@@ -338,7 +338,6 @@ public class Archive {
             fileName = fileName,
             fileExt = extension,
             fileSize = (int)fileInfo.Length,
-            addedAt = DateTime.Now,
             comment = comment
         });
 

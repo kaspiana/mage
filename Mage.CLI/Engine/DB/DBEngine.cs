@@ -342,7 +342,6 @@ public partial class DBEngine {
             ("file_name", document.fileName),
             ("file_ext", document.fileExt),
             ("file_size", document.fileSize),
-            ("added_at", ((DateTimeOffset)(document.addedAt)).ToUnixTimeSeconds()),
             ("comment", document.comment)
         );
         com.Transaction = transaction;
