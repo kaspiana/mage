@@ -325,6 +325,7 @@ public class Archive {
     }
 
     public DocumentID IngestFile(string filePath, string? comment = null){
+        var fileInfo = new FileInfo(filePath);
         var fileName = Path.GetFileNameWithoutExtension(filePath);
         var extension = Path.GetExtension(filePath)[1..];
         var hash = HashFile(filePath);
@@ -336,6 +337,7 @@ public class Archive {
             hash = hash,
             fileName = fileName,
             fileExt = extension,
+            fileSize = (int)fileInfo.Length,
             ingestedAt = DateTime.Now,
             comment = comment
         });

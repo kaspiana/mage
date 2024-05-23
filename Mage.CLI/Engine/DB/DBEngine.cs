@@ -100,16 +100,17 @@ public partial class DBEngine {
 
         return RunQuerySingle<Document>(com, (r) => {
             var ingestTimestamp = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
-            ingestTimestamp = ingestTimestamp.AddSeconds(r.GetInt32(4)).ToLocalTime();
+            ingestTimestamp = ingestTimestamp.AddSeconds(r.GetInt32(5)).ToLocalTime();
 
             return new Document(){
                 hash = r.GetString(1),
                 id = documentID,
                 fileName = r.GetString(2),
                 fileExt = r.GetString(3),
+                fileSize = r.GetInt32(4),
                 ingestedAt = ingestTimestamp,
-                comment = r.IsDBNull(5) ? null : r.GetString(5),
-                isDeleted = r.GetBoolean(6)
+                comment = r.IsDBNull(6) ? null : r.GetString(6),
+                isDeleted = r.GetBoolean(7)
             };
         });
     }
@@ -340,6 +341,7 @@ public partial class DBEngine {
             ("hash", document.hash),
             ("file_name", document.fileName),
             ("file_ext", document.fileExt),
+            ("file_size", document.fileSize),
             ("ingested_at", ((DateTimeOffset)(document.ingestedAt)).ToUnixTimeSeconds()),
             ("comment", document.comment)
         );

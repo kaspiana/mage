@@ -8,7 +8,8 @@ create table document (
     hash            text not null,
     file_name       text not null,
     file_ext        text not null,
-    ingested_at     integer not null,
+    file_size       integer not null, -- bytes
+    ingested_at     integer not null, -- unix timestamp
     comment         text,
     is_deleted      integer not null default 0
 );
