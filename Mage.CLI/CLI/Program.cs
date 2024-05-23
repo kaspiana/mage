@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using Mage.Engine;
 
-var archiveDir = "C:/home/catalogue-tool/v2/test-archives/a/";
+var archiveDir = Directory.GetCurrentDirectory().Replace('\\', '/') + "/";
 
 var ctx = new CLIContext(){
     archiveDir = archiveDir,
@@ -13,6 +13,13 @@ var ctx = new CLIContext(){
 try {
     if(Directory.Exists(ctx.mageDir))
         ctx.archive = Archive.Load(ctx.mageDir, archiveDir);
+    else {
+        var ogFGColor = Console.ForegroundColor;
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.Write("NOTE: ");
+        Console.ForegroundColor = ogFGColor;
+        Console.WriteLine("No archive exists in this directory. (Ignore if using mage init.)");
+    }
 } catch(Archive.IncompatibleArchiveException ex){
     var ogFGColor = Console.ForegroundColor;
     Console.ForegroundColor = ConsoleColor.Red;
