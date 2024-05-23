@@ -28,7 +28,7 @@ public static partial class CLICommands {
             ComDocUntag(ctx, docRefArgument),
             ComDocSources(ctx, docRefArgument),
             ComDocSource(ctx, docRefArgument),
-            //ComDocUnsource(ctx, docRefArgument)
+            ComDocUnsource(ctx, docRefArgument)
         };
 
         com.SetHandler((docRef, reflect) => {
@@ -111,6 +111,23 @@ public static partial class CLICommands {
         com.SetHandler((docRef, url) => {
             var docID = (DocumentID)ObjectRef.ResolveDocument(ctx.archive, docRef)!;
             ctx.archive.DocumentAddSource(docID, url);
+        }, docRefArgument, urlArgument);
+
+        return com;
+    }
+
+    public static Command ComDocUnsource(CLIContext ctx, Argument<string> docRefArgument){
+        var urlArgument = new Argument<string>(
+            name: "url"
+        );
+
+        var com = new Command("unsource", "From source from document."){
+            urlArgument
+        };
+
+        com.SetHandler((docRef, url) => {
+            var docID = (DocumentID)ObjectRef.ResolveDocument(ctx.archive, docRef)!;
+            ctx.archive.DocumentRemoveSource(docID, url);
         }, docRefArgument, urlArgument);
 
         return com;
