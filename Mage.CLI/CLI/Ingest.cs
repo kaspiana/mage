@@ -17,12 +17,21 @@ public static partial class CLICommands {
         var com = new Command("ingest", "Ingest files in inbox into archive.")
         {
             commentOption,
-            ComIngestFrom(ctx, commentOption)
+            ComIngestFrom(ctx, commentOption),
+            ComIngestList(ctx)
         };
         com.SetHandler((comment) => {
             ctx.archive.Ingest();
         }, commentOption);
 
+        return com;
+    }
+
+    public static Command ComIngestList(CLIContext ctx){
+        var com = new Command("list", "Ingest files from ingest list.");
+        com.SetHandler(() => {
+            ctx.archive.IngestList();
+        });
         return com;
     }
 

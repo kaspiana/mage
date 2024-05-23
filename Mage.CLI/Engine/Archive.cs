@@ -114,6 +114,9 @@ public class Archive {
     public const string INFO_FILE_PATH = DATA_DIR_PATH + "info.ini";
     public const string BIND_FILE_PATH = DATA_DIR_PATH + "bind.ini";
     public const string DB_FILE_PATH = DATA_DIR_PATH + "db.sqlite";
+    public const string INGEST_LIST_FILE_PATH = DATA_DIR_PATH + "ingestlist.txt";
+
+    public const string INGEST_LIST_FILE_HEADER = "# file_path | comment | tag list | series\n";
 
     public static readonly SemanticVersion VERSION = new SemanticVersion(){
         releaseType = -1,
@@ -169,6 +172,9 @@ public class Archive {
             $"series=",
             $"view={DEFAULT_VIEW_NAME}"
         ]);
+
+        // create ingest list file
+        File.WriteAllText($"{archiveDir}{INGEST_LIST_FILE_PATH}", INGEST_LIST_FILE_HEADER);
 
         var archive = Load(archiveDir);
         
@@ -250,6 +256,70 @@ public class Archive {
         foreach(var filePath in inboxFiles){
             IngestFile(filePath);
             File.Delete(filePath);
+        }
+    }
+
+    public void IngestList(){
+        var ingestListPath = $"{archiveDir}{INGEST_LIST_FILE_PATH}";
+
+        if(!File.Exists(ingestListPath)){
+            var ogFGColor = Console.ForegroundColor;
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.Write("NOTE: ");
+            Console.ForegroundColor = ogFGColor;
+            Console.WriteLine("Ingest list file did not exist.");
+
+            File.WriteAllText($"{archiveDir}{INGEST_LIST_FILE_PATH}", INGEST_LIST_FILE_HEADER);
+
+            return;
+        }
+
+        var ingestListLines = (string[])File.ReadAllLines(ingestListPath);
+
+        ingestListLines = ingestListLines.Where(
+            (l) => {
+                var t = l.Trim();
+                return (t.Count() > 0) && (t[0] != '#');
+            }
+        ).ToArray();
+
+        var ingestListItems = ingestListLines.Select(
+            (l) => Regex.Split(l, @"\|(?=(?:[^""]*""[^""]*"")*[^""]*$)")
+                        .Select(s => s.Trim())
+                        .ToArray()
+        );
+
+        // filePath | comment | tags | series
+
+        var i = 0;
+        foreach(var ingestListItem in ingestListItems){
+            if(ingestListItem.Count() < 3)
+                continue;
+
+            var filePath = ingestListItem[0];
+            var comment = ingestListItem[1];
+            if(comment.Count() > 0 && comment[0] == '"'){
+                comment = comment.Trim('"');
+            }
+            var tags = ingestListItem[2]
+                        .Split(' ')
+                        .Select((s) => s.Trim())
+                        .Where((s) => s.Count() > 0)
+                        .Select((s) => ObjectRef.ResolveTag(this, s));
+            //var series = ingestListItem[3];     // TODO
+
+            Console.WriteLine($"ingested document #{i}:");
+            Console.WriteLine($"  file path: {filePath}");
+            Console.WriteLine($"  comment: {comment}");
+            Console.WriteLine($"  tags: {string.Join(' ', tags)}");
+
+            i++;
+
+            var documentID = IngestFile(filePath, comment);
+            foreach(var tagID in tags){
+                if(tagID is null) continue;
+                DocumentAddTag(documentID, (TagID)tagID);
+            }
         }
     }
 
