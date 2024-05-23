@@ -473,6 +473,21 @@ public class Archive {
         db.DeleteDocumentTag(documentID, tagID);
     }
 
+    public string[] DocumentGetSources(DocumentID documentID){
+        db.EnsureConnected();
+        return db.ReadDocumentSources(documentID);
+    }
+
+    public void DocumentAddSource(DocumentID documentID, string url){
+        db.EnsureConnected();
+        db.InsertDocumentSource(documentID, url);
+    }
+
+    public void DocumentRemoveSource(DocumentID documentID, string url){
+        db.EnsureConnected();
+        db.DeleteDocumentSource(documentID, url);
+    }
+
     public Taxonym? TaxonymGet(TaxonymID taxonymID){
         db.EnsureConnected();
         return db.ReadTaxonym(taxonymID);
