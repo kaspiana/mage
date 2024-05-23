@@ -1,6 +1,9 @@
 ﻿using System.CommandLine;
 using System.Diagnostics;
+using System.Text;
 using Mage.Engine;
+
+Console.OutputEncoding = Encoding.UTF8;
 
 var _archiveDir = Directory.GetCurrentDirectory().Replace('\\', '/') + "/";
 
