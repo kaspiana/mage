@@ -1,4 +1,5 @@
 using System.CommandLine;
+using System.Diagnostics;
 using System.Security.Cryptography.X509Certificates;
 using Mage.Engine;
 using Sprache;
@@ -47,7 +48,8 @@ public static partial class CLICommands {
             Console.WriteLine();
             Console.WriteLine(tagSearchStr);
 
-
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
             
             var query = QueryParser.Parse(tagSearchStr);
 
@@ -55,12 +57,14 @@ public static partial class CLICommands {
 
             var ids = query.GetResults(ctx.archive);
 
+            sw.Stop();
+
             if(ids.Count() > 0){
                 var queryViewName = ctx.archive.ViewQueryCreate();
                 foreach(var id in ids){
                     ctx.archive.ViewAdd(queryViewName, id);
                 }
-                Console.WriteLine($"{ids.Count()} results found, reflected in {queryViewName}");
+                Console.WriteLine($"{ids.Count()} results found in {sw.ElapsedMilliseconds}ms, reflected in {queryViewName}");
             } else {
                 Console.WriteLine($"no results found");
             }
