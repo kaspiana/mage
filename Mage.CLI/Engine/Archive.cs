@@ -121,8 +121,8 @@ public class Archive {
     public static readonly SemanticVersion VERSION = new SemanticVersion(){
         releaseType = -1,
         major = 9,
-        minor = 3,
-        patch = 3
+        minor = 4,
+        patch = 0
     };
 
     public const string IN_VIEW_NAME = "in";
@@ -471,6 +471,21 @@ public class Archive {
     public void DocumentRemoveTag(DocumentID documentID, TagID tagID){
         db.EnsureConnected();
         db.DeleteDocumentTag(documentID, tagID);
+    }
+
+    public string[] DocumentGetSources(DocumentID documentID){
+        db.EnsureConnected();
+        return db.ReadDocumentSources(documentID);
+    }
+
+    public void DocumentAddSource(DocumentID documentID, string url){
+        db.EnsureConnected();
+        db.InsertDocumentSource(documentID, url);
+    }
+
+    public void DocumentRemoveSource(DocumentID documentID, string url){
+        db.EnsureConnected();
+        db.DeleteDocumentSource(documentID, url);
     }
 
     public Taxonym? TaxonymGet(TaxonymID taxonymID){
