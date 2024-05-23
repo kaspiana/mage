@@ -119,7 +119,7 @@ public class Archive {
         releaseType = -1,
         major = 9,
         minor = 1,
-        patch = 0
+        patch = 1
     };
 
     public const string IN_VIEW_NAME = "in";
@@ -356,9 +356,15 @@ public class Archive {
         return TagCreate((TaxonymID)TaxonymCreate(parentID, name)!);
     }
 
-    public void TagDelete(TagID tagID){
+    public void TagDelete(TagID tagID, bool preserveTaxonym = false){
+        var tag = TagGet(tagID);
+
         db.EnsureConnected();
         db.DeleteTag(tagID);
+
+        if(!preserveTaxonym){
+            db.DeleteTaxonym((TaxonymID)tag?.taxonymID);
+        }
     }
 
     public void TagAddImplication(TagID tagID, TagID consequentID){

@@ -493,7 +493,7 @@ public partial class DBEngine {
 
         using var com2 = GenCommand(
             DBCommands.Delete.TaxonymAliasWhereTaxonymID,
-            ("taxonym_idid", taxonymID)
+            ("taxonym_id", taxonymID)
         );
         com2.Transaction = transaction;
 
