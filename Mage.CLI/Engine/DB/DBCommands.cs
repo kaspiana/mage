@@ -34,19 +34,23 @@ public static class DBCommands {
         public const string DocumentTagIDWhereDocumentID = "select tag_id from document_tag where document_id = @document_id";
         public static string TagDocumentIDWhereTagID(bool public_ = true) => $"select document_id from {(public_ ? "public_" : "")}document_tag where tag_id = @tag_id";
     
+        public static string DocumentSource(bool public_ = true) => $"select * from {(public_ ? "public_" : "")}document_source";
+        public const string DocumentSourceWhereID = $"select * from document_source where document_id = @document_id";
     }
 
     public static class Count {
 
         public static string DocumentTagWhereTagID(bool public_ = true) => $"select count(*) from {(public_ ? "public_" : "")}document_tag where tag_id = @tag_id";
         public const string DocumentTagWhereDocumentID = "select count(*) from document_tag where document_id = @document_id";
-   
+    
+        public const string DocumentSourceWhereID = "select count(*) from document_source where document_id = @document_id";
     }
 
     public static class Insert {
 
         public const string Document = "insert into document (hash, file_name, extension, ingested_at, comment) values (@hash, @file_name, @extension, @ingested_at, @comment)";
         public const string DocumentTag = "insert into document_tag (document_id, tag_id) values (@document_id, @tag_id)";
+        public const string DocumentSource = "insert into document_source (document_id, url) values (@document_id, @url)";
         public const string Tag = "insert into tag (taxonym_id) values (@taxonym_id)";
         public const string TagImplication = "insert into tag_implication (antecedent_id, consequent_id) values (@antecedent_id, @consequent_id)";
         public const string Taxonym = "insert into taxonym (canon_parent_id, canon_alias) values (@canon_parent_id, @canon_alias)";
@@ -87,6 +91,8 @@ public static class DBCommands {
         public const string DocumentTagWhereDocumentID = "delete from document_tag where document_id = @document_id";
         public const string DocumentTagWhereTagID = "delete from document_tag where tag_id = @tag_id";
 
+        public const string DocumentSource = "delete from document_source";
+        public const string DocumentSourceWherePK = "delete from document_source where document_id = @document_id and url = @url";
 
     }
 
