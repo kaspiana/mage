@@ -1,6 +1,14 @@
 namespace Mage.Engine.AST;
 
-
+public enum QueryParameterOperator {
+    Equals,
+    NotEquals,
+    Greater,
+    GreaterOrEquals,
+    Lesser,
+    LesserOrEquals,
+    Like
+}
 
 public abstract class QueryNode {
     public abstract string ToSQL(Archive archive);
@@ -25,6 +33,43 @@ public class QueryNodeNone : QueryNode {
     public override string ToSQL(Archive archive)
     {
         return $"select id from document where 1=0";
+    }
+}
+public class QueryNodeMetaTag : QueryNode {
+
+    public string tag;
+    public QueryParameterOperator op;
+    public string param;
+
+    public override string ToString()
+    {
+        var opStr = "=";
+        switch(op){
+            case QueryParameterOperator.Equals: opStr = "="; break; 
+            case QueryParameterOperator.NotEquals: opStr = "!="; break;
+            case QueryParameterOperator.Greater: opStr = ">"; break;
+            case QueryParameterOperator.GreaterOrEquals: opStr = ">="; break;
+            case QueryParameterOperator.Lesser: opStr = "<"; break;
+            case QueryParameterOperator.LesserOrEquals: opStr = "<="; break;
+            case QueryParameterOperator.Like: opStr = "like"; break;
+        }
+        return $"(meta '{tag}' {opStr} {param})";
+    }
+
+    public override string ToSQL(Archive archive)
+    {
+        // sufficient for basic metatags
+        var opStr = "=";
+        switch(op){
+            case QueryParameterOperator.Equals: opStr = "="; break; 
+            case QueryParameterOperator.NotEquals: opStr = "!="; break;
+            case QueryParameterOperator.Greater: opStr = ">"; break;
+            case QueryParameterOperator.GreaterOrEquals: opStr = ">="; break;
+            case QueryParameterOperator.Lesser: opStr = "<"; break;
+            case QueryParameterOperator.LesserOrEquals: opStr = "<="; break;
+            case QueryParameterOperator.Like: opStr = "like"; break;
+        }
+        return $"select id from document where {tag} {opStr} {param}";
     }
 }
 public class QueryNodeTag : QueryNode {
