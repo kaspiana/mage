@@ -108,7 +108,7 @@ public partial class DBEngine {
                 fileName = r.GetString(2),
                 fileExt = r.GetString(3),
                 fileSize = r.GetInt32(4),
-                ingestedAt = ingestTimestamp,
+                addedAt = ingestTimestamp,
                 comment = r.IsDBNull(6) ? null : r.GetString(6),
                 isDeleted = r.GetBoolean(7)
             };
@@ -342,7 +342,7 @@ public partial class DBEngine {
             ("file_name", document.fileName),
             ("file_ext", document.fileExt),
             ("file_size", document.fileSize),
-            ("ingested_at", ((DateTimeOffset)(document.ingestedAt)).ToUnixTimeSeconds()),
+            ("added_at", ((DateTimeOffset)(document.addedAt)).ToUnixTimeSeconds()),
             ("comment", document.comment)
         );
         com.Transaction = transaction;

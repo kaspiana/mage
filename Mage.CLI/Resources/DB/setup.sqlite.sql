@@ -9,7 +9,7 @@ create table document (
     file_name       text not null,
     file_ext        text not null,
     file_size       integer not null, -- bytes
-    ingested_at     integer not null, -- unix timestamp
+    added_at        integer not null, -- unix timestamp
     comment         text,
     is_deleted      integer not null default 0
 );

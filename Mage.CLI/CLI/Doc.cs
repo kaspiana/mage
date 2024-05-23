@@ -47,7 +47,7 @@ public static partial class CLICommands {
                 default: fileSizeStr = $"{doc.fileSize / (1 << 30)} GB"; break;
             }
             Console.WriteLine($"  File size: {fileSizeStr}");
-            Console.WriteLine($"  Ingest timestamp: {doc.ingestedAt}");
+            Console.WriteLine($"  Added at: {doc.addedAt}");
             Console.WriteLine($"  Comment: {(doc.comment is null ? "<none>" : doc.comment)}");
             Console.WriteLine($"  Deleted: {(doc.isDeleted ? "yes" : "no")}");
 
