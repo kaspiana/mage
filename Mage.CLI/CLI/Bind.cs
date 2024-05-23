@@ -13,7 +13,7 @@ public static partial class CLICommands {
         };
 
         com.SetHandler(() => {
-            Console.Write( File.ReadAllText($"{ctx.archive.mageDir}{Archive.BIND_FILE_PATH}") );
+            Console.Write( File.ReadAllText($"{ctx.archive.archiveDir}{Archive.BIND_FILE_PATH}") );
         });
 
         return com;
