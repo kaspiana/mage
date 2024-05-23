@@ -25,7 +25,10 @@ public static partial class CLICommands {
             ComDocOpen(ctx, docRefArgument),
             ComDocTags(ctx, docRefArgument),
             ComDocTag(ctx, docRefArgument),
-            ComDocUntag(ctx, docRefArgument)
+            ComDocUntag(ctx, docRefArgument),
+            ComDocSources(ctx, docRefArgument),
+            //ComDocSource(ctx, docRefArgument),
+            //ComDocUnsource(ctx, docRefArgument)
         };
 
         com.SetHandler((docRef, reflect) => {
@@ -71,6 +74,28 @@ public static partial class CLICommands {
 
         }, docRefArgument);
         
+        return com;
+    }
+
+    public static Command ComDocSources(CLIContext ctx, Argument<string> docRefArgument){
+        var com = new Command("sources", "List document's sources.");
+
+        com.SetHandler((docRef) => {
+            var docID = (DocumentID)ObjectRef.ResolveDocument(ctx.archive, docRef)!;
+
+            var sources = ctx.archive.DocumentGetSources(docID);
+
+            if(sources.Count() == 0){
+                Console.WriteLine("no sources");
+                return;
+            }
+
+            foreach(var source in sources){
+                Console.WriteLine($" * {source}");
+            }
+
+        }, docRefArgument);
+
         return com;
     }
 
