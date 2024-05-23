@@ -10,6 +10,7 @@ create table document (
     file_ext        text not null,
     file_size       integer not null, -- bytes
     added_at        integer not null default (unixepoch()), -- unix timestamp
+    updated_at      integer not null default (unixepoch()), -- unix timestamp
     comment         text,
     is_deleted      integer not null default 0
 );

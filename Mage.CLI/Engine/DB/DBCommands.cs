@@ -99,6 +99,8 @@ public static class DBCommands {
     public static class Update {
 
         public const string DocumentIsDeletedWhereID = "update document set is_deleted = @is_deleted where id = @id";
+        public const string DocumentUpdatedAt = "update document set updated_at = unixepoch()";
+        public const string DocumentUpdatedAtWhereID = "update document set updated_at = unixepoch() where id = @id";
 
     }
 

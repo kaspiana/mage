@@ -99,18 +99,17 @@ public partial class DBEngine {
         com.Transaction = transaction;
 
         return RunQuerySingle<Document>(com, (r) => {
-            var ingestTimestamp = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
-            ingestTimestamp = ingestTimestamp.AddSeconds(r.GetInt32(5)).ToLocalTime();
-
+            var unixStart = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
             return new Document(){
                 hash = r.GetString(1),
                 id = documentID,
                 fileName = r.GetString(2),
                 fileExt = r.GetString(3),
                 fileSize = r.GetInt32(4),
-                addedAt = ingestTimestamp,
-                comment = r.IsDBNull(6) ? null : r.GetString(6),
-                isDeleted = r.GetBoolean(7)
+                addedAt = unixStart.AddSeconds(r.GetInt32(5)).ToLocalTime(),
+                updatedAt = unixStart.AddSeconds(r.GetInt32(6)).ToLocalTime(),
+                comment = r.IsDBNull(7) ? null : r.GetString(7),
+                isDeleted = r.GetBoolean(8)
             };
         });
     }
@@ -298,6 +297,8 @@ public partial class DBEngine {
         );
         com.Transaction = transaction;
         RunNonQuery(com);
+
+        UpdateDocumentUpdatedAt(documentID);
     }
 
     public void InsertDocumentSource(DocumentID documentID, string url, SqliteTransaction? transaction = null){
@@ -308,6 +309,8 @@ public partial class DBEngine {
         );
         com.Transaction = transaction;
         RunNonQuery(com);
+
+        UpdateDocumentUpdatedAt(documentID);
     }
 
     public TagID InsertTag(Tag tag, SqliteTransaction? transaction = null){
@@ -412,6 +415,8 @@ public partial class DBEngine {
         );
         com.Transaction = transaction;
         RunNonQuery(com);
+
+        UpdateDocumentUpdatedAt(documentID);
     }
 
     public void DeleteDocumentSource(DocumentID documentID, string url, SqliteTransaction? transaction = null){
@@ -422,6 +427,8 @@ public partial class DBEngine {
         );
         com.Transaction = transaction;
         RunNonQuery(com);
+
+        UpdateDocumentUpdatedAt(documentID);
     }
 
     public void DeleteTag(TagID tagID, SqliteTransaction? transaction = null){
@@ -476,20 +483,24 @@ public partial class DBEngine {
 
         RunNonQuery(com1);
         RunNonQuery(com2);
+
+        UpdateDocumentUpdatedAt(documentID);
     }
 
     public void DeleteAllDocuments(SqliteTransaction? transaction = null){
 
-        using var com1 = GenCommand(
-            DBCommands.Delete.DocumentTag
-        );
+        using var com1 = GenCommand(DBCommands.Delete.DocumentTag);
         com1.Transaction = transaction;
 
         using var com2 = GenCommand(DBCommands.Delete.Document);
         com2.Transaction = transaction;
+
+        using var com3 = GenCommand(DBCommands.Update.DocumentUpdatedAt);
+        com3.Transaction = transaction;
         
         RunNonQuery(com1);
         RunNonQuery(com2);
+        RunNonQuery(com3);
     }
 
     public void DeleteTaxonymAlias(TaxonymID taxonymID, string alias, SqliteTransaction? transaction = null){
@@ -552,6 +563,17 @@ public partial class DBEngine {
             DBCommands.Update.DocumentIsDeletedWhereID,
             ("id", documentID),
             ("is_deleted", isDeleted)
+        );
+        com.Transaction = transaction;
+        RunNonQuery(com);
+
+        UpdateDocumentUpdatedAt(documentID);
+    }
+
+    public void UpdateDocumentUpdatedAt(DocumentID documentID, SqliteTransaction? transaction = null){
+        using var com = GenCommand(
+            DBCommands.Update.DocumentUpdatedAtWhereID,
+            ("id", documentID)
         );
         com.Transaction = transaction;
         RunNonQuery(com);

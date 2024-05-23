@@ -48,6 +48,7 @@ public static partial class CLICommands {
             }
             Console.WriteLine($"  File size: {fileSizeStr}");
             Console.WriteLine($"  Added at: {doc.addedAt}");
+            Console.WriteLine($"  Updated at: {doc.updatedAt}");
             Console.WriteLine($"  Comment: {(doc.comment is null ? "<none>" : doc.comment)}");
             Console.WriteLine($"  Deleted: {(doc.isDeleted ? "yes" : "no")}");
 

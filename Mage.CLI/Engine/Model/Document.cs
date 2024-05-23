@@ -7,6 +7,7 @@ public struct Document {
     public string fileExt;
     public int fileSize;
     public DateTime addedAt;
+    public DateTime updatedAt;
     public string? comment;
     public bool isDeleted;
 }
