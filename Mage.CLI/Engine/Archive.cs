@@ -335,7 +335,7 @@ public class Archive {
         var documentID = db.InsertDocument(new Document(){
             hash = hash,
             fileName = fileName,
-            extension = extension,
+            fileExt = extension,
             ingestedAt = DateTime.Now,
             comment = comment
         });
@@ -727,7 +727,7 @@ public class Archive {
         var newIndex = filePaths.Count();
 
         FileExt.CreateHardLink(
-            $"{viewDir}{newIndex}~{document.hash}.{document.extension}",
+            $"{viewDir}{newIndex}~{document.hash}.{document.fileExt}",
             $"{archiveDir}{FILES_DIR_PATH}{document.hash}",
             IntPtr.Zero
         );
@@ -755,7 +755,7 @@ public class Archive {
                 var document = (Document)DocumentGet((DocumentID)documentID)!;
 
                 FileExt.CreateHardLink(
-                    $"{viewDir}{newIndex}~{document.hash}.{document.extension}",
+                    $"{viewDir}{newIndex}~{document.hash}.{document.fileExt}",
                     $"{archiveDir}{FILES_DIR_PATH}{document.hash}",
                     IntPtr.Zero
                 );

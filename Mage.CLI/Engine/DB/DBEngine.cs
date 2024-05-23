@@ -106,7 +106,7 @@ public partial class DBEngine {
                 hash = r.GetString(1),
                 id = documentID,
                 fileName = r.GetString(2),
-                extension = r.GetString(3),
+                fileExt = r.GetString(3),
                 ingestedAt = ingestTimestamp,
                 comment = r.IsDBNull(5) ? null : r.GetString(5),
                 isDeleted = r.GetBoolean(6)
@@ -339,7 +339,7 @@ public partial class DBEngine {
             DBCommands.Insert.Document,
             ("hash", document.hash),
             ("file_name", document.fileName),
-            ("extension", document.extension),
+            ("file_ext", document.fileExt),
             ("ingested_at", ((DateTimeOffset)(document.ingestedAt)).ToUnixTimeSeconds()),
             ("comment", document.comment)
         );

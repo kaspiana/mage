@@ -38,7 +38,7 @@ public static partial class CLICommands {
             Console.WriteLine($"document {doc.hash}");
             Console.WriteLine($"  Archive ID: /{doc.id}");
             Console.WriteLine($"  File name: {doc.fileName}");
-            Console.WriteLine($"  Extension: {doc.extension}");
+            Console.WriteLine($"  File extension: {doc.fileExt}");
             Console.WriteLine($"  Ingest timestamp: {doc.ingestedAt}");
             Console.WriteLine($"  Comment: {(doc.comment is null ? "<none>" : doc.comment)}");
             Console.WriteLine($"  Deleted: {(doc.isDeleted ? "yes" : "no")}");
@@ -70,7 +70,7 @@ public static partial class CLICommands {
             var doc = (Document)ctx.archive.DocumentGet(docID)!;
 
             var viewIndex = ctx.archive.ViewAdd(Archive.OPEN_VIEW_NAME, docID);
-            var viewFilePath = $"{ctx.archive.archiveDir}{Archive.VIEWS_DIR_PATH}{Archive.OPEN_VIEW_NAME}/{viewIndex}~{doc.hash}.{doc.extension}";
+            var viewFilePath = $"{ctx.archive.archiveDir}{Archive.VIEWS_DIR_PATH}{Archive.OPEN_VIEW_NAME}/{viewIndex}~{doc.hash}.{doc.fileExt}";
 
             using Process fileOpener = new Process();
 

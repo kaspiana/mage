@@ -7,7 +7,7 @@ create table document (
     id              integer not null primary key autoincrement,
     hash            text not null,
     file_name       text not null,
-    extension       text not null,
+    file_ext        text not null,
     ingested_at     integer not null,
     comment         text,
     is_deleted      integer not null default 0
