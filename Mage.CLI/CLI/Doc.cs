@@ -27,7 +27,7 @@ public static partial class CLICommands {
             ComDocTag(ctx, docRefArgument),
             ComDocUntag(ctx, docRefArgument),
             ComDocSources(ctx, docRefArgument),
-            //ComDocSource(ctx, docRefArgument),
+            ComDocSource(ctx, docRefArgument),
             //ComDocUnsource(ctx, docRefArgument)
         };
 
@@ -95,6 +95,23 @@ public static partial class CLICommands {
             }
 
         }, docRefArgument);
+
+        return com;
+    }
+
+    public static Command ComDocSource(CLIContext ctx, Argument<string> docRefArgument){
+        var urlArgument = new Argument<string>(
+            name: "url"
+        );
+
+        var com = new Command("source", "Add source to document."){
+            urlArgument
+        };
+
+        com.SetHandler((docRef, url) => {
+            var docID = (DocumentID)ObjectRef.ResolveDocument(ctx.archive, docRef)!;
+            ctx.archive.DocumentAddSource(docID, url);
+        }, docRefArgument, urlArgument);
 
         return com;
     }
