@@ -116,7 +116,7 @@ public class Archive {
     public const string DB_FILE_PATH = DATA_DIR_PATH + "db.sqlite";
     public const string INGEST_LIST_FILE_PATH = DATA_DIR_PATH + "ingestlist.txt";
 
-    public const string INGEST_LIST_FILE_HEADER = "# file_path | comment | tag list | series | source list\n";
+    public const string INGEST_LIST_FILE_HEADER = "# file path | comment | tag list | series | source list\n";
 
     public static readonly SemanticVersion VERSION = new SemanticVersion(){
         releaseType = -1,
