@@ -356,9 +356,15 @@ public class Archive {
         return TagCreate((TaxonymID)TaxonymCreate(parentID, name)!);
     }
 
-    public void TagDelete(TagID tagID){
+    public void TagDelete(TagID tagID, bool preserveTaxonym = false){
+        var tag = TagGet(tagID);
+
         db.EnsureConnected();
         db.DeleteTag(tagID);
+
+        if(!preserveTaxonym){
+            db.DeleteTaxonym((TaxonymID)tag?.taxonymID);
+        }
     }
 
     public void TagAddImplication(TagID tagID, TagID consequentID){

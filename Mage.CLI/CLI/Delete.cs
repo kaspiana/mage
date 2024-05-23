@@ -54,15 +54,21 @@ public static partial class CLICommands {
         var tagRefArgument = new Argument<string>(
             name: "tag"
         );
+        
+        var preserveTaxOption = new Option<bool>(
+            name: "--preserve-taxonym",
+            getDefaultValue: () => false
+        );
 
         var com = new Command("tag", "Delete tag."){
-            tagRefArgument
+            tagRefArgument,
+            preserveTaxOption
         };
 
-        com.SetHandler((tagRef) => {
+        com.SetHandler((tagRef, preserveTax) => {
             var tagID = (TagID)ObjectRef.ResolveTag(ctx.archive, tagRef)!;
-            ctx.archive.TagDelete(tagID);
-        }, tagRefArgument);
+            ctx.archive.TagDelete(tagID, preserveTax);
+        }, tagRefArgument, preserveTaxOption);
 
         return com;
     }
