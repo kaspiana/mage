@@ -49,7 +49,14 @@ public static partial class CLICommands {
             Console.WriteLine($"  File size: {fileSizeStr}");
             Console.WriteLine($"  Added at: {doc.addedAt}");
             Console.WriteLine($"  Updated at: {doc.updatedAt}");
-            Console.WriteLine($"  Comment: {(doc.comment is null ? "<none>" : doc.comment)}");
+            if(doc.comment is null)
+                Console.WriteLine($"  Comment: <none>");
+            else {
+                Console.WriteLine($"  Comment:");
+                foreach(var line in doc.comment.Split('\n')){
+                    Console.WriteLine($"   {line}");
+                }
+            }
             Console.WriteLine($"  Deleted: {(doc.isDeleted ? "yes" : "no")}");
 
             var tagNames = ctx.archive.DocumentGetTags(docID).Select(tagID => ctx.archive.TagAsString(tagID));
