@@ -42,6 +42,14 @@ public static class QueryParser {
                     return [x];
                 }
             });
+        } else if(node is AST.QueryNodeExclusiveDisjunction){
+            node.args = node.args.SelectMany(x => {
+                if(x is AST.QueryNodeExclusiveDisjunction){
+                    return JunctionFlatten((AST.QueryNodeExclusiveDisjunction)x).args;
+                } else {
+                    return [x];
+                }
+            });
         }
         return node;
     }
@@ -50,11 +58,16 @@ public static class QueryParser {
         from inner in Sprache.Parse.ChainOperator(
             Sprache.Parse.String("OR").Text().Token()
             .Or(Sprache.Parse.String("AND").Text().Token()
-                .Or(Sprache.Parse.WhiteSpace.AtLeastOnce().Text())),
+            .Or(Sprache.Parse.String("XOR").Text().Token())
+            .Or(Sprache.Parse.WhiteSpace.AtLeastOnce().Text())),
             Sprache.Parse.Ref(()=>InnerNode),
             (op, lhs, rhs) => {
                 if(op == "OR"){
                     return (AST.QueryNode)(new AST.QueryNodeDisjunction(){
+                        args = [lhs, rhs]
+                    });
+                } else if (op == "XOR"){
+                    return (AST.QueryNode)(new AST.QueryNodeExclusiveDisjunction(){ 
                         args = [lhs, rhs]
                     });
                 } else {
