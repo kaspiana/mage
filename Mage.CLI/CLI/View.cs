@@ -34,7 +34,24 @@ public static partial class CLICommands {
                     Console.WriteLine($" * /{i}: <missing>");
                 } else {
                     Console.WriteLine($" * /{i}: {ctx.archive.GetDocumentHash((DocumentID)documentID)}");
+                    var doc = ctx.archive.DocumentGet((DocumentID)documentID);
+                    Console.WriteLine($"      File extension: {doc?.fileExt}");
+                    if(doc?.comment is not null) {
+                        Console.WriteLine($"      Comment:");
+                        foreach(var line in doc?.comment.Split('\n')){
+                            Console.WriteLine($"       {line}");
+                        }
+                    }
+
+                    var tagNames = ctx.archive.DocumentGetTags((DocumentID)documentID).Select(tagID => ctx.archive.TagAsString(tagID));
+                    if(tagNames.Count() == 0)
+                        Console.WriteLine("$      Tags: <none>");
+                    else {
+                        Console.WriteLine($"      Tags:");
+                        Console.WriteLine($"       {string.Join(" ", tagNames)}");
+                    }
                 }
+                Console.WriteLine();
             }
 
         }, viewRefArgument);
