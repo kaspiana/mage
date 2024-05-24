@@ -62,6 +62,11 @@ public class Migration {
             Console.WriteLine($"Unable to migrate from {archiveVersion} to {buildVersion}. (No script.)");
         }
 
+        if(archiveVersion == buildVersion){
+            infoMap["version"] = Archive.VERSION.ToString();
+            Archive.WriteInfoFile(archiveDir, infoMap);
+        }        
+
         return archiveVersion == buildVersion;
     }
 
