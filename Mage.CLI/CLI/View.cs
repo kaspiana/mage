@@ -58,7 +58,7 @@ public static partial class CLICommands {
 
                     var tagNames = ctx.archive.DocumentGetTags((DocumentID)documentID).Select(tagID => ctx.archive.TagAsString(tagID));
                     if(tagNames.Count() == 0)
-                        Console.WriteLine("$      Tags: <none>");
+                        Console.WriteLine($"      Tags: <none>");
                     else {
                         Console.WriteLine($"      Tags:");
                         Console.WriteLine($"       {string.Join(" ", tagNames)}");

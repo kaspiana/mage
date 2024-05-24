@@ -123,7 +123,7 @@ public class Archive {
         releaseType = -1,
         major = 11,
         minor = 1,
-        patch = 0
+        patch = 1
     };
 
     public const string IN_VIEW_NAME = "in";
