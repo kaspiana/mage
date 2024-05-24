@@ -41,35 +41,61 @@ public class QueryNodeMetaTag : QueryNode {
     public QueryParameterOperator op;
     public string param;
 
+    private string OpToString(){
+        return op switch{
+            QueryParameterOperator.Equals => "=",
+            QueryParameterOperator.NotEquals => "!=",
+            QueryParameterOperator.Greater => ">",
+            QueryParameterOperator.GreaterOrEquals => ">=",
+            QueryParameterOperator.Lesser => "<",
+            QueryParameterOperator.LesserOrEquals => "<=",
+            QueryParameterOperator.Like => "like",
+            _ => "="
+        };
+    }
+
     public override string ToString()
     {
-        var opStr = "=";
-        switch(op){
-            case QueryParameterOperator.Equals: opStr = "="; break; 
-            case QueryParameterOperator.NotEquals: opStr = "!="; break;
-            case QueryParameterOperator.Greater: opStr = ">"; break;
-            case QueryParameterOperator.GreaterOrEquals: opStr = ">="; break;
-            case QueryParameterOperator.Lesser: opStr = "<"; break;
-            case QueryParameterOperator.LesserOrEquals: opStr = "<="; break;
-            case QueryParameterOperator.Like: opStr = "like"; break;
-        }
-        return $"(meta '{tag}' {opStr} {param})";
+        return $"(meta '{tag}' {OpToString()} {param})";
     }
 
     public override string ToSQL(Archive archive)
     {
-        // sufficient for basic metatags
-        var opStr = "=";
-        switch(op){
-            case QueryParameterOperator.Equals: opStr = "="; break; 
-            case QueryParameterOperator.NotEquals: opStr = "!="; break;
-            case QueryParameterOperator.Greater: opStr = ">"; break;
-            case QueryParameterOperator.GreaterOrEquals: opStr = ">="; break;
-            case QueryParameterOperator.Lesser: opStr = "<"; break;
-            case QueryParameterOperator.LesserOrEquals: opStr = "<="; break;
-            case QueryParameterOperator.Like: opStr = "like"; break;
+
+        switch(tag){
+            default:
+                return $"select id from document where 1=0";
+            break;
+
+            // basic metatags
+            case    "id" 
+                    or "hash" 
+                    or "file_name" 
+                    or "file_ext"
+                    or "added_at"
+                    or "updated_at"
+                    or "comment"
+                    or "media_type":
+
+                return $"select id from document where {tag} {OpToString()} {param}";
+
+            break;
+
+            // media metatags
+            case    "width"
+                    or "height"
+                    or "duration":
+
+                return $@"
+select document_id id from (
+select document_id, width, height, null from image_metadata
+union select document_id, null, null, duration from audio_metadata
+union select document_id, width, height, duration from video_metadata)
+where {tag} {OpToString()} {param}
+                ";
+
+            break;
         }
-        return $"select id from document where {tag} {opStr} {param}";
     }
 }
 public class QueryNodeTag : QueryNode {
