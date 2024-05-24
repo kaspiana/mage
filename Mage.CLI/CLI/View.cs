@@ -39,6 +39,7 @@ public static partial class CLICommands {
                         if(l.KeyChar == 'q')
                             break;
                         Console.SetCursorPosition(0, Console.CursorTop - 1);
+                        Console.WriteLine();
                     }
                 }
                 var documentID = view.documents[i];
