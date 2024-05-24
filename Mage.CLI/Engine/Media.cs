@@ -1,3 +1,6 @@
+using System.Reflection;
+using SkiaSharp;
+
 namespace Mage.Engine;
 
 public enum MediaType {
@@ -83,17 +86,32 @@ public class Media {
     }
 
     public static MediaMetadataImage GetImageMetadata(string filePath){
+
+        using var buf = File.OpenRead(filePath);
+        var bmHeader = SKBitmap.DecodeBounds(buf);
+
         return new MediaMetadataImage(){
-            width = 0,
-            height = 0
+            width = bmHeader.Width,
+            height = bmHeader.Height
         };
     }
 
     public static MediaMetadata GetAnimatedImageMetadata(string filePath){
+
+        using var buf = File.OpenRead(filePath);
+        using var codec = SKCodec.Create(buf);
+
+        if(codec.FrameCount == 0){
+            return new MediaMetadataImage(){
+                width = codec.Info.Width,
+                height = codec.Info.Height
+            };
+        }
+
         return new MediaMetadataAnimation(){
-            width = 0,
-            height = 0,
-            length = 0
+            width = codec.Info.Width,
+            height = codec.Info.Height,
+            length = codec.FrameInfo.Sum(fi => fi.Duration) / 1000
         };
     }
 
