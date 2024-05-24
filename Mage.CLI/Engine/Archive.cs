@@ -122,7 +122,7 @@ public class Archive {
     public static readonly SemanticVersion VERSION = new SemanticVersion(){
         releaseType = -1,
         major = 11,
-        minor = 0,
+        minor = 1,
         patch = 0
     };
 

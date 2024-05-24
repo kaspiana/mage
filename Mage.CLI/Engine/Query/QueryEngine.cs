@@ -53,9 +53,15 @@ public static class QueryParser {
             Sprache.Parse.String("id").Text()
             .Or(Sprache.Parse.String("hash").Text())
             .Or(Sprache.Parse.String("file_name").Text())
-            .Or(Sprache.Parse.String("extension").Text())
-            .Or(Sprache.Parse.String("ingested_at").Text())
+            .Or(Sprache.Parse.String("file_ext").Text())
+            .Or(Sprache.Parse.String("added_at").Text())
+            .Or(Sprache.Parse.String("updated_at").Text())
             .Or(Sprache.Parse.String("comment").Text())
+            .Or(Sprache.Parse.String("media_type").Text())
+            
+            .Or(Sprache.Parse.String("width").Text())
+            .Or(Sprache.Parse.String("height").Text())
+            .Or(Sprache.Parse.String("duration").Text())
         from lparen in Sprache.Parse.Char('(')
         from op in Sprache.Parse.Optional(
             Sprache.Parse.String("=").Text()
