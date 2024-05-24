@@ -332,7 +332,7 @@ public class Archive {
     public DocumentID? IngestFile(string filePath, string? comment = null){
         var fileInfo = new FileInfo(filePath);
         var fileName = Path.GetFileNameWithoutExtension(filePath);
-        var extension = Path.GetExtension(filePath)[1..];
+        var fileExt = Path.GetExtension(filePath)[1..];
         var hash = HashFile(filePath);
 
         db.EnsureConnected();
@@ -344,11 +344,39 @@ public class Archive {
 
         File.Copy(filePath, $"{archiveDir}{FILES_DIR_PATH}{hash}");
 
+        MediaType mediaType = MediaType.Binary;
+        switch(fileExt){
+            case "txt" or "ini" or "log":
+                mediaType = MediaType.Text;
+            break;
+
+            case "png" or "jpg" or "jpeg" or "avif":
+                mediaType = MediaType.Image;
+            break;
+
+            case "webp": // TODO: check whether it has > 1 frames
+                mediaType = MediaType.Image;
+            break;
+
+            case "gif" : // TODO: check whether it has > 1 frames
+                mediaType = MediaType.Animation;
+            break;
+            
+            case "mp3" or "wav" or "ogg" or "m4a":
+                mediaType = MediaType.Audio;
+            break;
+
+            case "mp4" or "webm" or "mkv" or "mov" or "avi":
+                mediaType = MediaType.Video;
+            break;
+        }
+
         var documentID = db.InsertDocument(new Document(){
             hash = hash,
             fileName = fileName,
-            fileExt = extension,
+            fileExt = fileExt,
             fileSize = (int)fileInfo.Length,
+            mediaType = mediaType,
             comment = comment
         });
 
