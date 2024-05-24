@@ -90,6 +90,15 @@ public partial class DBEngine {
         return RunQuery<DocumentID>(com, (r) => (DocumentID)r.GetInt32(0)).ToArray();
     }
 
+    public bool ExistsDocument(string documentHash, SqliteTransaction? transaction = null){
+        using var com = GenCommand(
+            DBCommands.Count.DocumentWhereHash,
+            ("hash", documentHash)
+        );
+        com.Transaction = transaction;
+        return 0 < RunQuerySingle<int>(com, r => r.GetInt32(0));
+    }
+
     public Document? ReadDocument(DocumentID documentID, SqliteTransaction? transaction = null){
 
         using var com = GenCommand(

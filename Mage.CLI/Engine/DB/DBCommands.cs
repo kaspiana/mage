@@ -40,6 +40,7 @@ public static class DBCommands {
 
     public static class Count {
 
+        public const string DocumentWhereHash = "select count(*) from document where hash = @hash";
         public static string DocumentTagWhereTagID(bool public_ = true) => $"select count(*) from {(public_ ? "public_" : "")}document_tag where tag_id = @tag_id";
         public const string DocumentTagWhereDocumentID = "select count(*) from document_tag where document_id = @document_id";
     

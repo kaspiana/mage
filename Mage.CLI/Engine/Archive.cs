@@ -7,6 +7,7 @@ using Mage.IO;
 using System.Text;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
+using Mage.CLI;
 
 namespace Mage.Engine;
 
@@ -122,7 +123,7 @@ public class Archive {
         releaseType = -1,
         major = 10,
         minor = 1,
-        patch = 0
+        patch = 1
     };
 
     public const string IN_VIEW_NAME = "in";
@@ -254,8 +255,9 @@ public class Archive {
         var inboxFiles = Directory.GetFiles($"{archiveDir}{IN_DIR_PATH}");
 
         foreach(var filePath in inboxFiles){
-            IngestFile(filePath);
-            File.Delete(filePath);
+            var docID = IngestFile(filePath);
+            if(docID is not null)
+                File.Delete(filePath);
         }
     }
 
@@ -317,22 +319,31 @@ public class Archive {
             i++;
 
             var documentID = IngestFile(filePath, comment);
+            if(documentID is null)
+                return;
+
             foreach(var tagID in tags){
                 if(tagID is null) continue;
-                DocumentAddTag(documentID, (TagID)tagID);
+                DocumentAddTag((DocumentID)documentID, (TagID)tagID);
             }
         }
     }
 
-    public DocumentID IngestFile(string filePath, string? comment = null){
+    public DocumentID? IngestFile(string filePath, string? comment = null){
         var fileInfo = new FileInfo(filePath);
         var fileName = Path.GetFileNameWithoutExtension(filePath);
         var extension = Path.GetExtension(filePath)[1..];
         var hash = HashFile(filePath);
 
+        db.EnsureConnected();
+        if(db.ExistsDocument(hash)){
+            ConsoleExt.WriteColored("ERROR: ", ConsoleColor.Red);
+            Console.WriteLine("File already present in archive.");
+            return null;
+        }
+
         File.Copy(filePath, $"{archiveDir}{FILES_DIR_PATH}{hash}");
 
-        db.EnsureConnected();
         var documentID = db.InsertDocument(new Document(){
             hash = hash,
             fileName = fileName,
