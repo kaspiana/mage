@@ -1,5 +1,6 @@
 using System.CommandLine;
 using System.Security.Cryptography.X509Certificates;
+using Mage.CLI;
 using Mage.Engine;
 using SQLitePCL;
 
@@ -26,15 +27,44 @@ public static partial class CLICommands {
             var viewName = ObjectRef.ResolveView(ctx.archive, viewRef);
             var view = (View)ctx.archive.ViewGet(viewName!)!;
 
-            Console.WriteLine($"view {viewName}");
+            ConsoleExt.WriteLineColored($"view {viewName}", ConsoleColor.Yellow);
+            Console.WriteLine();
             
+            var pageSize = 3; // move to config file
             for(int i = 0; i < view.documents.Count(); i++){
+                if(i % pageSize == 0){
+                    if(i > 0){
+                        Console.Write($":");
+                        var l = Console.ReadKey();
+                        if(l.KeyChar == 'q')
+                            break;
+                        Console.SetCursorPosition(0, Console.CursorTop - 1);
+                        Console.WriteLine();
+                    }
+                }
                 var documentID = view.documents[i];
                 if(documentID is null){
                     Console.WriteLine($" * /{i}: <missing>");
                 } else {
                     Console.WriteLine($" * /{i}: {ctx.archive.GetDocumentHash((DocumentID)documentID)}");
+                    var doc = ctx.archive.DocumentGet((DocumentID)documentID);
+                    Console.WriteLine($"      File extension: {doc?.fileExt}");
+                    if(doc?.comment is not null) {
+                        Console.WriteLine($"      Comment:");
+                        foreach(var line in doc?.comment.Split('\n')){
+                            Console.WriteLine($"       {line}");
+                        }
+                    }
+
+                    var tagNames = ctx.archive.DocumentGetTags((DocumentID)documentID).Select(tagID => ctx.archive.TagAsString(tagID));
+                    if(tagNames.Count() == 0)
+                        Console.WriteLine("$      Tags: <none>");
+                    else {
+                        Console.WriteLine($"      Tags:");
+                        Console.WriteLine($"       {string.Join(" ", tagNames)}");
+                    }
                 }
+                Console.WriteLine();
             }
 
         }, viewRefArgument);

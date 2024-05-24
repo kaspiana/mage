@@ -1,6 +1,7 @@
 using System.CommandLine;
 using System.Diagnostics;
 using System.Security.Cryptography.X509Certificates;
+using Mage.CLI;
 using Mage.Engine;
 using SQLitePCL;
 
@@ -35,7 +36,8 @@ public static partial class CLICommands {
             var docID = (DocumentID)ObjectRef.ResolveDocument(ctx.archive, docRef)!;
             var doc = (Document)ctx.archive.DocumentGet(docID)!;
 
-            Console.WriteLine($"document {doc.hash}");
+            ConsoleExt.WriteLineColored($"document {doc.hash}", ConsoleColor.Yellow);
+
             Console.WriteLine($"  Archive ID: /{doc.id}");
             Console.WriteLine($"  File name: {doc.fileName}");
             Console.WriteLine($"  File extension: {doc.fileExt}");
@@ -49,11 +51,23 @@ public static partial class CLICommands {
             Console.WriteLine($"  File size: {fileSizeStr}");
             Console.WriteLine($"  Added at: {doc.addedAt}");
             Console.WriteLine($"  Updated at: {doc.updatedAt}");
-            Console.WriteLine($"  Comment: {(doc.comment is null ? "<none>" : doc.comment)}");
             Console.WriteLine($"  Deleted: {(doc.isDeleted ? "yes" : "no")}");
+            if(doc.comment is null)
+                Console.WriteLine($"  Comment: <none>");
+            else {
+                Console.WriteLine($"  Comment:");
+                foreach(var line in doc.comment.Split('\n')){
+                    Console.WriteLine($"   {line}");
+                }
+            }
 
             var tagNames = ctx.archive.DocumentGetTags(docID).Select(tagID => ctx.archive.TagAsString(tagID));
-            Console.WriteLine($"  Tags: {string.Join(" ", tagNames)}");
+            if(tagNames.Count() == 0)
+                Console.WriteLine("$  Tags: <none>");
+            else {
+                Console.WriteLine($"  Tags:");
+                Console.WriteLine($"   {string.Join(" ", tagNames)}");
+            }
 
             if(reflect){
                 var boundView = ctx.archive.BindingGet(ObjectType.View);

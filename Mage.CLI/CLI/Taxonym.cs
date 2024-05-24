@@ -1,5 +1,6 @@
 using System.CommandLine;
 using System.Security.Cryptography.X509Certificates;
+using Mage.CLI;
 using Mage.Engine;
 using SQLitePCL;
 
@@ -29,9 +30,10 @@ public static partial class CLICommands {
             var taxonym = ctx.archive.TaxonymGet(taxonymID);
 
             if(taxonymID == Archive.ROOT_TAXONYM_ID){
-                Console.WriteLine($"taxonym /{taxonymID}: <root>");
+                ConsoleExt.WriteColored($"taxonym /{taxonymID}: ", ConsoleColor.Yellow);
+                Console.WriteLine("<root>");
             } else {
-                Console.WriteLine($"taxonym /{taxonymID}");
+                ConsoleExt.WriteLineColored($"taxonym /{taxonymID}", ConsoleColor.Yellow);
 
                 Console.WriteLine($"\tParents:");
                 var parentIDs = ctx.archive.TaxonymGetParents(taxonymID);
