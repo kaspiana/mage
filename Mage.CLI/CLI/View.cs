@@ -27,7 +27,8 @@ public static partial class CLICommands {
             var viewName = ObjectRef.ResolveView(ctx.archive, viewRef);
             var view = (View)ctx.archive.ViewGet(viewName!)!;
 
-            Console.WriteLine($"view {viewName}");
+            ConsoleExt.WriteLineColored($"view {viewName}", ConsoleColor.Yellow);
+            Console.WriteLine();
             
             var pageSize = 3; // move to config file
             for(int i = 0; i < view.documents.Count(); i++){
@@ -39,7 +40,6 @@ public static partial class CLICommands {
                             break;
                         Console.SetCursorPosition(0, Console.CursorTop - 1);
                     }
-                    ConsoleExt.WriteLineColored($"PAGE {i / pageSize}", ConsoleColor.Yellow);
                 }
                 var documentID = view.documents[i];
                 if(documentID is null){

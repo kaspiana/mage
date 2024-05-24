@@ -1,5 +1,6 @@
 using System.CommandLine;
 using System.Security.Cryptography.X509Certificates;
+using Mage.CLI;
 using Mage.Engine;
 using SQLitePCL;
 
@@ -25,7 +26,7 @@ public static partial class CLICommands {
             var taxonym = ctx.archive?.TaxonymGet((TaxonymID)tag?.taxonymID!);
             var parentTaxonym = ctx.archive?.TaxonymGet((TaxonymID)taxonym?.canonParentID!);
 
-            Console.WriteLine($"tag /{tagID}");
+            ConsoleExt.WriteLineColored($"tag /{tagID}", ConsoleColor.Yellow);
 
             if(parentTaxonym is not null)
                 Console.WriteLine($"  Taxonym: {parentTaxonym?.canonAlias}:{taxonym?.canonAlias} (/{taxonym?.id})");
