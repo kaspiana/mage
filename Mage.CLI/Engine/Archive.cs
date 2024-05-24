@@ -33,6 +33,15 @@ public struct SemanticVersion {
         return SemanticVersion.ToString(releaseType, major, minor, patch);
     }
 
+    public SemanticVersion Normalise(){
+        return new SemanticVersion(){
+            releaseType = releaseType,
+            major = major,
+            minor = 0,
+            patch = 0
+        };
+    }
+
     public static SemanticVersion FromString(string versionStr){
         int[] numericalParts;
         var semVer = new SemanticVersion(){
@@ -86,6 +95,40 @@ public struct SemanticVersion {
 
     public static bool operator !=(SemanticVersion lhs, SemanticVersion rhs){
         return !(lhs == rhs);
+    }
+
+    public static bool operator <=(SemanticVersion lhs, SemanticVersion rhs){
+        return (lhs == rhs) || (lhs < rhs);
+    }
+
+    public static bool operator >=(SemanticVersion lhs, SemanticVersion rhs){
+        return (lhs == rhs) || (lhs > rhs);
+    }
+
+    public static bool operator <(SemanticVersion lhs, SemanticVersion rhs){
+        if(lhs.releaseType > rhs.releaseType) return false;
+        if(lhs.releaseType < rhs.releaseType) return true;
+
+        if(lhs.major > rhs.major) return false;
+        if(lhs.major < rhs.major) return true;
+
+        if(lhs.minor > rhs.minor) return false;
+        if(lhs.minor < rhs.minor) return true;
+
+        return lhs.patch < rhs.patch;
+    }
+
+    public static bool operator >(SemanticVersion lhs, SemanticVersion rhs){
+        if(lhs.releaseType < rhs.releaseType) return false;
+        if(lhs.releaseType > rhs.releaseType) return true;
+
+        if(lhs.major < rhs.major) return false;
+        if(lhs.major > rhs.major) return true;
+
+        if(lhs.minor < rhs.minor) return false;
+        if(lhs.minor > rhs.minor) return true;
+
+        return lhs.patch > rhs.patch;
     }
 }
 
@@ -142,6 +185,25 @@ public class Archive {
         return File.Exists($"{archiveDir}{INFO_FILE_PATH}");
     }
 
+    public static void WriteInfoFile(string archiveDir, Dictionary<string, string> infoMap){
+        var infoLines = new List<string>();
+        foreach(var kv in infoMap){
+            infoLines.Add($"{kv.Key}={kv.Value}");
+        }
+        File.WriteAllLines($"{archiveDir}{INFO_FILE_PATH}", infoLines);
+    }
+
+    public static Dictionary<string, string> ReadInfoFile(string archiveDir){
+        var infoMap = new Dictionary<string, string>();
+        foreach(var line in File.ReadAllLines($"{archiveDir}{INFO_FILE_PATH}")){
+            var splitIndex = line.IndexOf('=');
+            var infoKey = line[..splitIndex];
+            var infoValue = line[(splitIndex+1)..];
+            infoMap[infoKey] = infoValue;
+        }
+        return infoMap;
+    }
+
     public static Archive Init(string archiveDir, string? name = null){
         var fileDir = archiveDir;
 
@@ -158,12 +220,7 @@ public class Archive {
         if(name is not null)
             infoMap["name"] = name;
         infoMap["version"] = VERSION.ToString();
-
-        var infoLines = new List<string>();
-        foreach(var kv in infoMap){
-            infoLines.Add($"{kv.Key}={kv.Value}");
-        }
-        File.WriteAllLines($"{archiveDir}{INFO_FILE_PATH}", infoLines);
+        WriteInfoFile(archiveDir, infoMap);
 
         // create bind file
         File.WriteAllLines($"{archiveDir}{BIND_FILE_PATH}", [
@@ -197,23 +254,14 @@ public class Archive {
 
     public static Archive Load(string archiveDir){
 
-        var infoMap = new Dictionary<string, string>();
-        foreach(var line in File.ReadAllLines($"{archiveDir}{INFO_FILE_PATH}")){
-            var splitIndex = line.IndexOf('=');
-            var infoKey = line[..splitIndex];
-            var infoValue = line[(splitIndex+1)..];
-            infoMap[infoKey] = infoValue;
-        }
+        var infoMap = ReadInfoFile(archiveDir);
 
         string versionStr = infoMap["version"];
 
         var version = SemanticVersion.FromString(versionStr);
 
-        if(version != VERSION){
-            if(version.releaseType != VERSION.releaseType 
-                || version.major != VERSION.major){
-                throw new IncompatibleArchiveException(VERSION, version);
-            }
+        if(version.Normalise() != VERSION.Normalise()){
+            throw new IncompatibleArchiveException(VERSION, version);
         }
 
         string? name = infoMap.ContainsKey("name") ? infoMap["name"] : null;
