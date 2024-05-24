@@ -7,10 +7,6 @@ public class Migration {
     /// <summary>Please order by version.</summary>
     public static List<(SemanticVersion version, Func<string, bool> migrate)> MigrationScripts = [
         
-        (SemanticVersion.FromString("alpha_12.0.0"), (archiveDir) => {
-            return true;
-        })
-
     ];
 
     public static bool Migrate(string archiveDir){
