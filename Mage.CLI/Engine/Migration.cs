@@ -12,18 +12,18 @@ public class Migration {
             db.EnsureConnected();
 
             db.RunScript(@"
-                create table ranking_category (
+                create table ranking (
                     name            text not null primary key
                 );
 
                 create table document_ranking (
                     document_id     integer not null,
-                    category        text not null,
+                    ranking_name    text not null,
                     score           integer not null default 0,
 
                     foreign key (document_id) references document(id),
-                    foreign key (category) references ranking_category(name),
-                    primary key (document_id, category)
+                    foreign key (ranking_name) references ranking(name),
+                    primary key (document_id, ranking_name)
                 );
             ");
 
