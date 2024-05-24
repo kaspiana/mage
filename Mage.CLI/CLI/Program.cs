@@ -22,8 +22,15 @@ try {
     }
 } catch(Archive.IncompatibleArchiveException ex){
     ConsoleExt.WriteColored("ERROR: ", ConsoleColor.Red);
-    Console.WriteLine(ex);
-    return;
+    Console.WriteLine("Incompatible archive version. Attempting to migrate...");
+
+    var success = Migration.Migrate(ctx.archiveDir);
+    
+    if(success){
+        ctx.archive = Archive.Load(ctx.archiveDir);
+    } else {
+        return;
+    }
 }
 
 var rootCommand = CLICommands.CreateRoot(ctx);
