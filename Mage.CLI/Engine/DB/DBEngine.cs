@@ -354,6 +354,7 @@ public partial class DBEngine {
             ("file_name", document.fileName),
             ("file_ext", document.fileExt),
             ("file_size", document.fileSize),
+            ("media_type", document.mediaType),
             ("comment", document.comment)
         );
         com.Transaction = transaction;
