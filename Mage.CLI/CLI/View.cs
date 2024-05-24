@@ -28,7 +28,21 @@ public static partial class CLICommands {
 
             Console.WriteLine($"view {viewName}");
             
+            var pageSize = 3; // move to config file
             for(int i = 0; i < view.documents.Count(); i++){
+                if(i % pageSize == 0){
+                    if(i > 0){
+                        Console.Write($":");
+                        var l = Console.ReadKey();
+                        if(l.KeyChar == 'q')
+                            break;
+                        Console.SetCursorPosition(0, Console.CursorTop - 1);
+                    }
+                    var ogFGColor = Console.ForegroundColor;
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine($"PAGE {i / pageSize}");
+                    Console.ForegroundColor = ogFGColor;
+                }
                 var documentID = view.documents[i];
                 if(documentID is null){
                     Console.WriteLine($" * /{i}: <missing>");
