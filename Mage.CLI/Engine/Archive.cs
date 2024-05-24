@@ -344,39 +344,14 @@ public class Archive {
 
         File.Copy(filePath, $"{archiveDir}{FILES_DIR_PATH}{hash}");
 
-        MediaType mediaType = MediaType.Binary;
-        switch(fileExt){
-            case "txt" or "ini" or "log":
-                mediaType = MediaType.Text;
-            break;
-
-            case "png" or "jpg" or "jpeg" or "avif":
-                mediaType = MediaType.Image;
-            break;
-
-            case "webp": // TODO: check whether it has > 1 frames
-                mediaType = MediaType.Image;
-            break;
-
-            case "gif" : // TODO: check whether it has > 1 frames
-                mediaType = MediaType.Animation;
-            break;
-            
-            case "mp3" or "wav" or "ogg" or "m4a":
-                mediaType = MediaType.Audio;
-            break;
-
-            case "mp4" or "webm" or "mkv" or "mov" or "avi":
-                mediaType = MediaType.Video;
-            break;
-        }
+        MediaMetadata mediaMetadata = Media.GetMediaType(filePath);
 
         var documentID = db.InsertDocument(new Document(){
             hash = hash,
             fileName = fileName,
             fileExt = fileExt,
             fileSize = (int)fileInfo.Length,
-            mediaType = mediaType,
+            mediaType = mediaMetadata.mediaType,
             comment = comment
         });
 
