@@ -1,6 +1,7 @@
 ﻿using System.CommandLine;
 using System.Diagnostics;
 using System.Text;
+using Mage.CLI;
 using Mage.Engine;
 
 Console.OutputEncoding = Encoding.UTF8;
@@ -16,17 +17,11 @@ try {
     if(Archive.Exists(ctx.archiveDir))
         ctx.archive = Archive.Load(ctx.archiveDir);
     else {
-        var ogFGColor = Console.ForegroundColor;
-        Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.Write("NOTE: ");
-        Console.ForegroundColor = ogFGColor;
+        ConsoleExt.WriteColored("NOTE: ", ConsoleColor.Yellow);
         Console.WriteLine("No archive exists in this directory. (Ignore if using mage init.)");
     }
 } catch(Archive.IncompatibleArchiveException ex){
-    var ogFGColor = Console.ForegroundColor;
-    Console.ForegroundColor = ConsoleColor.Red;
-    Console.Write("ERROR: ");
-    Console.ForegroundColor = ogFGColor;
+    ConsoleExt.WriteColored("ERROR: ", ConsoleColor.Red);
     Console.WriteLine(ex);
     return;
 }

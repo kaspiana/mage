@@ -1,6 +1,7 @@
 using System.CommandLine;
 using System.Diagnostics;
 using System.Security.Cryptography.X509Certificates;
+using Mage.CLI;
 using Mage.Engine;
 using SQLitePCL;
 
@@ -35,7 +36,8 @@ public static partial class CLICommands {
             var docID = (DocumentID)ObjectRef.ResolveDocument(ctx.archive, docRef)!;
             var doc = (Document)ctx.archive.DocumentGet(docID)!;
 
-            Console.WriteLine($"document {doc.hash}");
+            ConsoleExt.WriteLineColored($"document {doc.hash}", ConsoleColor.Yellow);
+
             Console.WriteLine($"  Archive ID: /{doc.id}");
             Console.WriteLine($"  File name: {doc.fileName}");
             Console.WriteLine($"  File extension: {doc.fileExt}");

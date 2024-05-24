@@ -1,5 +1,6 @@
 using System.CommandLine;
 using System.Security.Cryptography.X509Certificates;
+using Mage.CLI;
 using Mage.Engine;
 using SQLitePCL;
 
@@ -38,10 +39,7 @@ public static partial class CLICommands {
                             break;
                         Console.SetCursorPosition(0, Console.CursorTop - 1);
                     }
-                    var ogFGColor = Console.ForegroundColor;
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.WriteLine($"PAGE {i / pageSize}");
-                    Console.ForegroundColor = ogFGColor;
+                    ConsoleExt.WriteLineColored($"PAGE {i / pageSize}", ConsoleColor.Yellow);
                 }
                 var documentID = view.documents[i];
                 if(documentID is null){

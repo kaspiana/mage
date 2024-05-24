@@ -1,6 +1,7 @@
 using System.CommandLine;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
+using Mage.CLI;
 using Mage.Engine;
 using SQLitePCL;
 
@@ -40,10 +41,7 @@ public static partial class CLICommands {
         if(taxonymID != Archive.ROOT_TAXONYM_ID){
             Console.Write($"{BOX_DRAWING_LR} ");
 
-            var ogFGColor = Console.ForegroundColor;
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.Write($"{taxonym?.canonAlias}");
-            Console.ForegroundColor = ogFGColor;
+            ConsoleExt.WriteColored($"{taxonym?.canonAlias}", ConsoleColor.Yellow);
 
             Console.Write($" (/{taxonymID}) ");
             
