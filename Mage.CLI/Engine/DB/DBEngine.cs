@@ -155,6 +155,62 @@ public partial class DBEngine {
         return RunQuerySingle<DocumentID>(com, (r) => (DocumentID)r.GetInt32(0));
     }
 
+    public MediaMetadata ReadDocumentMetadata(DocumentID documentID, MediaType mediaType, SqliteTransaction? transaction = null){
+        switch(mediaType){
+            default: return new MediaMetadataBinary(); break;
+            case MediaType.Text: return new MediaMetadataText(); break;
+
+            case MediaType.Image: {
+                using var com = GenCommand(
+                    DBCommands.Select.ImageMetadataWhereID,
+                    ("document_id", documentID)
+                );
+                com.Transaction = transaction;
+                return RunQuerySingle(com, r => new MediaMetadataImage(){
+                    width = r.GetInt32(1),
+                    height = r.GetInt32(2)
+                })!;
+            } break;
+
+            case MediaType.Animation: {
+                using var com = GenCommand(
+                    DBCommands.Select.VideoMetadataWhereID,
+                    ("document_id", documentID)
+                );
+                com.Transaction = transaction;
+                return RunQuerySingle(com, r => new MediaMetadataAnimation(){
+                    width = r.GetInt32(1),
+                    height = r.GetInt32(2),
+                    duration = r.GetInt32(3)
+                })!;
+            } break;
+
+            case MediaType.Video: {
+                using var com = GenCommand(
+                    DBCommands.Select.VideoMetadataWhereID,
+                    ("document_id", documentID)
+                );
+                com.Transaction = transaction;
+                return RunQuerySingle(com, r => new MediaMetadataVideo(){
+                    width = r.GetInt32(1),
+                    height = r.GetInt32(2),
+                    duration = r.GetInt32(3)
+                })!;
+            } break;
+
+            case MediaType.Audio: {
+                using var com = GenCommand(
+                    DBCommands.Select.AudioMetadataWhereID,
+                    ("document_id", documentID)
+                );
+                com.Transaction = transaction;
+                return RunQuerySingle(com, r => new MediaMetadataAudio(){
+                    duration = r.GetInt32(1)
+                })!;
+            } break;
+        }
+    }
+
     public string[] ReadDocumentSources(DocumentID documentID, SqliteTransaction? transaction = null){
         using var com = GenCommand(
             DBCommands.Select.DocumentSourceWhereID,

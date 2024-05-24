@@ -49,8 +49,43 @@ public static partial class CLICommands {
                 default: fileSizeStr = $"{doc.fileSize / (1 << 30)} GB"; break;
             }
             Console.WriteLine($"  File size: {fileSizeStr}");
+            
             Console.WriteLine($"  Added at: {doc.addedAt}");
             Console.WriteLine($"  Updated at: {doc.updatedAt}");
+
+            var mediaMetadata = ctx.archive.DocumentGetMetadata(docID);
+            switch(mediaMetadata){
+                case MediaMetadataBinary mm:
+                    Console.WriteLine("  Media type: binary");
+                break;
+
+                case MediaMetadataText mm:
+                    Console.WriteLine("  Media type: text");
+                break;
+
+                case MediaMetadataImage mm: 
+                    Console.WriteLine("  Media type: image");
+                    Console.WriteLine($"    Image dimension: {mm.width}x{mm.height}");
+                break;
+
+                case MediaMetadataAnimation mm: 
+                    Console.WriteLine("  Media type: animation");
+                    Console.WriteLine($"    Animation dimension: {mm.width}x{mm.height}");
+                    Console.WriteLine($"    Animation duration: {mm.duration} ms");
+                break;
+
+                case MediaMetadataAudio mm:
+                    Console.WriteLine("  Media type: audio");
+                    Console.WriteLine($"    Audio duration: {mm.duration} ms");
+                break;
+
+                case MediaMetadataVideo mm: 
+                    Console.WriteLine("  Media type: video");
+                    Console.WriteLine($"    Video dimension: {mm.width}x{mm.height}");
+                    Console.WriteLine($"    Video duration: {mm.duration} ms");
+                break;
+            }
+
             Console.WriteLine($"  Deleted: {(doc.isDeleted ? "yes" : "no")}");
             if(doc.comment is null)
                 Console.WriteLine($"  Comment: <none>");
@@ -63,7 +98,7 @@ public static partial class CLICommands {
 
             var tagNames = ctx.archive.DocumentGetTags(docID).Select(tagID => ctx.archive.TagAsString(tagID));
             if(tagNames.Count() == 0)
-                Console.WriteLine("$  Tags: <none>");
+                Console.WriteLine($"  Tags: <none>");
             else {
                 Console.WriteLine($"  Tags:");
                 Console.WriteLine($"   {string.Join(" ", tagNames)}");

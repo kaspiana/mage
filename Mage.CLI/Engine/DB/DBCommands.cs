@@ -12,6 +12,10 @@ public static class DBCommands {
         public const string DocumentWhereHash = "select * from document where hash = @hash";
         public const string DocumentHashWhereID = "select hash from document where id = @id";
 
+        public const string ImageMetadataWhereID = "select * from image_metadata where document_id = @document_id";
+        public const string AudioMetadataWhereID = "select * from audio_metadata where document_id = @document_id";
+        public const string VideoMetadataWhereID = "select * from video_metadata where document_id = @document_id";
+
         public const string Taxonym = "select * from taxonym";
         public static string TaxonymIDClause(string clause) => $"select id from taxonym {clause}";
         public const string TaxonymWherePK = "select * from taxonym where id = @id";

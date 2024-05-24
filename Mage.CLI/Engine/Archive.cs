@@ -855,4 +855,10 @@ public class Archive {
         return db.ReadDocument(documentID);
     }
 
+    public MediaMetadata DocumentGetMetadata(DocumentID documentID){
+        db.EnsureConnected();
+        var mediaType = db.ReadDocument(documentID)?.mediaType ?? MediaType.Binary;
+        return db.ReadDocumentMetadata(documentID, mediaType);
+    }
+
 }
