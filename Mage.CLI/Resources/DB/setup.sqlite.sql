@@ -33,7 +33,7 @@ create view deleted_document as
     where is_deleted = 1;
 
 -- document.media_type = 'i'
-create table document_st_image (
+create table image_metadata (
     document_id     integer not null primary key,
 
     width           integer not null,
@@ -43,7 +43,7 @@ create table document_st_image (
 );
 
 -- document.media_type = 'a'
-create table document_st_audio (
+create table audio_metadata (
     document_id     integer not null primary key,
 
     length          integer not null, -- seconds
@@ -52,7 +52,7 @@ create table document_st_audio (
 );
 
 -- document.media_type = 'm' or 'v'
-create table document_st_video (
+create table video_metadata (
     document_id     integer not null primary key,
 
     width           integer not null,
