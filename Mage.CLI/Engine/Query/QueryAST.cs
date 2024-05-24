@@ -88,8 +88,8 @@ public class QueryNodeMetaTag : QueryNode {
 
                 return $@"
 select document_id id from (
-select document_id, width, height, null from image_metadata
-union select document_id, null, null, duration from audio_metadata
+select document_id, width, height, null duration from image_metadata
+union select document_id, null width, null height, duration from audio_metadata
 union select document_id, width, height, duration from video_metadata)
 where {tag} {OpToString()} {param}
                 ";
