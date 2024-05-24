@@ -31,6 +31,12 @@ public partial class DBEngine {
         }
     }
 
+    public void RunScript(string comText){
+        using var com = db.CreateCommand();
+        com.CommandText = comText;
+        com.ExecuteNonQuery();
+    }
+
     public void RunResourceScript(string resourcePath){
         var setupCommand = db.CreateCommand();
         setupCommand.CommandText = ResourceLoader.Load($"Resources.DB.{resourcePath}");
