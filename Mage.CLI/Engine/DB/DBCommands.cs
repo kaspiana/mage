@@ -59,6 +59,8 @@ public static class DBCommands {
 
         public const string Document = "insert into document (hash, file_name, file_ext, file_size, media_type, comment) values (@hash, @file_name, @file_ext, @file_size, @media_type, @comment)";
         
+        public const string Ranking = "insert into ranking (name) values (@name)";
+
         public const string ImageMetadata = "insert into image_metadata (document_id, width, height) values (@document_id, @width, @height)";
         public const string AudioMetadata = "insert into audio_metadata (document_id, duration) values (@document_id, @duration)";
         public const string VideoMetadata = "insert into video_metadata (document_id, width, height, duration) values (@document_id, @width, @height, @duration)";
@@ -77,6 +79,9 @@ public static class DBCommands {
 
         public const string Document = "delete from document";
         public const string DocumentWherePK = "delete from document where id = @id";
+
+        public const string RankingWherePK = "delete from ranking where name = @name";
+        public const string DocumentRankingWhereName = "delete from document_ranking where ranking_name = @ranking_name";
 
         public const string Taxonym = "delete from taxonym";
         public const string TaxonymWherePK = "delete from taxonym where id = @id";
@@ -115,7 +120,9 @@ public static class DBCommands {
         public const string DocumentIsDeletedWhereID = "update document set is_deleted = @is_deleted where id = @id";
         public const string DocumentUpdatedAt = "update document set updated_at = unixepoch()";
         public const string DocumentUpdatedAtWhereID = "update document set updated_at = unixepoch() where id = @id";
-
+        
+        public const string DocumentRanking = "insert or replace into document_ranking (document_id, ranking_name, score) values (@document_id, @ranking_name, @score)"; 
+        
     }
 
 }

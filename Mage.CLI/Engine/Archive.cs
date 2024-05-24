@@ -551,6 +551,41 @@ public class Archive {
         db.DeleteDocumentSource(documentID, url);
     }
 
+    public void RankingCreate(string name){
+        db.EnsureConnected();
+        db.InsertRanking(name);
+    }
+
+    public void RankingDelete(string name){
+        db.EnsureConnected();
+        db.DeleteRanking(name);
+    }
+
+    public string[] RankingsGet(){
+        db.EnsureConnected();
+        return db.ReadRankings();
+    }
+
+    public Dictionary<string, int> DocumentGetRankings(DocumentID documentID){
+        db.EnsureConnected();
+        var rankingMap = new Dictionary<string, int>();
+        var rankings = db.ReadDocumentRankings(documentID);
+        foreach(var ranking in rankings){
+            rankingMap[ranking.name] = ranking.score;
+        }
+        return rankingMap;
+    }
+
+    public int DocumentGetRanking(DocumentID documentID, string rankingName){
+        db.EnsureConnected();
+        return db.ReadDocumentRanking(documentID, rankingName);
+    }
+
+    public void DocumentSetRanking(DocumentID documentID, string rankingName, int score){
+        db.EnsureConnected();
+        db.UpdateDocumentRanking(documentID, rankingName, score);
+    }
+
     public Taxonym? TaxonymGet(TaxonymID taxonymID){
         db.EnsureConnected();
         return db.ReadTaxonym(taxonymID);
