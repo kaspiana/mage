@@ -4,6 +4,7 @@ using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.Resources;
 using Microsoft.Data.Sqlite;
+using SQLitePCL;
 
 namespace Mage.Engine;
 
@@ -115,7 +116,15 @@ public partial class DBEngine {
                 fileName = r.GetString(2),
                 fileExt = r.GetString(3),
                 fileSize = r.GetInt32(4),
-                mediaType = (MediaType)r.GetInt32(5),
+                mediaType = r.GetChar(5) switch {
+                    'b' => MediaType.Binary,
+                    't' => MediaType.Text,
+                    'i' => MediaType.Image,
+                    'm' => MediaType.Animation,
+                    'a' => MediaType.Audio,
+                    'v' => MediaType.Video,
+                    _ => MediaType.Binary
+                },
                 addedAt = unixStart.AddSeconds(r.GetInt32(6)).ToLocalTime(),
                 updatedAt = unixStart.AddSeconds(r.GetInt32(7)).ToLocalTime(),
                 comment = r.IsDBNull(8) ? null : r.GetString(8),
@@ -355,7 +364,15 @@ public partial class DBEngine {
             ("file_name", document.fileName),
             ("file_ext", document.fileExt),
             ("file_size", document.fileSize),
-            ("media_type", document.mediaType),
+            ("media_type", document.mediaType switch {
+                MediaType.Binary => 'b',
+                MediaType.Text => 't',
+                MediaType.Image => 'i',
+                MediaType.Animation => 'm',
+                MediaType.Audio => 'a',
+                MediaType.Video => 'v',
+                _ => MediaType.Binary
+            }),
             ("comment", document.comment)
         );
         com.Transaction = transaction;
