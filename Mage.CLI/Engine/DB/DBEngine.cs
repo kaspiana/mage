@@ -4,6 +4,7 @@ using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.Resources;
 using Microsoft.Data.Sqlite;
+using SQLitePCL;
 
 namespace Mage.Engine;
 
@@ -115,10 +116,19 @@ public partial class DBEngine {
                 fileName = r.GetString(2),
                 fileExt = r.GetString(3),
                 fileSize = r.GetInt32(4),
-                addedAt = unixStart.AddSeconds(r.GetInt32(5)).ToLocalTime(),
-                updatedAt = unixStart.AddSeconds(r.GetInt32(6)).ToLocalTime(),
-                comment = r.IsDBNull(7) ? null : r.GetString(7),
-                isDeleted = r.GetBoolean(8)
+                mediaType = r.GetChar(5) switch {
+                    'b' => MediaType.Binary,
+                    't' => MediaType.Text,
+                    'i' => MediaType.Image,
+                    'm' => MediaType.Animation,
+                    'a' => MediaType.Audio,
+                    'v' => MediaType.Video,
+                    _ => MediaType.Binary
+                },
+                addedAt = unixStart.AddSeconds(r.GetInt32(6)).ToLocalTime(),
+                updatedAt = unixStart.AddSeconds(r.GetInt32(7)).ToLocalTime(),
+                comment = r.IsDBNull(8) ? null : r.GetString(8),
+                isDeleted = r.GetBoolean(9)
             };
         });
     }
@@ -143,6 +153,62 @@ public partial class DBEngine {
         com.Transaction = transaction;
 
         return RunQuerySingle<DocumentID>(com, (r) => (DocumentID)r.GetInt32(0));
+    }
+
+    public MediaMetadata ReadDocumentMetadata(DocumentID documentID, MediaType mediaType, SqliteTransaction? transaction = null){
+        switch(mediaType){
+            default: return new MediaMetadataBinary(); break;
+            case MediaType.Text: return new MediaMetadataText(); break;
+
+            case MediaType.Image: {
+                using var com = GenCommand(
+                    DBCommands.Select.ImageMetadataWhereID,
+                    ("document_id", documentID)
+                );
+                com.Transaction = transaction;
+                return RunQuerySingle(com, r => new MediaMetadataImage(){
+                    width = r.GetInt32(1),
+                    height = r.GetInt32(2)
+                })!;
+            } break;
+
+            case MediaType.Animation: {
+                using var com = GenCommand(
+                    DBCommands.Select.VideoMetadataWhereID,
+                    ("document_id", documentID)
+                );
+                com.Transaction = transaction;
+                return RunQuerySingle(com, r => new MediaMetadataAnimation(){
+                    width = r.GetInt32(1),
+                    height = r.GetInt32(2),
+                    duration = r.GetInt32(3)
+                })!;
+            } break;
+
+            case MediaType.Video: {
+                using var com = GenCommand(
+                    DBCommands.Select.VideoMetadataWhereID,
+                    ("document_id", documentID)
+                );
+                com.Transaction = transaction;
+                return RunQuerySingle(com, r => new MediaMetadataVideo(){
+                    width = r.GetInt32(1),
+                    height = r.GetInt32(2),
+                    duration = r.GetInt32(3)
+                })!;
+            } break;
+
+            case MediaType.Audio: {
+                using var com = GenCommand(
+                    DBCommands.Select.AudioMetadataWhereID,
+                    ("document_id", documentID)
+                );
+                com.Transaction = transaction;
+                return RunQuerySingle(com, r => new MediaMetadataAudio(){
+                    duration = r.GetInt32(1)
+                })!;
+            } break;
+        }
     }
 
     public string[] ReadDocumentSources(DocumentID documentID, SqliteTransaction? transaction = null){
@@ -346,20 +412,79 @@ public partial class DBEngine {
         RunNonQuery(com);
     }
 
-    public DocumentID InsertDocument(Document document, SqliteTransaction? transaction = null){
+    public DocumentID InsertDocument(Document document, MediaMetadata mediaMetadata, SqliteTransaction? transaction = null){
 
-        using var com = GenCommand(
+        using var com1 = GenCommand(
             DBCommands.Insert.Document,
             ("hash", document.hash),
             ("file_name", document.fileName),
             ("file_ext", document.fileExt),
             ("file_size", document.fileSize),
+            ("media_type", document.mediaType switch {
+                MediaType.Binary => 'b',
+                MediaType.Text => 't',
+                MediaType.Image => 'i',
+                MediaType.Animation => 'm',
+                MediaType.Audio => 'a',
+                MediaType.Video => 'v',
+                _ => MediaType.Binary
+            }),
             ("comment", document.comment)
         );
-        com.Transaction = transaction;
-        RunNonQuery(com);
+        com1.Transaction = transaction;
+        RunNonQuery(com1);
 
         var documentID = (DocumentID)ReadLastInsertRowID();
+
+        switch(mediaMetadata){
+            default: break;
+
+            case MediaMetadataImage mm: {
+                using var com2 = GenCommand(
+                    DBCommands.Insert.ImageMetadata,
+                    ("document_id", documentID),
+                    ("width", mm.width),
+                    ("height", mm.height)
+                );
+                com2.Transaction = transaction;
+                RunNonQuery(com2);
+            } break;
+
+            case MediaMetadataAudio mm: {
+                using var com2 = GenCommand(
+                    DBCommands.Insert.AudioMetadata,
+                    ("document_id", documentID),
+                    ("duration", mm.duration)
+                );
+                com2.Transaction = transaction;
+                RunNonQuery(com2);
+            } break;
+
+            case MediaMetadataAnimation mm: {
+                using var com2 = GenCommand(
+                    DBCommands.Insert.VideoMetadata,
+                    ("document_id", documentID),
+                    ("width", mm.width),
+                    ("height", mm.height),
+                    ("duration", mm.duration)
+                );
+                com2.Transaction = transaction;
+                RunNonQuery(com2);
+            } break;
+
+            case MediaMetadataVideo mm: {
+                using var com2 = GenCommand(
+                    DBCommands.Insert.VideoMetadata,
+                    ("document_id", documentID),
+                    ("width", mm.width),
+                    ("height", mm.height),
+                    ("duration", mm.duration)
+                );
+                com2.Transaction = transaction;
+                RunNonQuery(com2);
+            } break;
+        }
+
         return documentID;
 
     }

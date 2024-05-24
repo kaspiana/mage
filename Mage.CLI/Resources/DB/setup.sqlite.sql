@@ -9,6 +9,13 @@ create table document (
     file_name       text not null,
     file_ext        text not null,
     file_size       integer not null, -- bytes
+    media_type      text check(media_type in ('b', 't', 'i', 'm', 'a', 'v')) not null default 'b',
+                    -- b = binary
+                    -- t = text
+                    -- i = image
+                    -- m = animation
+                    -- a = audio
+                    -- v = video
     added_at        integer not null default (unixepoch()), -- unix timestamp
     updated_at      integer not null default (unixepoch()), -- unix timestamp
     comment         text,
@@ -24,6 +31,36 @@ create view deleted_document as
     select * 
     from document 
     where is_deleted = 1;
+
+-- document.media_type = 'i'
+create table image_metadata (
+    document_id     integer not null primary key,
+
+    width           integer not null,
+    height          integer not null,
+
+    foreign key (document_id) references document(id)
+);
+
+-- document.media_type = 'a'
+create table audio_metadata (
+    document_id     integer not null primary key,
+
+    duration        integer not null, -- milliseconds
+
+    foreign key (document_id) references document(id)
+);
+
+-- document.media_type = 'm' or 'v'
+create table video_metadata (
+    document_id     integer not null primary key,
+
+    width           integer not null,
+    height          integer not null,
+    duration        integer not null, -- milliseconds
+
+    foreign key (document_id) references document(id)
+);
 
 ---
 --- TAXONYMS

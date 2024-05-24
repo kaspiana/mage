@@ -6,6 +6,7 @@ public struct Document {
     public string fileName;
     public string fileExt;
     public int fileSize;
+    public MediaType mediaType;
     public DateTime addedAt;
     public DateTime updatedAt;
     public string? comment;

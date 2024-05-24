@@ -122,8 +122,8 @@ public class Archive {
     public static readonly SemanticVersion VERSION = new SemanticVersion(){
         releaseType = -1,
         major = 10,
-        minor = 1,
-        patch = 1
+        minor = 2,
+        patch = 0
     };
 
     public const string IN_VIEW_NAME = "in";
@@ -332,7 +332,7 @@ public class Archive {
     public DocumentID? IngestFile(string filePath, string? comment = null){
         var fileInfo = new FileInfo(filePath);
         var fileName = Path.GetFileNameWithoutExtension(filePath);
-        var extension = Path.GetExtension(filePath)[1..];
+        var fileExt = Path.GetExtension(filePath)[1..];
         var hash = HashFile(filePath);
 
         db.EnsureConnected();
@@ -344,13 +344,16 @@ public class Archive {
 
         File.Copy(filePath, $"{archiveDir}{FILES_DIR_PATH}{hash}");
 
+        MediaMetadata mediaMetadata = Media.GetMediaType(filePath);
+
         var documentID = db.InsertDocument(new Document(){
             hash = hash,
             fileName = fileName,
-            fileExt = extension,
+            fileExt = fileExt,
             fileSize = (int)fileInfo.Length,
+            mediaType = mediaMetadata.mediaType,
             comment = comment
-        });
+        }, mediaMetadata);
 
         ViewAdd("in", documentID);
 
@@ -850,6 +853,12 @@ public class Archive {
     public Document? DocumentGet(DocumentID documentID){
         db.EnsureConnected();
         return db.ReadDocument(documentID);
+    }
+
+    public MediaMetadata DocumentGetMetadata(DocumentID documentID){
+        db.EnsureConnected();
+        var mediaType = db.ReadDocument(documentID)?.mediaType ?? MediaType.Binary;
+        return db.ReadDocumentMetadata(documentID, mediaType);
     }
 
 }
