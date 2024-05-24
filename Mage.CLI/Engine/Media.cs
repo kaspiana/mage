@@ -32,14 +32,14 @@ public class MediaMetadataImage : MediaMetadata {
 
 public class MediaMetadataAudio : MediaMetadata {
     override public MediaType mediaType { get => MediaType.Audio; }
-    public int length;
+    public int duration;
 }
 
 public class MediaMetadataVideo : MediaMetadata {
     override public MediaType mediaType { get => MediaType.Video; }
     public int width;
     public int height;
-    public int length;
+    public int duration;
 }
 
 public class MediaMetadataAnimation : MediaMetadataVideo {
@@ -111,13 +111,13 @@ public class Media {
         return new MediaMetadataAnimation(){
             width = codec.Info.Width,
             height = codec.Info.Height,
-            length = codec.FrameInfo.Sum(fi => fi.Duration) / 1000
+            duration = Math.Max(1, codec.FrameInfo.Sum(fi => fi.Duration) / 1000)
         };
     }
 
     public static MediaMetadataAudio GetAudioMetadata(string filePath){
         return new MediaMetadataAudio(){
-            length = 0
+            duration = 0
         };
     }
 
@@ -125,7 +125,7 @@ public class Media {
         return new MediaMetadataAnimation(){
             width = 0,
             height = 0,
-            length = 0
+            duration = 0
         };
     }
     

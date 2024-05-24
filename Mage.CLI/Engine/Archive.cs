@@ -353,7 +353,7 @@ public class Archive {
             fileSize = (int)fileInfo.Length,
             mediaType = mediaMetadata.mediaType,
             comment = comment
-        });
+        }, mediaMetadata);
 
         ViewAdd("in", documentID);
 

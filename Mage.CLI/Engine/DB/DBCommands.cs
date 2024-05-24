@@ -50,6 +50,11 @@ public static class DBCommands {
     public static class Insert {
 
         public const string Document = "insert into document (hash, file_name, file_ext, file_size, media_type, comment) values (@hash, @file_name, @file_ext, @file_size, @media_type, @comment)";
+        
+        public const string ImageMetadata = "insert into image_metadata (document_id, width, height) values (@document_id, @width, @height)";
+        public const string AudioMetadata = "insert into audio_metadata (document_id, duration) values (@document_id, @duration)";
+        public const string VideoMetadata = "insert into video_metadata (document_id, width, height, duration) values (@document_id, @width, @height, @duration)";
+        
         public const string DocumentTag = "insert into document_tag (document_id, tag_id) values (@document_id, @tag_id)";
         public const string DocumentSource = "insert into document_source (document_id, url) values (@document_id, @url)";
         public const string Tag = "insert into tag (taxonym_id) values (@taxonym_id)";
