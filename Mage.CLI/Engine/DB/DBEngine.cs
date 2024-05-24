@@ -217,6 +217,25 @@ public partial class DBEngine {
         }
     }
 
+    public int ReadDocumentRanking(DocumentID documentID, string rankingName, SqliteTransaction? transaction = null){
+        using var com = GenCommand(
+            DBCommands.Select.DocumentRankingWherePK,
+            ("document_id", documentID),
+            ("ranking_name", rankingName)
+        );
+        com.Transaction = transaction;
+        return RunQuerySingle(com, r => r.GetInt32(0));
+    }
+
+    public (string name, int score)[] ReadDocumentRankings(DocumentID documentID, SqliteTransaction? transaction = null){
+        using var com = GenCommand(
+            DBCommands.Select.DocumentRankingWhereID,
+            ("document_id", documentID)
+        );
+        com.Transaction = transaction;
+        return RunQuery(com, r => (r.GetString(0), r.GetInt32(1))).ToArray();
+    }
+
     public string[] ReadDocumentSources(DocumentID documentID, SqliteTransaction? transaction = null){
         using var com = GenCommand(
             DBCommands.Select.DocumentSourceWhereID,

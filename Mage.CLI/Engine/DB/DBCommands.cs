@@ -16,6 +16,10 @@ public static class DBCommands {
         public const string AudioMetadataWhereID = "select * from audio_metadata where document_id = @document_id";
         public const string VideoMetadataWhereID = "select * from video_metadata where document_id = @document_id";
 
+        public const string Ranking = "select * from ranking";
+        public const string DocumentRankingWhereID = "select ranking_name, score from document_ranking where document_id = @document_id";
+        public const string DocumentRankingWherePK = "select score from document_ranking where document_id = @document_id and ranking_name = @ranking_name";
+
         public const string Taxonym = "select * from taxonym";
         public static string TaxonymIDClause(string clause) => $"select id from taxonym {clause}";
         public const string TaxonymWherePK = "select * from taxonym where id = @id";
