@@ -101,7 +101,7 @@ public class Media {
         using var buf = File.OpenRead(filePath);
         using var codec = SKCodec.Create(buf);
 
-        if(codec.FrameCount == 0){
+        if(codec.FrameCount <= 1){
             return new MediaMetadataImage(){
                 width = codec.Info.Width,
                 height = codec.Info.Height
@@ -111,7 +111,7 @@ public class Media {
         return new MediaMetadataAnimation(){
             width = codec.Info.Width,
             height = codec.Info.Height,
-            duration = Math.Max(1, codec.FrameInfo.Sum(fi => fi.Duration) / 1000)
+            duration = codec.FrameInfo.Sum(fi => fi.Duration)
         };
     }
 

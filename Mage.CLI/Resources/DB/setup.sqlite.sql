@@ -46,7 +46,7 @@ create table image_metadata (
 create table audio_metadata (
     document_id     integer not null primary key,
 
-    duration        integer not null, -- seconds
+    duration        integer not null, -- milliseconds
 
     foreign key (document_id) references document(id)
 );
@@ -57,7 +57,7 @@ create table video_metadata (
 
     width           integer not null,
     height          integer not null,
-    duration        integer not null, -- seconds
+    duration        integer not null, -- milliseconds
 
     foreign key (document_id) references document(id)
 );
