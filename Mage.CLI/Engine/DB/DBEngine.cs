@@ -115,10 +115,11 @@ public partial class DBEngine {
                 fileName = r.GetString(2),
                 fileExt = r.GetString(3),
                 fileSize = r.GetInt32(4),
-                addedAt = unixStart.AddSeconds(r.GetInt32(5)).ToLocalTime(),
-                updatedAt = unixStart.AddSeconds(r.GetInt32(6)).ToLocalTime(),
-                comment = r.IsDBNull(7) ? null : r.GetString(7),
-                isDeleted = r.GetBoolean(8)
+                mediaType = (MediaType)r.GetInt32(5),
+                addedAt = unixStart.AddSeconds(r.GetInt32(6)).ToLocalTime(),
+                updatedAt = unixStart.AddSeconds(r.GetInt32(7)).ToLocalTime(),
+                comment = r.IsDBNull(8) ? null : r.GetString(8),
+                isDeleted = r.GetBoolean(9)
             };
         });
     }
