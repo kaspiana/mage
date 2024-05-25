@@ -17,49 +17,49 @@ public static class DBCommands {
         public const string VideoMetadataWhereID = "select * from video_metadata where document_id = @document_id";
 
         public const string Ranking = "select * from ranking";
-        public const string DocumentRankingWhereID = @"
+        public const string DocumentRatingWhereID = @"
             select 
-                document_ranking_full.name ranking_name, 
-                ifnull(score, 0) score
+                document_rating_full.name ranking_name, 
+                ifnull(rating, 0) rating
             from
                 (ranking cross join 
                     (select 
                         column1 document_id 
                     from (values (@document_id)))
-                ) document_ranking_full
+                ) document_rating_full
                 left join
-                document_ranking
-                on document_ranking_full.name = document_ranking.ranking_name
-                and document_ranking_full.document_id = document_ranking.document_id
+                document_rating
+                on document_rating_full.name = document_rating.ranking_name
+                and document_rating_full.document_id = document_rating.document_id
         ";
-        public const string DocumentRankingWhereName = @"
+        public const string DocumentRatingWhereName = @"
             select 
-                document_ranking_full.id,
-                ifnull(score, 0) score
+                document_rating_full.id,
+                ifnull(rating, 0) rating
             from
                 (document cross join 
                     (select 
                         column1 ranking_name 
                      from (values(@ranking_name)))
-                ) document_ranking_full
+                ) document_rating_full
                 left join
-                document_ranking
-                on document_ranking_full.ranking_name = document_ranking.ranking_name
-                and document_ranking_full.id = document_ranking.document_id
+                document_rating
+                on document_rating_full.ranking_name = document_rating.ranking_name
+                and document_rating_full.id = document_rating.document_id
         ";
-        public const string DocumentRankingWherePK = @"
+        public const string DocumentRatingWherePK = @"
             select 
-                ifnull(score, 0) score
+                ifnull(rating, 0) rating
             from
                 (select 
                     column1 document_id, 
                     column2 ranking_name 
                  from (values(@document_id, @ranking_name))
-                ) document_ranking_full
+                ) document_rating_full
                 left join
-                document_ranking
-                on document_ranking_full.ranking_name = document_ranking.ranking_name
-                and document_ranking_full.document_id = document_ranking.document_id
+                document_rating
+                on document_rating_full.ranking_name = document_rating.ranking_name
+                and document_rating_full.document_id = document_rating.document_id
         ";
 
         public const string Taxonym = "select * from taxonym";
@@ -128,7 +128,7 @@ public static class DBCommands {
         public const string DocumentWherePK = "delete from document where id = @id";
 
         public const string RankingWherePK = "delete from ranking where name = @name";
-        public const string DocumentRankingWhereName = @"delete from document_ranking where ranking_name = @ranking_name";
+        public const string DocumentRatingWhereName = @"delete from document_rating where ranking_name = @ranking_name";
 
         public const string Taxonym = "delete from taxonym";
         public const string TaxonymWherePK = "delete from taxonym where id = @id";
@@ -168,7 +168,7 @@ public static class DBCommands {
         public const string DocumentUpdatedAt = "update document set updated_at = unixepoch()";
         public const string DocumentUpdatedAtWhereID = "update document set updated_at = unixepoch() where id = @id";
         
-        public const string DocumentRanking = "insert or replace into document_ranking (document_id, ranking_name, score) values (@document_id, @ranking_name, @score)"; 
+        public const string DocumentRating = "insert or replace into document_rating (document_id, ranking_name, rating) values (@document_id, @ranking_name, @rating)"; 
         
     }
 

@@ -83,8 +83,8 @@ public static partial class CLICommands {
 
                 var ranking = rankingSample[0];
                 
-                var docARanking = ctx.archive.DocumentGetRanking((DocumentID)docA, ranking);
-                var docBRanking = ctx.archive.DocumentGetRanking((DocumentID)docB, ranking);
+                var docARating = ctx.archive.DocumentGetRating((DocumentID)docA, ranking);
+                var docBRating = ctx.archive.DocumentGetRating((DocumentID)docB, ranking);
                 var docAScore = 0;
                 var docBScore = 0;
 
@@ -109,11 +109,11 @@ public static partial class CLICommands {
                     break;
                 }
 
-                var docAUpdatedRanking = Elo.Update(docARanking, docBRanking, docAScore);
-                var docBUpdatedRanking = Elo.Update(docBRanking, docARanking, docBScore);
+                var docAUpdatedRating = Elo.Update(docARating, docBRating, docAScore);
+                var docBUpdatedRating = Elo.Update(docBRating, docARating, docBScore);
 
-                ctx.archive.DocumentSetRanking((DocumentID)docA, ranking, docAUpdatedRanking);
-                ctx.archive.DocumentSetRanking((DocumentID)docB, ranking, docBUpdatedRanking);
+                ctx.archive.DocumentSetRating((DocumentID)docA, ranking, docAUpdatedRating);
+                ctx.archive.DocumentSetRating((DocumentID)docB, ranking, docBUpdatedRating);
             }
 
             ctx.archive.ViewDelete("tournament");
