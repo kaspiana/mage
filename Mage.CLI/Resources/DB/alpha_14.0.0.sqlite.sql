@@ -23,3 +23,11 @@ for each row begin
         ranking.name ranking_name
     from ranking;
 end;
+
+insert or ignore into document_rating
+select
+    document.id document_id,
+    ranking.name ranking_name,
+    0
+from
+    document cross join ranking;

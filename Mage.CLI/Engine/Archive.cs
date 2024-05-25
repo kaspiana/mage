@@ -18,7 +18,7 @@ public class Archive {
         releaseType = -1,
         major = 15,
         minor = 0,
-        patch = 0
+        patch = 1
     };
 
     public const string IN_DIR_PATH = "in/";
