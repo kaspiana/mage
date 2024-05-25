@@ -17,50 +17,9 @@ public static class DBCommands {
         public const string VideoMetadataWhereID = "select * from video_metadata where document_id = @document_id";
 
         public const string Ranking = "select * from ranking";
-        public const string DocumentRatingWhereID = @"
-            select 
-                document_rating_full.name ranking_name, 
-                ifnull(rating, 0) rating
-            from
-                (ranking cross join 
-                    (select 
-                        column1 document_id 
-                    from (values (@document_id)))
-                ) document_rating_full
-                left join
-                document_rating
-                on document_rating_full.name = document_rating.ranking_name
-                and document_rating_full.document_id = document_rating.document_id
-        ";
-        public const string DocumentRatingWhereName = @"
-            select 
-                document_rating_full.id,
-                ifnull(rating, 0) rating
-            from
-                (document cross join 
-                    (select 
-                        column1 ranking_name 
-                     from (values(@ranking_name)))
-                ) document_rating_full
-                left join
-                document_rating
-                on document_rating_full.ranking_name = document_rating.ranking_name
-                and document_rating_full.id = document_rating.document_id
-        ";
-        public const string DocumentRatingWherePK = @"
-            select 
-                ifnull(rating, 0) rating
-            from
-                (select 
-                    column1 document_id, 
-                    column2 ranking_name 
-                 from (values(@document_id, @ranking_name))
-                ) document_rating_full
-                left join
-                document_rating
-                on document_rating_full.ranking_name = document_rating.ranking_name
-                and document_rating_full.document_id = document_rating.document_id
-        ";
+        public const string DocumentRatingWhereID = @"select ranking_name, rating from document_rating where document_id = @document_id";
+        public const string DocumentRatingWhereName = @"select document_id, rating from document_rating where ranking_name = @ranking_name";
+        public const string DocumentRatingWherePK = @"select rating from document_rating where document_id = @document_id and ranking_name = @ranking_name";
 
         public const string Taxonym = "select * from taxonym";
         public static string TaxonymIDClause(string clause) => $"select id from taxonym {clause}";

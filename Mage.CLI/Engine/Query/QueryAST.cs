@@ -224,19 +224,17 @@ on result.id = {(public_ ? "public_": "")}document.id
         var sortDirStr = asc ? "asc" : "desc";
         var sortedQuery = orderBy switch {
             var s when s.StartsWith("rank:") => @$"
-                select 
-                    document_ranking_full.id id
+                select id
                 from
-                    (({mainQuery}) cross join 
-                        (select 
-                            column1 ranking_name 
-                        from (values('{s[5..]}')))
-                    ) document_ranking_full
-                    left join
-                    document_ranking
-                    on document_ranking_full.ranking_name = document_ranking.ranking_name
-                    and document_ranking_full.id = document_ranking.document_id
-                order by ifnull(score, 0) {sortDirStr}
+                    ({mainQuery}) 
+					left join 
+					(select 
+						document_id, 
+						rating 
+					 from document_rating
+					 where ranking_name = '{s[5..]}')
+                    on id = document_id
+                order by rating {sortDirStr}
             ",
             _ => $"{mainQuery} order by result.id {sortDirStr}"
         };
