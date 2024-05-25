@@ -31,6 +31,12 @@ public partial class DBEngine {
         }
     }
 
+    public void RunScript(string comText){
+        using var com = db.CreateCommand();
+        com.CommandText = comText;
+        com.ExecuteNonQuery();
+    }
+
     public void RunResourceScript(string resourcePath){
         var setupCommand = db.CreateCommand();
         setupCommand.CommandText = ResourceLoader.Load($"Resources.DB.{resourcePath}");
@@ -209,6 +215,33 @@ public partial class DBEngine {
                 })!;
             } break;
         }
+    }
+
+    public string[] ReadRankings(SqliteTransaction? transaction = null){
+        using var com = GenCommand(
+            DBCommands.Select.Ranking
+        );
+        com.Transaction = transaction;
+        return RunQuery(com, r => r.GetString(0)).ToArray();
+    }
+
+    public int ReadDocumentRanking(DocumentID documentID, string rankingName, SqliteTransaction? transaction = null){
+        using var com = GenCommand(
+            DBCommands.Select.DocumentRankingWherePK,
+            ("document_id", documentID),
+            ("ranking_name", rankingName)
+        );
+        com.Transaction = transaction;
+        return RunQuerySingle(com, r => r.GetInt32(0));
+    }
+
+    public (string name, int score)[] ReadDocumentRankings(DocumentID documentID, SqliteTransaction? transaction = null){
+        using var com = GenCommand(
+            DBCommands.Select.DocumentRankingWhereID,
+            ("document_id", documentID)
+        );
+        com.Transaction = transaction;
+        return RunQuery(com, r => (r.GetString(0), r.GetInt32(1))).ToArray();
     }
 
     public string[] ReadDocumentSources(DocumentID documentID, SqliteTransaction? transaction = null){
@@ -534,11 +567,39 @@ public partial class DBEngine {
         return taxonymID;
     }
 
+    public void InsertRanking(string rankingName, SqliteTransaction? transaction = null){
+        using var com = GenCommand(
+            DBCommands.Insert.Ranking,
+            ("name", rankingName)
+        );
+        com.Transaction = transaction;
+        RunNonQuery(com);
+
+    }
+
 }
 
 
 // Deletion
 public partial class DBEngine {
+
+    public void DeleteRanking(string rankingName, SqliteTransaction? transaction = null){
+
+        using var com1 = GenCommand(
+            DBCommands.Delete.DocumentRankingWhereName,
+            ("ranking_name", rankingName)
+        );
+        com1.Transaction = transaction;
+
+        using var com2 = GenCommand(
+            DBCommands.Delete.RankingWherePK,
+            ("name", rankingName)
+        );
+        com2.Transaction = transaction;
+
+        RunNonQuery(com1);
+        RunNonQuery(com2);
+    }
 
     public void DeleteDocumentTag(DocumentID documentID, TagID tagID, SqliteTransaction? transaction = null){
         
@@ -708,6 +769,17 @@ public partial class DBEngine {
         using var com = GenCommand(
             DBCommands.Update.DocumentUpdatedAtWhereID,
             ("id", documentID)
+        );
+        com.Transaction = transaction;
+        RunNonQuery(com);
+    }
+
+    public void UpdateDocumentRanking(DocumentID documentID, string rankingName, int score, SqliteTransaction? transaction = null){
+        using var com = GenCommand(
+            DBCommands.Update.DocumentRanking,
+            ("document_id", documentID),
+            ("ranking_name", rankingName),
+            ("score", score)
         );
         com.Transaction = transaction;
         RunNonQuery(com);

@@ -9,8 +9,25 @@ public static partial class CLICommands {
         var com = new Command("delete", "Delete an object."){
             ComDeleteDoc(ctx),
             ComDeleteTaxonym(ctx),
-            ComDeleteTag(ctx)
+            ComDeleteTag(ctx),
+            ComDeleteRanking(ctx)
         };
+        return com;
+    }
+
+    public static Command ComDeleteRanking(CLIContext ctx){
+        var nameArgument = new Argument<string>(
+            name: "name"
+        );
+
+        var com = new Command("ranking", "Delete a ranking."){
+            nameArgument
+        };
+
+        com.SetHandler((name) => {
+            ctx.archive.RankingDelete(name);
+        }, nameArgument);
+
         return com;
     }
 

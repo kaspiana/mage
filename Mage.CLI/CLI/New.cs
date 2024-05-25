@@ -8,8 +8,25 @@ public static partial class CLICommands {
     public static Command ComNew(CLIContext ctx){
         var com = new Command("new", "Create an object."){
             ComNewTaxonym(ctx),
-            ComNewTag(ctx)
+            ComNewTag(ctx),
+            ComNewRanking(ctx)
         };
+        return com;
+    }
+
+    public static Command ComNewRanking(CLIContext ctx){
+        var nameArgument = new Argument<string>(
+            name: "name"
+        );
+
+        var com = new Command("ranking", "Create a ranking."){
+            nameArgument
+        };
+
+        com.SetHandler((name) => {
+            ctx.archive.RankingCreate(name);
+        }, nameArgument);
+
         return com;
     }
 

@@ -7,6 +7,14 @@ public class Migration {
     /// <summary>Please order by version.</summary>
     public static List<(SemanticVersion version, Func<string, bool> migrate)> MigrationScripts = [
         
+        (SemanticVersion.FromString("alpha_12.0.0"), archiveDir => {
+            var db = new DBEngine(){ dbPath = $"{archiveDir}{Archive.DB_FILE_PATH}" };
+            db.EnsureConnected();
+            db.RunResourceScript("alpha_12.0.0.sqlite.sql");
+
+            return true;
+        })
+
     ];
 
     public static bool Migrate(string archiveDir){

@@ -38,6 +38,8 @@ public static partial class CLICommands {
                 ComTags(ctx),
                 ComTag(ctx),
 
+                ComRankings(ctx),
+
                 ComSearch(ctx)
             };
         }
