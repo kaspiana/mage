@@ -11,144 +11,15 @@ using Mage.CLI;
 
 namespace Mage.Engine;
 
-public struct SemanticVersion {
-
-    public int releaseType;
-    public int major;
-    public int minor;
-    public int patch;
-
-    public static string ToString(int releaseType, int major, int minor, int patch){
-        var releaseTypeStr = "";
-        switch(releaseType){
-            default:
-            case -1: releaseTypeStr = "alpha_"; break;
-            case 0: releaseTypeStr = "beta_"; break;
-        }
-        return $"{releaseTypeStr}{major}.{minor}.{patch}";
-    }
-
-    public override string ToString()
-    {
-        return SemanticVersion.ToString(releaseType, major, minor, patch);
-    }
-
-    public SemanticVersion Normalise(){
-        return new SemanticVersion(){
-            releaseType = releaseType,
-            major = major,
-            minor = 0,
-            patch = 0
-        };
-    }
-
-    public static SemanticVersion FromString(string versionStr){
-        int[] numericalParts;
-        var semVer = new SemanticVersion(){
-            releaseType = 1,
-            major = 1,
-            minor = 0,
-            patch = 0
-        };
-
-        if(versionStr.Contains('_')){
-            var parts = versionStr.Split('_');
-            var releaseTypeStr = parts[0];
-            var numericalStr = parts[1];
-            numericalParts = numericalStr
-                                .Split('.')
-                                .Select(s => int.Parse(s))
-                                .ToArray();
-
-            if(releaseTypeStr == "alpha") semVer.releaseType = -1;
-            else if(releaseTypeStr == "beta") semVer.releaseType = 0;
-
-        } else {
-            numericalParts = versionStr
-                                .Split('.')
-                                .Select(s => int.Parse(s))
-                                .ToArray();
-        }
-
-        switch(numericalParts.Count()){
-            case 0: break;
-            case 1: 
-                semVer.major = numericalParts[0]; break;
-            case 2:
-                semVer.major = numericalParts[0];
-                semVer.minor = numericalParts[1]; break;
-            case >= 3:
-                semVer.major = numericalParts[0];
-                semVer.minor = numericalParts[1]; 
-                semVer.patch = numericalParts[2]; break;
-        }
-
-        return semVer;
-    }
-
-    public static bool operator ==(SemanticVersion lhs, SemanticVersion rhs){
-        return lhs.releaseType == rhs.releaseType
-                && lhs.major == rhs.major
-                && lhs.minor == rhs.minor
-                && lhs.patch == rhs.patch;
-    }
-
-    public static bool operator !=(SemanticVersion lhs, SemanticVersion rhs){
-        return !(lhs == rhs);
-    }
-
-    public static bool operator <=(SemanticVersion lhs, SemanticVersion rhs){
-        return (lhs == rhs) || (lhs < rhs);
-    }
-
-    public static bool operator >=(SemanticVersion lhs, SemanticVersion rhs){
-        return (lhs == rhs) || (lhs > rhs);
-    }
-
-    public static bool operator <(SemanticVersion lhs, SemanticVersion rhs){
-        if(lhs.releaseType > rhs.releaseType) return false;
-        if(lhs.releaseType < rhs.releaseType) return true;
-
-        if(lhs.major > rhs.major) return false;
-        if(lhs.major < rhs.major) return true;
-
-        if(lhs.minor > rhs.minor) return false;
-        if(lhs.minor < rhs.minor) return true;
-
-        return lhs.patch < rhs.patch;
-    }
-
-    public static bool operator >(SemanticVersion lhs, SemanticVersion rhs){
-        if(lhs.releaseType < rhs.releaseType) return false;
-        if(lhs.releaseType > rhs.releaseType) return true;
-
-        if(lhs.major < rhs.major) return false;
-        if(lhs.major > rhs.major) return true;
-
-        if(lhs.minor < rhs.minor) return false;
-        if(lhs.minor > rhs.minor) return true;
-
-        return lhs.patch > rhs.patch;
-    }
-}
 
 public class Archive {
 
-    public class IncompatibleArchiveException : Exception {
-        SemanticVersion expected;
-        SemanticVersion actual;
-
-        public IncompatibleArchiveException(
-            SemanticVersion expected, SemanticVersion actual){
-            
-            this.expected = expected;
-            this.actual = actual;
-        }
-
-        override public string ToString(){
-            return $"Archive made in version {actual} is incompatible with Mage {expected}";
-        }
-    }
+    public static readonly SemanticVersion VERSION = new SemanticVersion(){
+        releaseType = -1,
+        major = 13,
+        minor = 0,
+        patch = 1
+    };
 
     public const string IN_DIR_PATH = "in/";
     public const string OUT_DIR_PATH = "out/";
@@ -161,13 +32,6 @@ public class Archive {
     public const string INGEST_LIST_FILE_PATH = DATA_DIR_PATH + "ingestlist.txt";
 
     public const string INGEST_LIST_FILE_HEADER = "# file path | comment | tag list | series | source list\n";
-
-    public static readonly SemanticVersion VERSION = new SemanticVersion(){
-        releaseType = -1,
-        major = 13,
-        minor = 0,
-        patch = 0
-    };
 
     public const string IN_VIEW_NAME = "in";
     public const string OPEN_VIEW_NAME = "open";
@@ -942,6 +806,22 @@ public class Archive {
         db.EnsureConnected();
         var mediaType = db.ReadDocument(documentID)?.mediaType ?? MediaType.Binary;
         return db.ReadDocumentMetadata(documentID, mediaType);
+    }
+
+    public class IncompatibleArchiveException : Exception {
+        SemanticVersion expected;
+        SemanticVersion actual;
+
+        public IncompatibleArchiveException(
+            SemanticVersion expected, SemanticVersion actual){
+            
+            this.expected = expected;
+            this.actual = actual;
+        }
+
+        override public string ToString(){
+            return $"Archive made in version {actual} is incompatible with Mage {expected}";
+        }
     }
 
 }
