@@ -26,7 +26,7 @@ public static partial class CLICommands {
 
         var singleOption = new Option<string?>(
             name: "--single",
-            description: "Match opponents against single selected document.",
+            description: "Only improve ratings of single ranking.",
             getDefaultValue: () => null
         );
 
@@ -34,7 +34,7 @@ public static partial class CLICommands {
             singleOption
         };
 
-        com.SetHandler((docRef) => {
+        com.SetHandler((singleRanking) => {
             ctx.archive.db.EnsureConnected();
 
             using var rankingSampleCom = ctx.archive.db.GenCommand(
@@ -42,46 +42,27 @@ public static partial class CLICommands {
                 ("limit", 1)
             );
 
-            ctx.archive.ViewCreate("tournament");
-
             using var docSampleCom = ctx.archive.db.GenCommand(
                 DBCommands.Sample.Document(),
-                ("limit", null)
+                ("limit", 2)
             );
 
-            DocumentID? docA = null;
-            
-            if(docRef is null){
-                docSampleCom.Parameters["limit"].Value = 2;
-            } else {
-                docSampleCom.Parameters["limit"].Value = 1;
-                docA = (DocumentID)ObjectRef.ResolveDocument(ctx.archive, docRef)!;
-            }
+            ctx.archive.ViewCreate("tournament");
 
             while(true){
-
-                DocumentID? docB = null;
                 
-                if(docRef is null){
-                    var docSample = DBEngine.RunQuery(docSampleCom, r => (DocumentID)r.GetInt32(0)).ToArray();
-                    if(docSample.Count() != 2){
-                        return;
-                    }
-
-                    docA = docSample[0];
-                    docB = docSample[1];
-                } else {
-                    while(docB is null || docB == docA){
-                        docB = DBEngine.RunQuerySingle(docSampleCom, r => (DocumentID)r.GetInt32(0));
-                    }
-                }
-
-                var rankingSample = DBEngine.RunQuery(rankingSampleCom, r => r.GetString(0)).ToArray();
-                if(rankingSample.Count() != 1){
+                var docSample = DBEngine.RunQuery(docSampleCom, r => (DocumentID)r.GetInt32(0)).ToArray();
+                if(docSample.Count() != 2){
                     return;
                 }
 
-                var ranking = rankingSample[0];
+                var docA = docSample[0];
+                var docB = docSample[1];
+
+                var ranking = singleRanking switch {
+                    null => DBEngine.RunQuerySingle(rankingSampleCom, r => r.GetString(0)),
+                    var s => s
+                };
                 
                 var docARating = ctx.archive.DocumentGetRating((DocumentID)docA, ranking);
                 var docBRating = ctx.archive.DocumentGetRating((DocumentID)docB, ranking);
