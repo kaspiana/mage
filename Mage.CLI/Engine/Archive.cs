@@ -16,7 +16,7 @@ public class Archive {
 
     public static readonly SemanticVersion VERSION = new SemanticVersion(){
         releaseType = -1,
-        major = 14,
+        major = 15,
         minor = 0,
         patch = 0
     };
@@ -440,9 +440,24 @@ public class Archive {
         return ratingMap;
     }
 
+    public Dictionary<string, double> DocumentGetRatingsNormalised(DocumentID documentID){
+        db.EnsureConnected();
+        var ratingMap = new Dictionary<string, double>();
+        var ratings = db.ReadDocumentRatingsNormalised(documentID);
+        foreach(var rating in ratings){
+            ratingMap[rating.name] = rating.rating;
+        }
+        return ratingMap;
+    }
+
     public int DocumentGetRating(DocumentID documentID, string rankingName){
         db.EnsureConnected();
         return db.ReadDocumentRating(documentID, rankingName);
+    }
+
+    public double DocumentGetRatingNormalised(DocumentID documentID, string rankingName){
+        db.EnsureConnected();
+        return db.ReadDocumentRatingNormalised(documentID, rankingName);
     }
 
     public void DocumentSetRating(DocumentID documentID, string rankingName, int score){

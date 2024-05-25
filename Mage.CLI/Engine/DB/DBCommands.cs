@@ -20,6 +20,8 @@ public static class DBCommands {
         public const string DocumentRatingWhereID = @"select ranking_name, rating from document_rating where document_id = @document_id";
         public const string DocumentRatingWhereName = @"select document_id, rating from document_rating where ranking_name = @ranking_name";
         public const string DocumentRatingWherePK = @"select rating from document_rating where document_id = @document_id and ranking_name = @ranking_name";
+        public const string DocumentRatingNormalisedWhereID = @"select ranking_name, rating_normalised from document_rating_normalised where document_id = @document_id";
+        public const string DocumentRatingNormalisedWherePK = @"select rating_normalised from document_rating_normalised where document_id = @document_id and ranking_name = @ranking_name";
 
         public const string Taxonym = "select * from taxonym";
         public static string TaxonymIDClause(string clause) => $"select id from taxonym {clause}";

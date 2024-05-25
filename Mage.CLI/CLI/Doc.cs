@@ -88,15 +88,18 @@ public static partial class CLICommands {
 
             Console.WriteLine($"  Deleted: {(doc.isDeleted ? "yes" : "no")}");
 
-            var rankings = ctx.archive.DocumentGetRatings(docID);
-            if(rankings.Count() == 0){
+            var ratings = ctx.archive.DocumentGetRatingsNormalised(docID);
+            if(ratings.Count() == 0){
                 Console.WriteLine($"  Ratings: <none>");
             } else {
-                var maxKeyLength = rankings.Max(kv => kv.Key.Count());
+                var maxKeyLength = ratings.Max(kv => kv.Key.Count());
                 Console.WriteLine($"  Ratings:");
-                foreach(var ranking in rankings){
-                    var indent = maxKeyLength - ranking.Key.Count();
-                    Console.WriteLine($"   * {ranking.Key}: {new string(' ', indent)}{ranking.Value}");
+                foreach(var rating in ratings){
+                    var ratingOutOf10 = (int)Math.Round(rating.Value * 10.0);
+                    var indent = maxKeyLength - rating.Key.Count();
+                    var indentStr = new string(' ', indent);
+                    var ratingStars = new string('*', ratingOutOf10) + new string(' ', 10 - ratingOutOf10);
+                    Console.WriteLine($"   * {rating.Key}: {indentStr}[{ratingStars}]");
                 }
             }
             
