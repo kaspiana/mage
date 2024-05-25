@@ -89,6 +89,11 @@ public static class DBCommands {
         public const string DocumentSourceWhereID = $"select url from document_source where document_id = @document_id";
     }
 
+    public static class Sample {
+        public static string Document(bool public_ = true) => $"select id from {(public_ ? "public_" : "")}document order by random() limit @limit";
+        public const string Ranking = "select name from ranking order by random() limit @limit";
+    }
+
     public static class Count {
 
         public const string DocumentWhereHash = "select count(*) from document where hash = @hash";
