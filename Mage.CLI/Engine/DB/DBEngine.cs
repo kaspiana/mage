@@ -67,9 +67,11 @@ public partial class DBEngine {
     }
 
     public static T? RunQuerySingle<T>(SqliteCommand com, Func<SqliteDataReader, T> read) {
-        var reader = com.ExecuteReader();
+        using var reader = com.ExecuteReader();
         if(reader.Read()){
-            return read(reader);
+            var res = read(reader);
+            reader.Close();
+            return res;
         }
         reader.Close();
         return default(T?);
