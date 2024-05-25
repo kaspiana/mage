@@ -21,6 +21,14 @@ public class Migration {
             db.RunResourceScript("alpha_13.0.0.sqlite.sql");
 
             return true;
+        }),
+
+        (SemanticVersion.FromString("alpha_14.0.0"), archiveDir => {
+            var db = new DBEngine(){ dbPath = $"{archiveDir}{Archive.DB_FILE_PATH}" };
+            db.EnsureConnected();
+            db.RunResourceScript("alpha_14.0.0.sqlite.sql");
+
+            return true;
         })
 
     ];
