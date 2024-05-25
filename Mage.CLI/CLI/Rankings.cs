@@ -77,7 +77,7 @@ public static partial class CLICommands {
                 ctx.archive.ViewAdd("tournament", docA);
                 ctx.archive.ViewAdd("tournament", docB);
 
-                Console.WriteLine($"Which is more '{ranking}': tournament/0 (a), tournament/1 (b), both (b), or neither (n)? (q to quit)");
+                Console.WriteLine($"Which is more '{ranking}': tournament/0 (a), tournament/1 (b), or neither (n)? (q to quit)");
                 Console.Write("> ");
                 var lineIn = Console.ReadLine().Trim().ToLower();
 
