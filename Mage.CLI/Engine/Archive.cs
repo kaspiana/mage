@@ -164,9 +164,9 @@ public class Archive {
 
     public static readonly SemanticVersion VERSION = new SemanticVersion(){
         releaseType = -1,
-        major = 12,
-        minor = 2,
-        patch = 1
+        major = 13,
+        minor = 0,
+        patch = 0
     };
 
     public const string IN_VIEW_NAME = "in";
