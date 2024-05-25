@@ -227,9 +227,9 @@ public partial class DBEngine {
         return RunQuery(com, r => r.GetString(0)).ToArray();
     }
 
-    public int ReadDocumentRanking(DocumentID documentID, string rankingName, SqliteTransaction? transaction = null){
+    public int ReadDocumentRating(DocumentID documentID, string rankingName, SqliteTransaction? transaction = null){
         using var com = GenCommand(
-            DBCommands.Select.DocumentRankingWherePK,
+            DBCommands.Select.DocumentRatingWherePK,
             ("document_id", documentID),
             ("ranking_name", rankingName)
         );
@@ -237,9 +237,9 @@ public partial class DBEngine {
         return RunQuerySingle(com, r => r.GetInt32(0));
     }
 
-    public (string name, int score)[] ReadDocumentRankings(DocumentID documentID, SqliteTransaction? transaction = null){
+    public (string name, int rating)[] ReadDocumentRatings(DocumentID documentID, SqliteTransaction? transaction = null){
         using var com = GenCommand(
-            DBCommands.Select.DocumentRankingWhereID,
+            DBCommands.Select.DocumentRatingWhereID,
             ("document_id", documentID)
         );
         com.Transaction = transaction;
@@ -588,7 +588,7 @@ public partial class DBEngine {
     public void DeleteRanking(string rankingName, SqliteTransaction? transaction = null){
 
         using var com1 = GenCommand(
-            DBCommands.Delete.DocumentRankingWhereName,
+            DBCommands.Delete.DocumentRatingWhereName,
             ("ranking_name", rankingName)
         );
         com1.Transaction = transaction;
@@ -776,12 +776,12 @@ public partial class DBEngine {
         RunNonQuery(com);
     }
 
-    public void UpdateDocumentRanking(DocumentID documentID, string rankingName, int score, SqliteTransaction? transaction = null){
+    public void UpdateDocumentRating(DocumentID documentID, string rankingName, int rating, SqliteTransaction? transaction = null){
         using var com = GenCommand(
-            DBCommands.Update.DocumentRanking,
+            DBCommands.Update.DocumentRating,
             ("document_id", documentID),
             ("ranking_name", rankingName),
-            ("score", score)
+            ("rating", rating)
         );
         com.Transaction = transaction;
         RunNonQuery(com);

@@ -164,9 +164,9 @@ public class Archive {
 
     public static readonly SemanticVersion VERSION = new SemanticVersion(){
         releaseType = -1,
-        major = 12,
-        minor = 2,
-        patch = 1
+        major = 13,
+        minor = 0,
+        patch = 0
     };
 
     public const string IN_VIEW_NAME = "in";
@@ -566,24 +566,24 @@ public class Archive {
         return db.ReadRankings();
     }
 
-    public Dictionary<string, int> DocumentGetRankings(DocumentID documentID){
+    public Dictionary<string, int> DocumentGetRatings(DocumentID documentID){
         db.EnsureConnected();
-        var rankingMap = new Dictionary<string, int>();
-        var rankings = db.ReadDocumentRankings(documentID);
-        foreach(var ranking in rankings){
-            rankingMap[ranking.name] = ranking.score;
+        var ratingMap = new Dictionary<string, int>();
+        var ratings = db.ReadDocumentRatings(documentID);
+        foreach(var rating in ratings){
+            ratingMap[rating.name] = rating.rating;
         }
-        return rankingMap;
+        return ratingMap;
     }
 
-    public int DocumentGetRanking(DocumentID documentID, string rankingName){
+    public int DocumentGetRating(DocumentID documentID, string rankingName){
         db.EnsureConnected();
-        return db.ReadDocumentRanking(documentID, rankingName);
+        return db.ReadDocumentRating(documentID, rankingName);
     }
 
-    public void DocumentSetRanking(DocumentID documentID, string rankingName, int score){
+    public void DocumentSetRating(DocumentID documentID, string rankingName, int score){
         db.EnsureConnected();
-        db.UpdateDocumentRanking(documentID, rankingName, score);
+        db.UpdateDocumentRating(documentID, rankingName, score);
     }
 
     public Taxonym? TaxonymGet(TaxonymID taxonymID){
