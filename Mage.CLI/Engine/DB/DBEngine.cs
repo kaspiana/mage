@@ -237,6 +237,16 @@ public partial class DBEngine {
         return RunQuerySingle(com, r => r.GetInt32(0));
     }
 
+    public double ReadDocumentRatingNormalised(DocumentID documentID, string rankingName, SqliteTransaction? transaction = null){
+        using var com = GenCommand(
+            DBCommands.Select.DocumentRatingNormalisedWherePK,
+            ("document_id", documentID),
+            ("ranking_name", rankingName)
+        );
+        com.Transaction = transaction;
+        return RunQuerySingle(com, r => r.GetDouble(0));
+    }
+
     public (string name, int rating)[] ReadDocumentRatings(DocumentID documentID, SqliteTransaction? transaction = null){
         using var com = GenCommand(
             DBCommands.Select.DocumentRatingWhereID,
@@ -244,6 +254,15 @@ public partial class DBEngine {
         );
         com.Transaction = transaction;
         return RunQuery(com, r => (r.GetString(0), r.GetInt32(1))).ToArray();
+    }
+
+    public (string name, double rating)[] ReadDocumentRatingsNormalised(DocumentID documentID, SqliteTransaction? transaction = null){
+        using var com = GenCommand(
+            DBCommands.Select.DocumentRatingNormalisedWhereID,
+            ("document_id", documentID)
+        );
+        com.Transaction = transaction;
+        return RunQuery(com, r => (r.GetString(0), r.GetDouble(1))).ToArray();
     }
 
     public string[] ReadDocumentSources(DocumentID documentID, SqliteTransaction? transaction = null){
