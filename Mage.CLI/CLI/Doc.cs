@@ -87,6 +87,19 @@ public static partial class CLICommands {
             }
 
             Console.WriteLine($"  Deleted: {(doc.isDeleted ? "yes" : "no")}");
+
+            var rankings = ctx.archive.DocumentGetRankings(docID);
+            if(rankings.Count() == 0){
+                Console.WriteLine($"  Rankings: <none>");
+            } else {
+                var maxKeyLength = rankings.Max(kv => kv.Key.Count());
+                Console.WriteLine($"  Rankings:");
+                foreach(var ranking in rankings){
+                    var indent = maxKeyLength - ranking.Key.Count();
+                    Console.WriteLine($"   * {ranking.Key}: {new string(' ', indent)}{ranking.Value}");
+                }
+            }
+            
             if(doc.comment is null)
                 Console.WriteLine($"  Comment: <none>");
             else {
