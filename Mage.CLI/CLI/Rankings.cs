@@ -4,19 +4,6 @@ using Mage.Engine;
 using Microsoft.VisualBasic;
 using SQLitePCL;
 
-public class ELO {
-    public const double K = 32;
-
-    public static double Expected(int rankA, int rankB){
-        return 1.0 / ( 1.0 + (Math.Pow(10.0, (rankB - rankA)/400)) );
-    }
-
-    public static int Update(int rankA, int rankB, double scoreActual){
-        var scoreExpected = Expected(rankA, rankB);
-        return Math.Max(0, (int)Math.Floor(rankA + K * (scoreActual - scoreExpected)));
-    }
-}
-
 public static partial class CLICommands {
 
     public static Command ComRankings(CLIContext ctx){
@@ -91,11 +78,11 @@ public static partial class CLICommands {
                     docAScore = 0;
                     docBScore = 0;
                 } else if(lineIn == "q"){
-                    return;
+                    break;;
                 }
 
-                var docAUpdatedRanking = ELO.Update(docARanking, docBRanking, docAScore);
-                var docBUpdatedRanking = ELO.Update(docBRanking, docARanking, docBScore);
+                var docAUpdatedRanking = Elo.Update(docARanking, docBRanking, docAScore);
+                var docBUpdatedRanking = Elo.Update(docBRanking, docARanking, docBScore);
 
                 ctx.archive.DocumentSetRanking(docA, ranking, docAUpdatedRanking);
                 ctx.archive.DocumentSetRanking(docB, ranking, docBUpdatedRanking);

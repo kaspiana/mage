@@ -75,7 +75,7 @@ public partial class DBEngine {
         return default(T?);
     }
 
-    public void RunNonQuery(SqliteCommand com){
+    public static void RunNonQuery(SqliteCommand com){
         com.ExecuteNonQuery();
     }
 
