@@ -207,19 +207,42 @@ public class Query {
     public static int tempTableIndex = 0;
     public static string documentTagNormalised = "select id from document";
 
-    public DocumentID[] GetResults(Archive archive, bool public_ = true){
+    public DocumentID[] GetResults(Archive archive, string orderBy, bool asc, bool public_ = true){
 
         archive.db.EnsureConnected();
         var db = archive.db.db;
 
         var documents = new List<DocumentID>();
 
-        var com = db.CreateCommand();
-        com.CommandText = @$"
+        var mainQuery = @$"
 select distinct result.id from 
 ({root.ToSQL(archive)}) result
 inner join {(public_ ? "public_": "")}document
-on result.id = {(public_ ? "public_": "")}document.id;";
+on result.id = {(public_ ? "public_": "")}document.id
+";
+
+        var sortDirStr = asc ? "asc" : "desc";
+        var sortedQuery = orderBy switch {
+            var s when s.StartsWith("rank:") => @$"
+                select 
+                    document_ranking_full.id id
+                from
+                    (({mainQuery}) cross join 
+                        (select 
+                            column1 ranking_name 
+                        from (values('{s[5..]}')))
+                    ) document_ranking_full
+                    left join
+                    document_ranking
+                    on document_ranking_full.ranking_name = document_ranking.ranking_name
+                    and document_ranking_full.id = document_ranking.document_id
+                order by ifnull(score, 0) {sortDirStr}
+            ",
+            _ => $"{mainQuery} order by result.id {sortDirStr}"
+        };
+
+        var com = db.CreateCommand();
+        com.CommandText = sortedQuery;
         
         Console.WriteLine("SQL: " + com.CommandText);
 

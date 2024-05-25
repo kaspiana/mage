@@ -34,8 +34,7 @@ public static class DBCommands {
         ";
         public const string DocumentRankingWhereName = @"
             select 
-                document_ranking_full.id, 
-                document_ranking_full.ranking_name, 
+                document_ranking_full.id,
                 ifnull(score, 0) score
             from
                 (document cross join 

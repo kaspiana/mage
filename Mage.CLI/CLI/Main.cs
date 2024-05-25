@@ -70,10 +70,10 @@ public static partial class CLICommands {
         var com = new Command("test", "For debugging purposes.");
         com.SetHandler(() => {
             
-            var query = QueryParser.Query.Parse("(rose_lalonde AND dirk_strider) OR homestuck2");
+            /*var query = QueryParser.Query.Parse("(rose_lalonde AND dirk_strider) OR homestuck2");
             Console.WriteLine(query.root);
 
-            query.GetResults(ctx.archive);
+            query.GetResults(ctx.archive);*/
 
         });
 
