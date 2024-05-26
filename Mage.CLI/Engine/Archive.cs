@@ -18,7 +18,7 @@ public class Archive {
         releaseType = -1,
         major = 15,
         minor = 1,
-        patch = 0
+        patch = 1
     };
 
     public const string IN_DIR_PATH = "in/";
@@ -500,7 +500,7 @@ public class Archive {
 
         while(layerIDs.Count() > 0){
             foreach(var (taxonymID, alias) in layerAliases){
-                if(Regex.IsMatch(alias, target)){
+                if(Regex.IsMatch(alias, $"^{target}$")){
                     if(qualifiedNameParts.Count() == 1){
                         taxonymIDs.Add(taxonymID);
                     } else {
