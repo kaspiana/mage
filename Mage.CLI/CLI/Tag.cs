@@ -17,7 +17,8 @@ public static partial class CLICommands {
             ComTagImplications(ctx, tagRefArgument),
             ComTagAntecedents(ctx, tagRefArgument),
             ComTagImply(ctx, tagRefArgument),
-            ComTagUnimply(ctx, tagRefArgument)
+            ComTagUnimply(ctx, tagRefArgument),
+            ComTagApply(ctx, tagRefArgument)
         };
 
         com.SetHandler((tagRef) => {
@@ -39,6 +40,33 @@ public static partial class CLICommands {
 
         return com;
 
+    }
+
+    public static Command ComTagApply(CLIContext ctx, Argument<string> tagRefArgument){
+
+        var docRefsArgument = new Argument<string[]>(
+            name: "documents"
+        ){ Arity = ArgumentArity.ZeroOrMore };
+
+        var com = new Command("apply", "Apply tag to documents."){
+            docRefsArgument
+        };
+
+        com.SetHandler((tagRef, docRefs) => {
+
+            var tagID = (TagID)ObjectRef.ResolveTag(ctx.archive!, tagRef!)!;
+            var docIDs = docRefs.Select(r => (DocumentID)ObjectRef.ResolveDocument(ctx.archive, r));
+
+            foreach(var docID in docIDs){
+                ctx.archive.DocumentAddTag(docID, tagID);
+            }
+
+        },
+            tagRefArgument,
+            docRefsArgument
+        );
+
+        return com;
     }
 
     public static Command ComTagImplications(CLIContext ctx, Argument<string?> tagRefArgument){
