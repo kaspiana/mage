@@ -1,5 +1,6 @@
 using System.CommandLine;
 using System.Security.Cryptography.X509Certificates;
+using System.Text.RegularExpressions;
 using Mage.Engine;
 using SQLitePCL;
 
@@ -10,8 +11,31 @@ public static partial class CLICommands {
             ComDeleteDoc(ctx),
             ComDeleteTaxonym(ctx),
             ComDeleteTag(ctx),
-            ComDeleteRanking(ctx)
+            ComDeleteRanking(ctx),
+            ComDeleteView(ctx)
         };
+        return com;
+    }
+
+    public static Command ComDeleteView(CLIContext ctx){
+        var nameArgument = new Argument<string>(
+            name: "name"
+        );
+
+        var com = new Command("view", "Delete a view."){
+            nameArgument
+        };
+
+        com.SetHandler((name) => {
+            var nameRegex = $"^{name.Replace("*", ".*")}$";
+            var views = ctx.archive.ViewsGetAll();
+            foreach(var viewName in views){
+                if(Regex.IsMatch(viewName, nameRegex)){
+                    ctx.archive.ViewDelete(viewName);
+                }
+            }
+        }, nameArgument);
+
         return com;
     }
 

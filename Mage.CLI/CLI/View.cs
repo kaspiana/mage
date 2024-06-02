@@ -15,7 +15,7 @@ public static partial class CLICommands {
         var com = new Command("view", "Manipulate view."){
             viewRefArgument,
             ComViewClear(ctx, viewRefArgument),
-            ComViewDelete(ctx, viewRefArgument),
+            //ComViewDelete(ctx, viewRefArgument),
             ComViewReflect(ctx, viewRefArgument),
             ComViewStash(ctx, viewRefArgument),
             ComViewUnstash(ctx, viewRefArgument),
