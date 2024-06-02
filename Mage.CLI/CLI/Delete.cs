@@ -1,5 +1,6 @@
 using System.CommandLine;
 using System.Security.Cryptography.X509Certificates;
+using System.Text.RegularExpressions;
 using Mage.Engine;
 using SQLitePCL;
 
@@ -26,7 +27,13 @@ public static partial class CLICommands {
         };
 
         com.SetHandler((name) => {
-            ctx.archive.ViewDelete(name);
+            var nameRegex = $"^{name.Replace("*", ".*")}$";
+            var views = ctx.archive.ViewsGetAll();
+            foreach(var viewName in views){
+                if(Regex.IsMatch(viewName, nameRegex)){
+                    ctx.archive.ViewDelete(viewName);
+                }
+            }
         }, nameArgument);
 
         return com;
