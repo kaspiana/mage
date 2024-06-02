@@ -10,8 +10,25 @@ public static partial class CLICommands {
             ComDeleteDoc(ctx),
             ComDeleteTaxonym(ctx),
             ComDeleteTag(ctx),
-            ComDeleteRanking(ctx)
+            ComDeleteRanking(ctx),
+            ComDeleteView(ctx)
         };
+        return com;
+    }
+
+    public static Command ComDeleteView(CLIContext ctx){
+        var nameArgument = new Argument<string>(
+            name: "name"
+        );
+
+        var com = new Command("view", "Delete a view."){
+            nameArgument
+        };
+
+        com.SetHandler((name) => {
+            ctx.archive.ViewDelete(name);
+        }, nameArgument);
+
         return com;
     }
 

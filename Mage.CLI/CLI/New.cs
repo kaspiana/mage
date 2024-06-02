@@ -9,8 +9,27 @@ public static partial class CLICommands {
         var com = new Command("new", "Create an object."){
             ComNewTaxonym(ctx),
             ComNewTag(ctx),
-            ComNewRanking(ctx)
+            ComNewRanking(ctx),
+            ComNewView(ctx)
         };
+        return com;
+    }
+
+    public static Command ComNewView(CLIContext ctx){
+        var nameArgument = new Argument<string?>(
+            name: "name",
+            getDefaultValue: () => null
+        );
+
+        var com = new Command("view", "Create a user view."){
+            nameArgument
+        };
+
+        com.SetHandler((name) => {
+            var viewName = ctx.archive.ViewUserCreate(name);
+            Console.WriteLine($"created view {viewName}");
+        }, nameArgument);
+
         return com;
     }
 
