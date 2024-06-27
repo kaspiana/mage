@@ -74,6 +74,9 @@ public class Archive {
     }
 
     public string? ReadCommentFile(){
+        if(!File.Exists($"{archiveDir}{COMMENT_FILE_PATH}")){
+            File.Create($"{archiveDir}{COMMENT_FILE_PATH}");
+        }
         var comment = File.ReadAllText($"{archiveDir}{COMMENT_FILE_PATH}");
         if(comment == "") return null;
         else return comment;
