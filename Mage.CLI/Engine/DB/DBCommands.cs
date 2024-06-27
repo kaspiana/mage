@@ -128,7 +128,8 @@ public static class DBCommands {
         public const string DocumentIsDeletedWhereID = "update document set is_deleted = @is_deleted where id = @id";
         public const string DocumentUpdatedAt = "update document set updated_at = unixepoch()";
         public const string DocumentUpdatedAtWhereID = "update document set updated_at = unixepoch() where id = @id";
-        
+        public const string DocumentCommentWhereID = "update document set comment = @comment where id = @id";
+
         public const string DocumentRating = "insert or replace into document_rating (document_id, ranking_name, rating) values (@document_id, @ranking_name, @rating)"; 
         
     }

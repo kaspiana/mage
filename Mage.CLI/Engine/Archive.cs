@@ -30,6 +30,7 @@ public class Archive {
     public const string BIND_FILE_PATH = DATA_DIR_PATH + "bind.ini";
     public const string DB_FILE_PATH = DATA_DIR_PATH + "db.sqlite";
     public const string INGEST_LIST_FILE_PATH = DATA_DIR_PATH + "ingestlist.txt";
+    public const string COMMENT_FILE_PATH = DATA_DIR_PATH + "comment.txt";
 
     public const string INGEST_LIST_FILE_HEADER = "# file path | comment | tag list | series | source list\n";
 
@@ -68,6 +69,19 @@ public class Archive {
         return infoMap;
     }
 
+    public void SetCommentFile(string? comment){
+        File.WriteAllText($"{archiveDir}{COMMENT_FILE_PATH}", comment ?? "");
+    }
+
+    public string? ReadCommentFile(){
+        if(!File.Exists($"{archiveDir}{COMMENT_FILE_PATH}")){
+            File.Create($"{archiveDir}{COMMENT_FILE_PATH}");
+        }
+        var comment = File.ReadAllText($"{archiveDir}{COMMENT_FILE_PATH}");
+        if(comment == "") return null;
+        else return comment;
+    }
+
     public static Archive Init(string archiveDir, string? name = null){
         var fileDir = archiveDir;
 
@@ -95,8 +109,9 @@ public class Archive {
             $"view={DEFAULT_VIEW_NAME}"
         ]);
 
-        // create ingest list file
+        // create other files
         File.WriteAllText($"{archiveDir}{INGEST_LIST_FILE_PATH}", INGEST_LIST_FILE_HEADER);
+        File.Create($"{archiveDir}{COMMENT_FILE_PATH}");
 
         var archive = Load(archiveDir);
         
@@ -463,6 +478,11 @@ public class Archive {
     public void DocumentSetRating(DocumentID documentID, string rankingName, int score){
         db.EnsureConnected();
         db.UpdateDocumentRating(documentID, rankingName, score);
+    }
+
+    public void DocumentSetComment(DocumentID documentID, string? comment){
+        db.EnsureConnected();
+        db.UpdateDocumentComment(documentID, comment);
     }
 
     public Taxonym? TaxonymGet(TaxonymID taxonymID){
