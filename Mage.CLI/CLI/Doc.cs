@@ -44,10 +44,10 @@ public static partial class CLICommands {
             Console.WriteLine($"  File extension: {doc.fileExt}");
             var fileSizeStr = "";
             switch(doc.fileSize){
-                case < (1 << 10): fileSizeStr = $"{doc.fileSize / (1 << 0)} B"; break;
-                case < (1 << 20): fileSizeStr = $"{doc.fileSize / (1 << 10)} KB"; break;
-                case < (1 << 30): fileSizeStr = $"{doc.fileSize / (1 << 20)} MB"; break;
-                default: fileSizeStr = $"{doc.fileSize / (1 << 30)} GB"; break;
+                case < (1 << 10): fileSizeStr = $"{doc.fileSize / (double)(1 << 0) : 0} B"; break;
+                case < (1 << 20): fileSizeStr = $"{doc.fileSize / (double)(1 << 10) : 0} KB"; break;
+                case < (1 << 30): fileSizeStr = $"{doc.fileSize / (double)(1 << 20) : 0.#} MB"; break;
+                default: fileSizeStr =          $"{doc.fileSize / (double)(1 << 30) : 0.##} GB"; break;
             }
             Console.WriteLine($"  File size: {fileSizeStr}");
             
