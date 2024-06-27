@@ -3,6 +3,7 @@ using System.Data;
 using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.Resources;
+using System.Transactions;
 using Microsoft.Data.Sqlite;
 using SQLitePCL;
 
@@ -773,6 +774,18 @@ public partial class DBEngine {
 
 // Update
 public partial class DBEngine {
+
+    public void UpdateDocumentComment(DocumentID documentID, string? comment, SqliteTransaction? transaction = null){
+        using var com = GenCommand(
+            DBCommands.Update.DocumentCommentWhereID,
+            ("id", documentID),
+            ("comment", comment)
+        );
+        com.Transaction = transaction;
+        RunNonQuery(com);
+
+        UpdateDocumentUpdatedAt(documentID);
+    }
 
     public void UpdateDocumentIsDeleted(DocumentID documentID, bool isDeleted, SqliteTransaction? transaction = null){
         using var com = GenCommand(

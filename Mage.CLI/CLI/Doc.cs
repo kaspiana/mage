@@ -29,7 +29,8 @@ public static partial class CLICommands {
             ComDocUntag(ctx, docRefArgument),
             ComDocSources(ctx, docRefArgument),
             ComDocSource(ctx, docRefArgument),
-            ComDocUnsource(ctx, docRefArgument)
+            ComDocUnsource(ctx, docRefArgument),
+            ComDocComment(ctx, docRefArgument)
         };
 
         com.SetHandler((docRef, reflect) => {
@@ -175,6 +176,38 @@ public static partial class CLICommands {
             }
 
         }, docRefArgument);
+
+        return com;
+    }
+
+    public static Command ComDocComment(CLIContext ctx, Argument<string> docRefArgument){
+        var commentArgument = new Argument<string?>(
+            name: "comment",
+            getDefaultValue: () => null
+        );
+
+        var com = new Command("comment", "Modify comment on document."){
+            commentArgument
+        };
+
+        com.SetHandler((docRef, comment) => {
+            var docID = (DocumentID)ObjectRef.ResolveDocument(ctx.archive, docRef)!;
+
+            if(comment is null){
+                var doc = (Document)ctx.archive.DocumentGet(docID)!;
+                
+                ctx.archive.SetCommentFile(doc.comment);
+                Console.WriteLine("Edit data/comment.txt and then press enter to set the comment.");
+                
+                Process.Start("notepad.exe", $"{ctx.archive.archiveDir}{Archive.COMMENT_FILE_PATH}");
+
+                Console.Read();
+                comment = ctx.archive.ReadCommentFile();
+            }
+
+            ctx.archive.DocumentSetComment(docID, comment);
+
+        }, docRefArgument, commentArgument);
 
         return com;
     }
