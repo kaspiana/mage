@@ -1,4 +1,5 @@
 using System.CommandLine;
+using System.Diagnostics;
 using System.Security.Cryptography.X509Certificates;
 using Mage.CLI;
 using Mage.Engine;
@@ -19,7 +20,8 @@ public static partial class CLICommands {
             ComViewReflect(ctx, viewRefArgument),
             ComViewStash(ctx, viewRefArgument),
             ComViewUnstash(ctx, viewRefArgument),
-            ComViewAdd(ctx, viewRefArgument)
+            ComViewAdd(ctx, viewRefArgument),
+            ComViewOpen(ctx, viewRefArgument),
         };
 
         com.SetHandler((viewRef) => {
@@ -69,6 +71,25 @@ public static partial class CLICommands {
 
         }, viewRefArgument);
 
+        return com;
+    }
+
+    public static Command ComViewOpen(CLIContext ctx, Argument<string> viewRefArgument){
+        // mage view [view-ref] open
+        var com = new Command("open", "Open the view.");
+
+        com.SetHandler((viewRef) => {
+            var viewName = ObjectRef.ResolveView(ctx.archive, viewRef);
+            
+            var viewPath = $"{ctx.archive.archiveDir}{Archive.VIEWS_DIR_PATH}{viewName}/";
+
+            using Process fileOpener = new Process();
+
+            fileOpener.StartInfo.FileName = "\"" + viewPath + "\"";
+            fileOpener.StartInfo.UseShellExecute = true;
+            fileOpener.Start();
+        }, viewRefArgument);
+        
         return com;
     }
 
