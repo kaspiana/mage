@@ -43,7 +43,7 @@ public static class QueryParser {
             case ">=": return QueryParameterOperator.GreaterOrEquals; break;
             case "<": return QueryParameterOperator.Lesser; break;
             case "<=": return QueryParameterOperator.LesserOrEquals; break;
-            case "like": return QueryParameterOperator.Like; break;
+            case "~": return QueryParameterOperator.Like; break;
         }
         return QueryParameterOperator.Equals;
     }
@@ -62,7 +62,7 @@ public static class QueryParser {
             .Or(Sprache.Parse.String("width").Text())
             .Or(Sprache.Parse.String("height").Text())
             .Or(Sprache.Parse.String("duration").Text())
-        from lparen in Sprache.Parse.Char('(')
+        from colon in Sprache.Parse.Char(':')
         from op in Sprache.Parse.Optional(
             Sprache.Parse.String("=").Text()
             .Or(Sprache.Parse.String("!=").Text())
@@ -70,12 +70,11 @@ public static class QueryParser {
             .Or(Sprache.Parse.String(">=").Text())
             .Or(Sprache.Parse.String("<").Text())
             .Or(Sprache.Parse.String("<=").Text())
-            .Or(Sprache.Parse.String("like").Text())
-        ).Token()
+            .Or(Sprache.Parse.String("~").Text())
+        )
         from param in 
-            Sprache.Parse.Numeric.AtLeastOnce().Text().Token()
-            .Or(SingleQuotedString.Token())
-        from rparen in Sprache.Parse.Char(')')
+            Sprache.Parse.Numeric.AtLeastOnce().Text()
+            .Or(SingleQuotedString)
         select new QueryNodeMetaTag(){
             tag = tag,
             op = ParseParameterOperator(op.GetOrElse("")),

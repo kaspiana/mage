@@ -17,7 +17,7 @@ public class Archive {
     public static readonly SemanticVersion VERSION = new SemanticVersion(){
         releaseType = -1,
         major = 15,
-        minor = 5,
+        minor = 6,
         patch = 0
     };
 
