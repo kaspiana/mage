@@ -43,7 +43,7 @@ public static class QueryParser {
             case ">=": return QueryParameterOperator.GreaterOrEquals; break;
             case "<": return QueryParameterOperator.Lesser; break;
             case "<=": return QueryParameterOperator.LesserOrEquals; break;
-            case "like": return QueryParameterOperator.Like; break;
+            case "~": return QueryParameterOperator.Like; break;
         }
         return QueryParameterOperator.Equals;
     }
@@ -70,7 +70,7 @@ public static class QueryParser {
             .Or(Sprache.Parse.String(">=").Text())
             .Or(Sprache.Parse.String("<").Text())
             .Or(Sprache.Parse.String("<=").Text())
-            .Or(Sprache.Parse.String("like").Text())
+            .Or(Sprache.Parse.String("~").Text())
         )
         from param in 
             Sprache.Parse.Numeric.AtLeastOnce().Text()
